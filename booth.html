@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>✨ 포토부스 · Korean Photo Booth ✨</title>
+<style>
+  /* ─── Google Fonts ─── */
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Nanum+Pen+Script&display=swap');
+
+  /* ─── CSS Variables ─── */
+  :root {
+    --pink:      #ffb3c6;
+    --pink-deep: #ff85a1;
+    --lavender:  #c9b8f5;
+    --blue:      #b3d9ff;
+    --cream:     #fff8f0;
+    --mint:      #b8f0e0;
+    --yellow:    #fff1a8;
+    --white:     #ffffff;
+    --text:      #5a4a6a;
+    --text-light:#9a8ab0;
+    --shadow:    rgba(180,140,200,0.22);
+    --strip-bg:  #ffffff;
+  }
+
+  /* ─── Reset & Base ─── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(135deg, #ffe0ee 0%, #e8d5ff 35%, #d0eaff 70%, #fff0d0 100%);
+    min-height: 100vh;
+    color: var(--text);
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* ─── Floating Background Decorations ─── */
+  .bg-deco {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
+  }
+  .bg-deco span {
+    position: absolute;
+    font-size: clamp(18px, 3vw, 32px);
+    opacity: 0.18;
+    animation: floatDeco linear infinite;
+  }
+  @keyframes floatDeco {
+    0%   { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+    10%  { opacity: 0.18; }
+    90%  { opacity: 0.18; }
+    100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+  }
+
+  /* ─── Main Wrapper ─── */
+  #app {
+    position: relative; z-index: 1;
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 100vh;
+    padding: 24px 16px 48px;
+  }
+
+  /* ─── Header ─── */
+  .app-header {
+    text-align: center; margin-bottom: 28px;
+  }
+  .app-header .logo {
+    font-size: clamp(30px, 6vw, 48px);
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--pink-deep), var(--lavender), var(--blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -1px;
+    line-height: 1.1;
+    text-shadow: none;
+  }
+  .app-header .subtitle {
+    font-size: 13px;
+    color: var(--text-light);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  /* ─── Card ─── */
+  .card {
+    background: rgba(255,255,255,0.82);
+    backdrop-filter: blur(14px);
+    border-radius: 28px;
+    padding: 36px 32px;
+    box-shadow: 0 8px 40px var(--shadow), 0 2px 0 rgba(255,255,255,0.9) inset;
+    width: 100%; max-width: 480px;
+    border: 1.5px solid rgba(255,255,255,0.8);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .card:hover { transform: translateY(-2px); box-shadow: 0 14px 50px var(--shadow); }
+
+  /* ─── Step Indicator ─── */
+  .step-indicator {
+    display: flex; gap: 8px; justify-content: center; margin-bottom: 24px;
+  }
+  .step-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: #e0d0f0; transition: all 0.4s ease;
+  }
+  .step-dot.active { background: var(--pink-deep); transform: scale(1.4); }
+  .step-dot.done   { background: var(--lavender); }
+
+  /* ─── Typography ─── */
+  .section-title {
+    font-size: 22px; font-weight: 800;
+    color: var(--text); text-align: center;
+    margin-bottom: 6px;
+  }
+  .section-sub {
+    font-size: 13px; color: var(--text-light);
+    text-align: center; margin-bottom: 24px;
+    line-height: 1.5;
+  }
+
+  /* ─── Welcome Screen ─── */
+  .welcome-emojis {
+    font-size: 48px; text-align: center; margin-bottom: 12px;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
+
+  /* ─── Input Fields ─── */
+  .input-group { margin-bottom: 16px; }
+  .input-group label {
+    display: block; font-size: 12px; font-weight: 700;
+    color: var(--text-light); letter-spacing: 1.5px; text-transform: uppercase;
+    margin-bottom: 7px;
+  }
+  .input-group input, .input-group textarea {
+    width: 100%; padding: 13px 18px;
+    border: 2px solid #f0e0f8;
+    border-radius: 16px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 15px; color: var(--text);
+    background: rgba(255,255,255,0.9);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    resize: none;
+  }
+  .input-group input:focus, .input-group textarea:focus {
+    border-color: var(--pink-deep);
+    box-shadow: 0 0 0 4px rgba(255,133,161,0.14);
+  }
+  .input-group input::placeholder, .input-group textarea::placeholder {
+    color: #d0c0e0;
+  }
+
+  /* ─── Buttons ─── */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 14px 28px;
+    border: none; border-radius: 100px; cursor: pointer;
+    font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 800;
+    letter-spacing: 0.3px;
+    transition: transform 0.18s, box-shadow 0.18s, filter 0.18s;
+    position: relative; overflow: hidden;
+  }
+  .btn::after {
+    content: ''; position: absolute; inset: 0;
+    background: rgba(255,255,255,0); transition: background 0.2s;
+    border-radius: inherit;
+  }
+  .btn:hover::after { background: rgba(255,255,255,0.15); }
+  .btn:active { transform: scale(0.96); }
+  .btn:hover  { transform: translateY(-2px); box-shadow: 0 8px 24px var(--shadow); }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--pink-deep), var(--lavender));
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(255,100,150,0.3);
+    width: 100%; margin-top: 8px;
+  }
+  .btn-secondary {
+    background: linear-gradient(135deg, var(--lavender), var(--blue));
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(150,150,255,0.2);
+  }
+  .btn-download {
+    background: linear-gradient(135deg, #a8edbc, #6dd5b5);
+    color: #2a6655;
+    box-shadow: 0 4px 16px rgba(100,200,160,0.3);
+    width: 100%; margin-top: 12px; font-size: 17px;
+  }
+  .btn-restart {
+    background: rgba(240,230,255,0.8);
+    color: var(--text-light);
+    width: 100%; margin-top: 8px; font-size: 14px;
+    box-shadow: none; border: 2px solid #e8d8f8;
+  }
+  .btn-restart:hover { background: rgba(240,230,255,1); }
+  .btn:disabled {
+    opacity: 0.5; cursor: not-allowed; transform: none !important;
+  }
+
+  /* ─── Camera Section ─── */
+  .camera-wrap {
+    position: relative; width: 100%; border-radius: 20px; overflow: hidden;
+    background: #1a0a2e;
+    aspect-ratio: 4/3;
+    box-shadow: 0 6px 28px rgba(100,50,150,0.25);
+    margin-bottom: 16px;
+  }
+  #video {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    transform: scaleX(-1); /* mirror */
+  }
+
+  /* Flash effect overlay */
+  .flash-overlay {
+    position: absolute; inset: 0;
+    background: #fff; opacity: 0; pointer-events: none;
+    border-radius: 20px;
+    transition: opacity 0.05s;
+  }
+  .flash-overlay.flash { animation: flashAnim 0.5s ease-out forwards; }
+  @keyframes flashAnim {
+    0%   { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  /* Countdown */
+  .countdown-display {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    pointer-events: none;
+  }
+  .countdown-number {
+    font-size: 100px; font-weight: 900;
+    color: #fff;
+    text-shadow: 0 0 40px rgba(255,180,220,0.9), 0 4px 20px rgba(0,0,0,0.3);
+    opacity: 0;
+    transform: scale(0.5);
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .countdown-number.show {
+    opacity: 1; transform: scale(1);
+    animation: countPop 0.8s ease forwards;
+  }
+  @keyframes countPop {
+    0%  { transform: scale(0.5); opacity: 1; }
+    50% { transform: scale(1.2); }
+    100%{ transform: scale(1);   opacity: 0; }
+  }
+
+  /* Photo counter */
+  .photo-counter {
+    display: flex; gap: 10px; justify-content: center;
+    margin-bottom: 14px;
+  }
+  .photo-dot {
+    width: 14px; height: 14px; border-radius: 50%;
+    background: #e0d0f0; border: 2px solid #c8b8e8;
+    transition: all 0.3s ease;
+  }
+  .photo-dot.taken {
+    background: var(--pink-deep);
+    box-shadow: 0 0 8px rgba(255,100,150,0.5);
+    transform: scale(1.2);
+  }
+
+  /* Thumbnails */
+  .thumbnails {
+    display: flex; gap: 10px; justify-content: center;
+    margin-top: 12px; flex-wrap: wrap;
+  }
+  .thumb {
+    width: 80px; height: 60px; border-radius: 10px;
+    object-fit: cover;
+    border: 3px solid var(--pink);
+    box-shadow: 0 3px 12px var(--shadow);
+    animation: thumbPop 0.4s cubic-bezier(0.175,0.885,0.32,1.275) forwards;
+    transform: scale(0);
+  }
+  @keyframes thumbPop {
+    to { transform: scale(1) rotate(-1deg); }
+  }
+  .thumb:nth-child(2) { animation-delay: 0.05s; transform: rotate(1deg) scale(0) !important; }
+  .thumb:nth-child(3) { animation-delay: 0.10s; transform: rotate(-0.5deg) scale(0) !important; }
+
+  /* ─── Strip Preview Section ─── */
+  #stripSection { text-align: center; }
+  .strip-wrap {
+    display: flex; justify-content: center;
+    margin: 16px 0 20px;
+  }
+  #stripCanvas {
+    border-radius: 12px;
+    box-shadow: 0 10px 50px rgba(150,100,200,0.3), 0 2px 0 rgba(255,255,255,0.8) inset;
+    max-width: 100%;
+    animation: stripReveal 0.6s cubic-bezier(0.175,0.885,0.32,1.275) forwards;
+    transform: scale(0.8) translateY(20px); opacity: 0;
+  }
+  @keyframes stripReveal {
+    to { transform: scale(1) translateY(0); opacity: 1; }
+  }
+
+  /* ─── Stickers / Decoration ─── */
+  .sticker-row {
+    display: flex; gap: 6px; justify-content: center; flex-wrap: wrap;
+    font-size: 20px; margin-bottom: 18px;
+    animation: wiggle 2s ease-in-out infinite;
+  }
+  @keyframes wiggle {
+    0%,100%{ transform: rotate(0deg); }
+    25%    { transform: rotate(-3deg); }
+    75%    { transform: rotate(3deg); }
+  }
+
+  /* ─── Utility ─── */
+  .hidden { display: none !important; }
+  .mt-16 { margin-top: 16px; }
+  .text-center { text-align: center; }
+
+  /* ─── Responsive ─── */
+  @media (max-width: 520px) {
+    .card { padding: 26px 18px; border-radius: 22px; }
+    .thumb { width: 68px; height: 52px; }
+  }
+
+  /* ─── Page transition ─── */
+  .step-screen {
+    animation: slideIn 0.45s cubic-bezier(0.22,1,0.36,1) forwards;
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  @keyframes slideIn {
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<!-- Floating background decorations -->
+<div class="bg-deco" id="bgDeco"></div>
+
+<div id="app">
+
+  <!-- ── Header ── -->
+  <header class="app-header">
+    <div class="logo">✨ 포토부스</div>
+    <div class="subtitle">Korean Photo Booth</div>
+  </header>
+
+  <!-- ── Step Indicator ── -->
+  <div class="step-indicator">
+    <div class="step-dot active" id="dot1"></div>
+    <div class="step-dot"        id="dot2"></div>
+    <div class="step-dot"        id="dot3"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SCREEN 1 – Welcome / User Info
+  ══════════════════════════════════════ -->
+  <div class="card step-screen" id="welcomeScreen">
+    <div class="welcome-emojis">📸✨💖</div>
+    <h1 class="section-title">어서오세요!</h1>
+    <p class="section-sub">Welcome to your personal photo booth.<br>Enter your info to get started~</p>
+
+    <div class="input-group">
+      <label>✦ Your Name</label>
+      <input type="text" id="userName" placeholder="e.g. 소연 · Soyeon" maxlength="30" />
+    </div>
+    <div class="input-group">
+      <label>✦ Your Message</label>
+      <textarea id="userMessage" rows="2" placeholder="e.g. 오늘도 행복하게 ♡" maxlength="60"></textarea>
+    </div>
+
+    <button class="btn btn-primary" onclick="startBooth()">
+      <span>Start Photo Booth</span> <span>🌸</span>
+    </button>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SCREEN 2 – Camera
+  ══════════════════════════════════════ -->
+  <div class="card step-screen hidden" id="cameraScreen">
+    <div class="sticker-row" id="stickerRow">⭐ 💕 ✨ 🌸 💫 🎀</div>
+    <h2 class="section-title" id="cameraTitle">Ready? Say 치즈!</h2>
+    <p class="section-sub" id="cameraSubtitle">Photo <span id="photoNum">1</span> of 3 — smile! ☺</p>
+
+    <!-- Photo counter dots -->
+    <div class="photo-counter">
+      <div class="photo-dot" id="pdot1"></div>
+      <div class="photo-dot" id="pdot2"></div>
+      <div class="photo-dot" id="pdot3"></div>
+    </div>
+
+    <!-- Camera preview -->
+    <div class="camera-wrap">
+      <video id="video" autoplay playsinline muted></video>
+      <canvas id="hiddenCanvas" class="hidden"></canvas>
+      <div class="flash-overlay" id="flashOverlay"></div>
+      <div class="countdown-display">
+        <div class="countdown-number" id="countdownNum"></div>
+      </div>
+    </div>
+
+    <!-- Thumbnails -->
+    <div class="thumbnails" id="thumbnails"></div>
+
+    <!-- Capture button -->
+    <button class="btn btn-primary mt-16" id="captureBtn" onclick="startCountdown()">
+      <span>📸 Take Photo</span>
+    </button>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SCREEN 3 – Strip Result
+  ══════════════════════════════════════ -->
+  <div class="card step-screen hidden" id="stripSection">
+    <div class="sticker-row">🎀 💕 ✨ ⭐ 🌸 💫 🎀</div>
+    <h2 class="section-title">Your Photo Strip!</h2>
+    <p class="section-sub">Here's your Korean-style 포토부스 strip~<br>Download and keep forever! 💾</p>
+
+    <div class="strip-wrap">
+      <canvas id="stripCanvas"></canvas>
+    </div>
+
+    <button class="btn btn-download" onclick="downloadStrip()">
+      💾 Download Strip
+    </button>
+    <button class="btn btn-restart" onclick="restartBooth()">
+      🔄 Take New Photos
+    </button>
+  </div>
+
+</div>
+
+<!-- Hidden canvas for capturing frames -->
+<canvas id="captureCanvas" class="hidden"></canvas>
+
+<script>
+/* ════════════════════════════════════════════════════════
+   🌸  KOREAN PHOTO BOOTH  –  Main Script
+   ════════════════════════════════════════════════════════ */
+
+// ── State ──────────────────────────────────────────────
+let userName    = '';
+let userMessage = '';
+let photosTaken = 0;
+const MAX_PHOTOS = 3;
+const capturedImages = [];  // base64 data URLs
+let stream = null;
+let isCounting = false;
+
+// ── DOM refs ───────────────────────────────────────────
+const video          = document.getElementById('video');
+const flashOverlay   = document.getElementById('flashOverlay');
+const countdownNum   = document.getElementById('countdownNum');
+const thumbnails     = document.getElementById('thumbnails');
+const captureBtn     = document.getElementById('captureBtn');
+const photoNumSpan   = document.getElementById('photoNum');
+
+// ── Background Floating Decorations ───────────────────
+(function initBgDeco() {
+  const emojis = ['✨','💕','⭐','🌸','💫','🎀','💖','🌟','🍬','🎵','💝','🌺'];
+  const container = document.getElementById('bgDeco');
+  for (let i = 0; i < 18; i++) {
+    const s = document.createElement('span');
+    s.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    s.style.left   = Math.random() * 100 + 'vw';
+    s.style.bottom = '-60px';
+    s.style.animationDuration  = (12 + Math.random() * 14) + 's';
+    s.style.animationDelay     = (Math.random() * 12)       + 's';
+    s.style.fontSize            = (16 + Math.random() * 20)  + 'px';
+    container.appendChild(s);
+  }
+})();
+
+// ── STEP 1 : Start Booth ───────────────────────────────
+function startBooth() {
+  const nameInput = document.getElementById('userName').value.trim();
+  const msgInput  = document.getElementById('userMessage').value.trim();
+
+  if (!nameInput) {
+    shakeInput('userName');
+    return;
+  }
+
+  userName    = nameInput;
+  userMessage = msgInput || '오늘도 행복하게 ♡';
+
+  switchScreen('welcomeScreen', 'cameraScreen');
+  setStepDots(2);
+  initCamera();
+}
+
+function shakeInput(id) {
+  const el = document.getElementById(id);
+  el.style.animation = 'none';
+  el.style.borderColor = '#ff85a1';
+  setTimeout(() => {
+    el.style.borderColor = '';
+  }, 1000);
+}
+
+// ── STEP 2 : Camera ────────────────────────────────────
+async function initCamera() {
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 960 } },
+      audio: false
+    });
+    video.srcObject = stream;
+  } catch (err) {
+    alert('📷 Camera access needed!\nPlease allow camera permissions and try again.\n\n' + err.message);
+  }
+}
+
+// Countdown then capture
+function startCountdown() {
+  if (isCounting || photosTaken >= MAX_PHOTOS) return;
+  isCounting = true;
+  captureBtn.disabled = true;
+
+  let count = 3;
+  showCountNum(count);
+
+  const interval = setInterval(() => {
+    count--;
+    if (count > 0) {
+      showCountNum(count);
+    } else {
+      clearInterval(interval);
+      capturePhoto();
+    }
+  }, 1000);
+}
+
+function showCountNum(n) {
+  countdownNum.textContent = n;
+  countdownNum.classList.remove('show');
+  void countdownNum.offsetWidth; // reflow trick
+  countdownNum.classList.add('show');
+}
+
+function capturePhoto() {
+  // Flash
+  flashOverlay.classList.remove('flash');
+  void flashOverlay.offsetWidth;
+  flashOverlay.classList.add('flash');
+
+  // Draw video frame to canvas
+  const canvas = document.getElementById('captureCanvas');
+  canvas.width  = video.videoWidth  || 640;
+  canvas.height = video.videoHeight || 480;
+  const ctx = canvas.getContext('2d');
+
+  // Mirror to match preview
+  ctx.translate(canvas.width, 0);
+  ctx.scale(-1, 1);
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  const dataURL = canvas.toDataURL('image/jpeg', 0.95);
+  capturedImages.push(dataURL);
+  photosTaken++;
+
+  // Update dots
+  document.getElementById('pdot' + photosTaken).classList.add('taken');
+
+  // Add thumbnail
+  const img = document.createElement('img');
+  img.src = dataURL;
+  img.className = 'thumb';
+  thumbnails.appendChild(img);
+
+  isCounting = false;
+
+  if (photosTaken >= MAX_PHOTOS) {
+    // All photos taken — generate strip
+    captureBtn.textContent = '✨ Generating strip…';
+    setTimeout(() => {
+      stopCamera();
+      generateStrip();
+    }, 700);
+  } else {
+    // Next photo
+    photoNumSpan.textContent = photosTaken + 1;
+    captureBtn.disabled = false;
+    captureBtn.innerHTML = '<span>📸 Take Photo ' + (photosTaken + 1) + '</span>';
+  }
+}
+
+function stopCamera() {
+  if (stream) {
+    stream.getTracks().forEach(t => t.stop());
+    stream = null;
+  }
+}
+
+// ── STEP 3 : Generate Strip ────────────────────────────
+function generateStrip() {
+  switchScreen('cameraScreen', 'stripSection');
+  setStepDots(3);
+
+  const canvas = document.getElementById('stripCanvas');
+  const ctx    = canvas.getContext('2d');
+
+  // Strip dimensions
+  const stripW = 360;
+  const photoW = 300;
+  const photoH = 225;  // 4:3
+  const padX   = (stripW - photoW) / 2;  // 30
+  const padTop = 36;
+  const gap     = 14;
+  const footerH = 100;
+  const decorH  = 28; // top decoration strip
+  const stripH  = decorH + padTop + (photoH * 3) + (gap * 2) + footerH + 24;
+
+  canvas.width  = stripW;
+  canvas.height = stripH;
+
+  // ── Background ──
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, stripW, stripH);
+
+  // Subtle noise/gradient background
+  const bgGrad = ctx.createLinearGradient(0, 0, 0, stripH);
+  bgGrad.addColorStop(0,   '#fff9fd');
+  bgGrad.addColorStop(0.5, '#fff4fb');
+  bgGrad.addColorStop(1,   '#fff0f8');
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, stripW, stripH);
+
+  // ── Top color bar ──
+  const topGrad = ctx.createLinearGradient(0, 0, stripW, 0);
+  topGrad.addColorStop(0,   '#ffb3c6');
+  topGrad.addColorStop(0.5, '#c9b8f5');
+  topGrad.addColorStop(1,   '#b3d9ff');
+  ctx.fillStyle = topGrad;
+  ctx.fillRect(0, 0, stripW, decorH);
+
+  // Top bar decorations
+  ctx.font = '16px serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  const topStickers = ['✦','✦','✦','✦','✦','✦','✦','✦','✦','✦','✦','✦'];
+  topStickers.forEach((s, i) => {
+    ctx.fillText(s, 10 + i * 28, 20);
+  });
+
+  // ── Draw 3 photos ──
+  const imgPromises = capturedImages.map(src => {
+    return new Promise(resolve => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.src = src;
+    });
+  });
+
+  Promise.all(imgPromises).then(images => {
+    images.forEach((img, i) => {
+      const y = decorH + padTop + i * (photoH + gap);
+
+      // Photo shadow
+      ctx.shadowColor   = 'rgba(180,120,200,0.2)';
+      ctx.shadowBlur    = 12;
+      ctx.shadowOffsetY = 4;
+
+      // Rounded photo clip
+      ctx.save();
+      roundRect(ctx, padX, y, photoW, photoH, 10);
+      ctx.clip();
+      ctx.drawImage(img, padX, y, photoW, photoH);
+      ctx.restore();
+      ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+
+      // Photo border
+      ctx.strokeStyle = 'rgba(200,180,230,0.6)';
+      ctx.lineWidth   = 2;
+      ctx.save();
+      roundRect(ctx, padX, y, photoW, photoH, 10);
+      ctx.stroke();
+      ctx.restore();
+    });
+
+    // ── Side decoration lines ──
+    ctx.strokeStyle = 'rgba(200,170,220,0.4)';
+    ctx.lineWidth   = 3;
+    ctx.setLineDash([4, 6]);
+    ctx.beginPath(); ctx.moveTo(12, decorH + 10); ctx.lineTo(12, stripH - footerH - 10); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(stripW - 12, decorH + 10); ctx.lineTo(stripW - 12, stripH - footerH - 10); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // ── Footer area ──
+    const footerY = stripH - footerH;
+
+    // Footer divider
+    const divGrad = ctx.createLinearGradient(padX, 0, padX + photoW, 0);
+    divGrad.addColorStop(0,   'rgba(180,140,210,0)');
+    divGrad.addColorStop(0.5, 'rgba(180,140,210,0.5)');
+    divGrad.addColorStop(1,   'rgba(180,140,210,0)');
+    ctx.strokeStyle = divGrad;
+    ctx.lineWidth   = 1.5;
+    ctx.beginPath(); ctx.moveTo(padX, footerY); ctx.lineTo(padX + photoW, footerY); ctx.stroke();
+
+    // Hearts / sparkles row
+    ctx.font      = '15px serif';
+    ctx.textAlign = 'center';
+    const heartRow = '♡  ✦  ♡  ✦  ♡  ✦  ♡';
+    ctx.fillStyle = '#d4a8d0';
+    ctx.fillText(heartRow, stripW / 2, footerY + 20);
+
+    // Name
+    ctx.font      = 'bold 20px "Nanum Pen Script", cursive, serif';
+    ctx.fillStyle = '#8a6aaa';
+    ctx.fillText(userName, stripW / 2, footerY + 44);
+
+    // Message
+    ctx.font      = '13px "Nunito", sans-serif';
+    ctx.fillStyle = '#b09ac0';
+    // Wrap long message
+    const words = userMessage.split(' ');
+    let line = '', lines2 = [];
+    for (const w of words) {
+      const test = line + (line ? ' ' : '') + w;
+      if (ctx.measureText(test).width > photoW - 10 && line) {
+        lines2.push(line); line = w;
+      } else { line = test; }
+    }
+    lines2.push(line);
+    lines2.slice(0, 2).forEach((l, i) => {
+      ctx.fillText(l, stripW / 2, footerY + 62 + i * 16);
+    });
+
+    // Bottom color bar
+    const botGrad = ctx.createLinearGradient(0, 0, stripW, 0);
+    botGrad.addColorStop(0,   '#b3d9ff');
+    botGrad.addColorStop(0.5, '#c9b8f5');
+    botGrad.addColorStop(1,   '#ffb3c6');
+    ctx.fillStyle = botGrad;
+    ctx.fillRect(0, stripH - 20, stripW, 20);
+
+    // Bottom text
+    ctx.font      = '10px "Nunito", sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    ctx.textAlign = 'center';
+    const today = new Date();
+    const dateStr = today.getFullYear() + '.' + String(today.getMonth()+1).padStart(2,'0') + '.' + String(today.getDate()).padStart(2,'0');
+    ctx.fillText('포토부스 · ' + dateStr, stripW / 2, stripH - 7);
+  });
+}
+
+// Helper: Rounded rect path
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+// ── Download ────────────────────────────────────────────
+function downloadStrip() {
+  const canvas = document.getElementById('stripCanvas');
+  const link   = document.createElement('a');
+  const safeName = (userName || 'photobooth').replace(/[^a-z0-9가-힣]/gi, '_');
+  link.download = '포토부스_' + safeName + '_' + Date.now() + '.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+// ── Restart ─────────────────────────────────────────────
+function restartBooth() {
+  // Reset state
+  photosTaken = 0;
+  capturedImages.length = 0;
+  isCounting = false;
+
+  // Reset UI
+  thumbnails.innerHTML = '';
+  ['pdot1','pdot2','pdot3'].forEach(id => document.getElementById(id).classList.remove('taken'));
+  captureBtn.disabled = false;
+  captureBtn.innerHTML = '<span>📸 Take Photo</span>';
+  document.getElementById('photoNum').textContent = '1';
+
+  switchScreen('stripSection', 'welcomeScreen');
+  setStepDots(1);
+}
+
+// ── Screen Switcher ─────────────────────────────────────
+function switchScreen(fromId, toId) {
+  const from = document.getElementById(fromId);
+  const to   = document.getElementById(toId);
+  from.classList.add('hidden');
+  to.classList.remove('hidden');
+  to.classList.remove('step-screen');
+  void to.offsetWidth;
+  to.classList.add('step-screen');
+}
+
+// ── Step Dots ───────────────────────────────────────────
+function setStepDots(active) {
+  [1,2,3].forEach(i => {
+    const dot = document.getElementById('dot' + i);
+    dot.classList.remove('active','done');
+    if (i < active)  dot.classList.add('done');
+    if (i === active) dot.classList.add('active');
+  });
+}
+
+// ── Enter key support for welcome screen ───────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const ws = document.getElementById('welcomeScreen');
+    if (!ws.classList.contains('hidden')) startBooth();
+  }
+});
+</script>
+</body>
+</html>
