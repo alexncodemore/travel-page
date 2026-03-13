@@ -1,786 +1,641 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>포토부스 · Korean Photo Booth</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,600&family=Nanum+Pen+Script&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,600;1,500;1,700&family=Nanum+Pen+Script&display=swap');
 
 :root {
-  --rose:      #f9a8c9;
-  --rose-deep: #e8698a;
-  --lilac:     #c4b0f0;
-  --sky:       #a8d4f5;
-  --peach:     #fcd5b5;
-  --mint:      #a8e6cf;
-  --cream:     #fffaf5;
-  --text:      #3d2c4a;
-  --text-mid:  #7a6490;
-  --text-light:#b0a0c0;
-  --glass:     rgba(255,255,255,0.75);
-  --glow:      rgba(232,105,138,0.18);
+  --rose:#f9a8c9;--rose-deep:#e8698a;--rose-dark:#c04e72;
+  --lilac:#c4b0f0;--lilac-deep:#9b85d9;
+  --sky:#a8d4f5;--mint:#a8e6cf;--peach:#fcd5b5;
+  --text:#3d2c4a;--text-mid:#7a6490;--text-light:#b0a0c0;
 }
-
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  font-family: 'DM Sans', sans-serif;
-  background: #fdf0f6;
-  min-height: 100vh;
-  color: var(--text);
-  overflow-x: hidden;
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:#fdf0f6;min-height:100vh;color:var(--text);overflow-x:hidden;
 }
-
-/* Soft noise background */
-body::before {
-  content: '';
-  position: fixed; inset: 0; z-index: 0;
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;
   background:
-    radial-gradient(ellipse 80% 60% at 15% 20%, rgba(249,168,201,0.25) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 80% at 85% 80%, rgba(196,176,240,0.22) 0%, transparent 60%),
-    radial-gradient(ellipse 70% 50% at 50% 50%, rgba(168,212,245,0.15) 0%, transparent 70%);
-  pointer-events: none;
+    radial-gradient(ellipse 80% 60% at 10% 15%,rgba(249,168,201,.22) 0%,transparent 55%),
+    radial-gradient(ellipse 60% 80% at 90% 85%,rgba(196,176,240,.2) 0%,transparent 55%),
+    radial-gradient(ellipse 70% 50% at 55% 45%,rgba(168,212,245,.13) 0%,transparent 65%);
+  pointer-events:none;
 }
-
-#app {
-  position: relative; z-index: 1;
-  display: flex; flex-direction: column; align-items: center;
-  min-height: 100vh;
-  padding: 28px 16px 60px;
+#app{
+  position:relative;z-index:1;
+  display:flex;flex-direction:column;align-items:center;
+  min-height:100vh;padding:24px 14px 60px;
 }
 
 /* ── Header ── */
-.app-header {
-  text-align: center;
-  margin-bottom: 24px;
+.app-header{text-align:center;margin-bottom:20px}
+.header-badge{
+  display:inline-flex;align-items:center;gap:7px;
+  background:rgba(255,255,255,.88);border:1.5px solid rgba(232,105,138,.18);
+  border-radius:100px;padding:5px 16px;
+  font-size:10px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--rose-deep);font-weight:600;margin-bottom:8px;
 }
-.header-badge {
-  display: inline-flex; align-items: center; gap: 8px;
-  background: rgba(255,255,255,0.9);
-  border: 1.5px solid rgba(232,105,138,0.2);
-  border-radius: 100px;
-  padding: 6px 18px;
-  font-size: 11px;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: var(--rose-deep);
-  font-weight: 600;
-  margin-bottom: 10px;
-}
-.header-badge .dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--rose-deep);
-  animation: breathe 2s ease-in-out infinite;
-}
-@keyframes breathe { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.7)} }
-
-.logo {
-  font-family: 'Playfair Display', serif;
-  font-style: italic;
-  font-size: clamp(28px, 5.5vw, 42px);
-  color: var(--text);
-  letter-spacing: -0.5px;
-  line-height: 1;
-}
-.logo span {
-  background: linear-gradient(135deg, var(--rose-deep) 0%, var(--lilac) 50%, var(--sky) 100%);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+.badge-dot{width:5px;height:5px;border-radius:50%;background:var(--rose-deep);animation:breathe 2s ease-in-out infinite}
+@keyframes breathe{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.7)}}
+.logo{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:700;
+  font-size:clamp(30px,6vw,46px);letter-spacing:-.5px;line-height:1;
+  background:linear-gradient(135deg,var(--rose-dark) 0%,var(--lilac-deep) 50%,#6ab4e8 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
 }
 
-/* ── Step Dots ── */
-.step-indicator {
-  display: flex; align-items: center; gap: 0;
-  margin-bottom: 22px;
+/* ── Step bar ── */
+.step-bar{display:flex;align-items:center;margin-bottom:20px}
+.sdot{
+  width:9px;height:9px;border-radius:50%;background:rgba(196,176,240,.3);
+  transition:all .45s cubic-bezier(.34,1.56,.64,1);
 }
-.step-dot {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: rgba(196,176,240,0.35);
-  transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1);
-}
-.step-line {
-  width: 28px; height: 1.5px;
-  background: rgba(196,176,240,0.3);
-  transition: background 0.4s;
-}
-.step-dot.active {
-  background: var(--rose-deep);
-  transform: scale(1.5);
-  box-shadow: 0 0 0 4px rgba(232,105,138,0.2);
-}
-.step-dot.done { background: var(--lilac); transform: scale(1.1); }
-.step-line.done { background: var(--lilac); }
+.sline{width:32px;height:1.5px;background:rgba(196,176,240,.25);transition:background .4s}
+.sdot.active{background:var(--rose-deep);transform:scale(1.6);box-shadow:0 0 0 4px rgba(232,105,138,.18)}
+.sdot.done{background:var(--lilac-deep);transform:scale(1.2)}
+.sline.done{background:var(--lilac)}
 
 /* ── Card ── */
-.card {
-  background: rgba(255,255,255,0.88);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: 24px;
-  padding: 32px 28px;
-  box-shadow:
-    0 2px 0 rgba(255,255,255,0.95) inset,
-    0 12px 48px rgba(180,120,200,0.12),
-    0 2px 8px rgba(180,120,200,0.08);
-  width: 100%; max-width: 460px;
-  border: 1px solid rgba(255,255,255,0.9);
-  transition: box-shadow 0.3s;
-}
-.card:hover { box-shadow: 0 2px 0 rgba(255,255,255,0.95) inset, 0 18px 60px rgba(180,120,200,0.16), 0 2px 8px rgba(180,120,200,0.1); }
-
-/* ── Typography ── */
-.section-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 26px;
-  color: var(--text);
-  text-align: center;
-  margin-bottom: 6px;
-  letter-spacing: -0.3px;
-}
-.section-sub {
-  font-size: 13px;
-  color: var(--text-light);
-  text-align: center;
-  margin-bottom: 26px;
-  line-height: 1.6;
-  font-weight: 400;
+.card{
+  background:rgba(255,255,255,.9);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+  border-radius:26px;padding:28px 24px;
+  box-shadow:0 2px 0 rgba(255,255,255,.95) inset,0 14px 50px rgba(160,100,190,.11),0 2px 8px rgba(160,100,190,.07);
+  width:100%;max-width:430px;border:1px solid rgba(255,255,255,.92);
 }
 
-/* ── Welcome decorative art ── */
-.welcome-art {
-  width: 90px; height: 90px;
-  margin: 0 auto 18px;
-  position: relative;
+/* ── Welcome ── */
+.welcome-art{width:80px;height:80px;margin:0 auto 16px;position:relative;display:flex;align-items:center;justify-content:center}
+.wa-ring{position:absolute;inset:0;border-radius:50%;border:1.5px solid rgba(249,168,201,.45);animation:wspin 9s linear infinite}
+.wa-ring2{inset:11px;animation:wspin 5.5s linear infinite reverse;border-color:rgba(196,176,240,.5)}
+.wa-core{
+  position:absolute;inset:22px;border-radius:50%;
+  background:linear-gradient(135deg,var(--rose),var(--lilac));
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+  box-shadow:0 4px 18px rgba(232,105,138,.28);
 }
-.welcome-art .ring {
-  position: absolute; border-radius: 50%;
-  border: 2px solid;
-}
-.welcome-art .ring-1 {
-  inset: 0; border-color: rgba(249,168,201,0.4);
-  animation: spin 8s linear infinite;
-}
-.welcome-art .ring-2 {
-  inset: 10px; border-color: rgba(196,176,240,0.5);
-  animation: spin 5s linear infinite reverse;
-}
-.welcome-art .inner {
-  position: absolute; inset: 22px;
-  background: linear-gradient(135deg, var(--rose), var(--lilac));
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 20px;
-  box-shadow: 0 4px 16px rgba(232,105,138,0.3);
-}
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes wspin{to{transform:rotate(360deg)}}
 
-/* ── Inputs ── */
-.input-group { margin-bottom: 14px; }
-.input-group label {
-  display: flex; align-items: center; gap: 6px;
-  font-size: 11px; font-weight: 600;
-  color: var(--text-mid);
-  letter-spacing: 1.5px; text-transform: uppercase;
-  margin-bottom: 8px;
-}
-.input-group label .label-icon {
-  width: 18px; height: 18px; border-radius: 6px;
-  background: linear-gradient(135deg, var(--rose), var(--lilac));
-  display: inline-flex; align-items: center; justify-content: center;
-  font-size: 9px;
-}
-.input-group input, .input-group textarea {
-  width: 100%; padding: 13px 16px;
-  border: 1.5px solid rgba(196,176,240,0.35);
-  border-radius: 14px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 15px; color: var(--text);
-  background: rgba(255,255,255,0.8);
-  outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
-  resize: none;
-}
-.input-group input:focus, .input-group textarea:focus {
-  border-color: var(--rose-deep);
-  box-shadow: 0 0 0 4px rgba(232,105,138,0.1);
-  background: #fff;
-}
-.input-group input::placeholder, .input-group textarea::placeholder { color: #d8c8e8; }
+.section-title{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:25px;color:var(--text);text-align:center;margin-bottom:5px}
+.section-sub{font-size:13px;color:var(--text-light);text-align:center;margin-bottom:22px;line-height:1.6}
 
-/* ── Buttons ── */
-.btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  padding: 14px 24px;
-  border: none; border-radius: 100px; cursor: pointer;
-  font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600;
-  letter-spacing: 0.2px;
-  transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s;
-  width: 100%; margin-top: 10px;
+.input-group{margin-bottom:12px}
+.input-group label{display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:600;color:var(--text-mid);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px}
+.lico{width:16px;height:16px;border-radius:5px;background:linear-gradient(135deg,var(--rose),var(--lilac));display:inline-flex;align-items:center;justify-content:center;font-size:8px;color:#fff;flex-shrink:0}
+.input-group input,.input-group textarea{
+  width:100%;padding:11px 14px;
+  border:1.5px solid rgba(196,176,240,.3);border-radius:12px;
+  font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);
+  background:rgba(255,255,255,.8);outline:none;resize:none;
+  transition:border-color .2s,box-shadow .2s,background .2s;
 }
-.btn:hover { transform: translateY(-2px) scale(1.01); }
-.btn:active { transform: scale(0.97); }
-.btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; }
+.input-group input:focus,.input-group textarea:focus{border-color:var(--rose-deep);box-shadow:0 0 0 4px rgba(232,105,138,.09);background:#fff}
+.input-group input::placeholder,.input-group textarea::placeholder{color:#d8c8e8}
 
-.btn-primary {
-  background: linear-gradient(135deg, var(--rose-deep) 0%, #c45a85 50%, var(--lilac) 100%);
-  background-size: 200% 100%; background-position: 0% 50%;
-  color: #fff;
-  box-shadow: 0 4px 20px rgba(232,105,138,0.35);
-  transition: transform 0.2s, box-shadow 0.2s, background-position 0.4s;
+/* Theme selector */
+.theme-label{font-size:10.5px;font-weight:600;color:var(--text-mid);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.theme-row{display:flex;gap:7px;margin-bottom:14px}
+.theme-btn{
+  flex:1;padding:8px 4px;border:1.5px solid rgba(196,176,240,.25);border-radius:11px;
+  background:rgba(255,255,255,.7);cursor:pointer;font-family:'DM Sans',sans-serif;
+  font-size:10.5px;font-weight:600;color:var(--text-mid);text-align:center;
+  transition:all .2s;
 }
-.btn-primary:hover { background-position: 100% 50%; box-shadow: 0 8px 28px rgba(232,105,138,0.45); }
+.theme-btn .tswatch{display:block;width:26px;height:6px;border-radius:4px;margin:0 auto 5px}
+.theme-btn.sel{border-color:var(--rose-deep);background:rgba(232,105,138,.08);color:var(--rose-deep)}
 
-.btn-download {
-  background: linear-gradient(135deg, #85d9b5 0%, #5ec4a0 100%);
-  color: #1a5c48;
-  box-shadow: 0 4px 20px rgba(94,196,160,0.3);
+/* Buttons */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:13px 22px;border:none;border-radius:100px;cursor:pointer;
+  font-family:'DM Sans',sans-serif;font-size:14.5px;font-weight:600;
+  transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .2s;
+  width:100%;margin-top:9px;
 }
-.btn-download:hover { box-shadow: 0 8px 28px rgba(94,196,160,0.4); }
+.btn:hover{transform:translateY(-2px) scale(1.01)}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.42;cursor:not-allowed;transform:none!important}
+.btn-primary{background:linear-gradient(135deg,var(--rose-dark),var(--rose-deep) 45%,var(--lilac-deep));color:#fff;box-shadow:0 4px 20px rgba(220,80,120,.3)}
+.btn-primary:hover{box-shadow:0 8px 28px rgba(220,80,120,.42)}
+.btn-dl{background:linear-gradient(135deg,#6ac8a8,#4db090);color:#1a5040;box-shadow:0 4px 18px rgba(74,180,140,.28);font-size:15px}
+.btn-dl:hover{box-shadow:0 8px 26px rgba(74,180,140,.4)}
+.btn-ghost{background:rgba(196,176,240,.1);color:var(--text-mid);border:1.5px solid rgba(196,176,240,.28);box-shadow:none;font-size:13px;margin-top:7px}
+.btn-ghost:hover{background:rgba(196,176,240,.2);transform:none}
 
-.btn-ghost {
-  background: rgba(196,176,240,0.12);
-  color: var(--text-mid);
-  border: 1.5px solid rgba(196,176,240,0.3);
-  box-shadow: none;
-  font-size: 13px; margin-top: 8px;
+/* Camera screen */
+.cam-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.cam-title{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:21px;color:var(--text)}
+.chips{display:flex;gap:5px}
+.chip{
+  width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:10.5px;font-weight:700;background:rgba(196,176,240,.18);color:var(--text-light);
+  border:1.5px solid rgba(196,176,240,.28);transition:all .4s cubic-bezier(.34,1.56,.64,1);
 }
-.btn-ghost:hover { background: rgba(196,176,240,0.2); transform: none; }
+.chip.taken{background:linear-gradient(135deg,var(--rose-deep),var(--lilac-deep));color:#fff;border-color:transparent;transform:scale(1.18);box-shadow:0 2px 10px rgba(232,105,138,.35)}
 
-/* ── Camera Screen ── */
-.cam-header {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 16px;
+/* ── CAMERA VIEWPORT: padding-bottom trick for perfect 3:4 on all devices ── */
+.camera-outer{
+  position:relative;
+  width:100%;
+  padding-bottom:133.33%;   /* 4/3 * 100% = perfect 3:4 portrait */
+  border-radius:18px;
+  overflow:hidden;
+  background:#18082a;
+  box-shadow:0 8px 32px rgba(90,40,110,.22);
+  margin-bottom:12px;
 }
-.cam-title { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--text); }
-.cam-counter-chips {
-  display: flex; gap: 6px;
+.camera-inner{
+  position:absolute;
+  inset:0;
 }
-.chip {
-  width: 28px; height: 28px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 700;
-  background: rgba(196,176,240,0.2);
-  color: var(--text-light);
-  border: 1.5px solid rgba(196,176,240,0.3);
-  transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1);
+#video{
+  width:100%;height:100%;
+  object-fit:cover;
+  display:block;
+  transform:scaleX(-1);
 }
-.chip.taken {
-  background: linear-gradient(135deg, var(--rose-deep), var(--lilac));
-  color: #fff; border-color: transparent;
-  box-shadow: 0 2px 10px rgba(232,105,138,0.35);
-  transform: scale(1.15);
+.cam-vignette{
+  position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse at center,transparent 60%,rgba(18,8,26,.28) 100%);
 }
+.flash-overlay{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+.flash-overlay.flash{animation:fl .5s ease-out forwards}
+@keyframes fl{0%{opacity:1}100%{opacity:0}}
+.cd-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:5}
+.cd-num{
+  font-family:'Cormorant Garamond',serif;font-weight:700;font-style:italic;
+  font-size:clamp(80px,22vw,130px);
+  color:rgba(255,255,255,.95);
+  text-shadow:0 0 60px rgba(255,150,200,.7),0 4px 24px rgba(0,0,0,.22);
+  opacity:0;transform:scale(.5);
+}
+.cd-num.show{animation:cpop .95s ease forwards}
+@keyframes cpop{0%{opacity:1;transform:scale(.5)}40%{transform:scale(1.18)}70%{transform:scale(.95);opacity:1}100%{transform:scale(1.05);opacity:0}}
 
-/* Camera wrapper — 3:4 portrait ratio (phone ratio) */
-.camera-wrap {
-  position: relative; width: 100%;
-  aspect-ratio: 3 / 4;
-  border-radius: 18px; overflow: hidden;
-  background: #1a0d24;
-  box-shadow: 0 8px 32px rgba(100,50,120,0.22);
-  margin-bottom: 14px;
+/* Thumbnails — 3:4 ratio */
+.thumbs{display:flex;gap:8px;justify-content:center;margin-top:4px}
+.thumb{
+  width:54px;height:72px;   /* strict 3:4 */
+  border-radius:9px;object-fit:cover;
+  border:2px solid rgba(249,168,201,.6);
+  box-shadow:0 3px 12px rgba(180,100,140,.18);
+  animation:tpop .4s cubic-bezier(.34,1.56,.64,1) forwards;transform:scale(0);
 }
-#video {
-  width: 100%; height: 100%;
-  object-fit: cover; display: block;
-  transform: scaleX(-1);
-}
+@keyframes tpop{to{transform:scale(1)}}
 
-/* Camera overlay – subtle vignette */
-.camera-wrap::after {
-  content: '';
-  position: absolute; inset: 0;
-  background: radial-gradient(ellipse at center, transparent 60%, rgba(20,10,30,0.3) 100%);
-  pointer-events: none;
-  border-radius: 18px;
+/* Strip result */
+.strip-result{text-align:center}
+.strip-scroll{overflow:auto;display:flex;justify-content:center;padding:4px 0 8px;margin:12px 0 12px;max-height:70vh}
+#stripCanvas{
+  border-radius:14px;flex-shrink:0;
+  box-shadow:0 14px 60px rgba(140,70,160,.2),0 2px 0 rgba(255,255,255,.85) inset;
+  animation:sr .7s cubic-bezier(.22,1,.36,1) forwards;
+  transform:scale(.85) translateY(16px);opacity:0;
 }
+@keyframes sr{to{transform:scale(1) translateY(0);opacity:1}}
 
-.flash-overlay {
-  position: absolute; inset: 0;
-  background: #fff; opacity: 0; pointer-events: none;
-}
-.flash-overlay.flash { animation: flashAnim 0.5s ease-out forwards; }
-@keyframes flashAnim { 0%{opacity:1} 100%{opacity:0} }
-
-.countdown-display {
-  position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-  pointer-events: none; z-index: 5;
-}
-.countdown-number {
-  font-family: 'Playfair Display', serif;
-  font-size: 120px; font-weight: 700;
-  color: rgba(255,255,255,0.95);
-  text-shadow: 0 0 60px rgba(255,180,220,0.8), 0 4px 24px rgba(0,0,0,0.25);
-  opacity: 0; transform: scale(0.6);
-}
-.countdown-number.show { animation: countPop 0.9s ease forwards; }
-@keyframes countPop {
-  0%  { opacity: 1; transform: scale(0.6); }
-  40% { transform: scale(1.15); }
-  70% { transform: scale(0.95); opacity: 1; }
-  100%{ transform: scale(1);   opacity: 0; }
-}
-
-/* Thumbnails */
-.thumbnails {
-  display: flex; gap: 8px; justify-content: center;
-  margin-top: 4px; margin-bottom: 4px;
-}
-.thumb {
-  border-radius: 10px;
-  object-fit: cover;
-  border: 2px solid rgba(249,168,201,0.6);
-  box-shadow: 0 3px 12px rgba(180,100,140,0.2);
-  animation: thumbPop 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards;
-  transform: scale(0);
-  /* 3:4 ratio thumbnails */
-  width: 60px;
-  height: 80px;
-}
-@keyframes thumbPop { to { transform: scale(1); } }
-
-/* ── Strip Result ── */
-.strip-wrap {
-  display: flex; justify-content: center;
-  margin: 14px 0 16px;
-}
-#stripCanvas {
-  border-radius: 14px;
-  box-shadow: 0 12px 60px rgba(150,80,160,0.22), 0 2px 0 rgba(255,255,255,0.8) inset;
-  max-width: 100%; max-height: 70vh;
-  animation: stripReveal 0.7s cubic-bezier(0.22,1,0.36,1) forwards;
-  transform: scale(0.85) translateY(16px); opacity: 0;
-}
-@keyframes stripReveal { to { transform: scale(1) translateY(0); opacity: 1; } }
-
-/* ── Screen transitions ── */
-.step-screen { animation: slideIn 0.45s cubic-bezier(0.22,1,0.36,1) forwards; opacity: 0; transform: translateY(20px); }
-@keyframes slideIn { to { opacity: 1; transform: translateY(0); } }
-.hidden { display: none !important; }
+.step-screen{animation:si .45s cubic-bezier(.22,1,.36,1) forwards;opacity:0;transform:translateY(18px)}
+@keyframes si{to{opacity:1;transform:translateY(0)}}
+.hidden{display:none!important}
 </style>
 </head>
 <body>
-
 <div id="app">
 
-  <!-- Header -->
   <header class="app-header">
-    <div class="header-badge"><span class="dot"></span>Photo Booth</div>
-    <div class="logo"><span>포토부스</span></div>
+    <div class="header-badge"><span class="badge-dot"></span>Korean Photo Booth</div>
+    <div class="logo">포토부스</div>
   </header>
 
-  <!-- Step Indicator -->
-  <div class="step-indicator">
-    <div class="step-dot active" id="dot1"></div>
-    <div class="step-line" id="line1"></div>
-    <div class="step-dot" id="dot2"></div>
-    <div class="step-line" id="line2"></div>
-    <div class="step-dot" id="dot3"></div>
+  <div class="step-bar">
+    <div class="sdot active" id="dot1"></div>
+    <div class="sline" id="ln1"></div>
+    <div class="sdot" id="dot2"></div>
+    <div class="sline" id="ln2"></div>
+    <div class="sdot" id="dot3"></div>
   </div>
 
-  <!-- SCREEN 1: Welcome -->
+  <!-- SCREEN 1 -->
   <div class="card step-screen" id="welcomeScreen">
     <div class="welcome-art">
-      <div class="ring ring-1"></div>
-      <div class="ring ring-2"></div>
-      <div class="inner">📷</div>
+      <div class="wa-ring"></div>
+      <div class="wa-ring wa-ring2"></div>
+      <div class="wa-core">📷</div>
     </div>
     <h1 class="section-title">어서오세요!</h1>
-    <p class="section-sub">Welcome to your personal photo strip.<br>Three photos, one beautiful memory.</p>
+    <p class="section-sub">Three photos, one beautiful memory.<br>Choose your theme &amp; smile!</p>
 
     <div class="input-group">
-      <label><span class="label-icon">✦</span> Your Name</label>
-      <input type="text" id="userName" placeholder="e.g. Soyeon · 소연" maxlength="30" />
+      <label><span class="lico">✦</span>Your Name</label>
+      <input type="text" id="userName" placeholder="e.g. Soyeon · 소연" maxlength="28"/>
     </div>
     <div class="input-group">
-      <label><span class="label-icon">♡</span> Your Message</label>
-      <textarea id="userMessage" rows="2" placeholder="e.g. 오늘도 행복하게" maxlength="60"></textarea>
+      <label><span class="lico">♡</span>Your Message</label>
+      <textarea id="userMessage" rows="2" placeholder="e.g. 오늘도 행복하게" maxlength="55"></textarea>
     </div>
-    <button class="btn btn-primary" onclick="startBooth()">Start Photo Booth →</button>
+
+    <div class="theme-label"><span class="lico">◈</span>Strip Theme</div>
+    <div class="theme-row">
+      <button class="theme-btn sel" data-theme="blossom" onclick="pickTheme(this)">
+        <span class="tswatch" style="background:linear-gradient(90deg,#f9a8c9,#c4b0f0)"></span>Blossom
+      </button>
+      <button class="theme-btn" data-theme="noir" onclick="pickTheme(this)">
+        <span class="tswatch" style="background:linear-gradient(90deg,#2a2040,#5a4a7a)"></span>Noir
+      </button>
+      <button class="theme-btn" data-theme="cotton" onclick="pickTheme(this)">
+        <span class="tswatch" style="background:linear-gradient(90deg,#a8d4f5,#a8e6cf)"></span>Cotton
+      </button>
+      <button class="theme-btn" data-theme="gold" onclick="pickTheme(this)">
+        <span class="tswatch" style="background:linear-gradient(90deg,#f5c842,#e8955a)"></span>Gold
+      </button>
+    </div>
+
+    <button class="btn btn-primary" onclick="startBooth()">Start Photo Booth &rarr;</button>
   </div>
 
-  <!-- SCREEN 2: Camera -->
+  <!-- SCREEN 2 -->
   <div class="card step-screen hidden" id="cameraScreen">
     <div class="cam-header">
       <div class="cam-title">Say 치즈!</div>
-      <div class="cam-counter-chips">
+      <div class="chips">
         <div class="chip" id="ch1">1</div>
         <div class="chip" id="ch2">2</div>
         <div class="chip" id="ch3">3</div>
       </div>
     </div>
 
-    <div class="camera-wrap">
-      <video id="video" autoplay playsinline muted></video>
-      <div class="flash-overlay" id="flashOverlay"></div>
-      <div class="countdown-display">
-        <div class="countdown-number" id="countdownNum"></div>
+    <div class="camera-outer">
+      <div class="camera-inner">
+        <video id="video" autoplay playsinline muted></video>
+        <div class="cam-vignette"></div>
+        <div class="flash-overlay" id="flashOverlay"></div>
+        <div class="cd-wrap"><div class="cd-num" id="cdNum"></div></div>
       </div>
     </div>
 
-    <div class="thumbnails" id="thumbnails"></div>
-
-    <button class="btn btn-primary" id="captureBtn" onclick="startCountdown()">
-      Take Photo <span id="photoNum">1</span> of 3
-    </button>
+    <div class="thumbs" id="thumbnails"></div>
+    <button class="btn btn-primary" id="captureBtn" onclick="startCountdown()">Take Photo <span id="pNum">1</span> of 3</button>
   </div>
 
-  <!-- SCREEN 3: Strip -->
-  <div class="card step-screen hidden" id="stripSection">
+  <!-- SCREEN 3 -->
+  <div class="card step-screen hidden strip-result" id="stripSection">
     <h2 class="section-title">Your Strip!</h2>
-    <p class="section-sub">Your Korean-style photo strip is ready.<br>Download and keep it forever.</p>
-    <div class="strip-wrap">
-      <canvas id="stripCanvas"></canvas>
-    </div>
-    <button class="btn btn-download" onclick="downloadStrip()">Download Strip</button>
+    <p class="section-sub">Download your 포토부스 memory.</p>
+    <div class="strip-scroll"><canvas id="stripCanvas"></canvas></div>
+    <button class="btn btn-dl" onclick="downloadStrip()">Download Strip</button>
     <button class="btn btn-ghost" onclick="restartBooth()">Take New Photos</button>
   </div>
 
 </div>
-
-<!-- Hidden capture canvas -->
 <canvas id="captureCanvas" class="hidden"></canvas>
 
 <script>
-let userName = '', userMessage = '';
-let photosTaken = 0;
-const MAX_PHOTOS = 3;
-const capturedImages = [];
-let stream = null;
-let isCounting = false;
+/* ═══ STATE ═══ */
+let userName='',userMessage='',selTheme='blossom';
+let photosTaken=0,capturedImages=[],stream=null,isCounting=false;
 
-const video = document.getElementById('video');
-const flashOverlay = document.getElementById('flashOverlay');
-const countdownNum = document.getElementById('countdownNum');
-const thumbnails = document.getElementById('thumbnails');
-const captureBtn = document.getElementById('captureBtn');
-const photoNumSpan = document.getElementById('photoNum');
+/* ═══ THEMES ═══ */
+const T={
+  blossom:{
+    bg0:'#fff9fc',bg1:'#fdf4ff',
+    h:['#f9a8c9','#c4b0f0','#a8d4f5'],
+    f:['#a8d4f5','#c4b0f0','#f9a8c9'],
+    accent:'#c04e72',accentSoft:'rgba(196,176,240,.45)',
+    nameCol:'#7a4a90',msgCol:'#b090c8',dateCol:'rgba(170,140,200,.6)',
+    borderCol:'rgba(200,170,220,.4)',shadowCol:'rgba(180,100,180,.14)',
+    pillBg:'rgba(255,255,255,.92)',pillTxt:'#b070c0',
+    filmStrip:false,darkBg:false,
+    watermark:'포토부스  ·  Blossom',
+  },
+  noir:{
+    bg0:'#1a1525',bg1:'#12101e',
+    h:['#2e2040','#4a3a6a','#3a2e55'],
+    f:['#2a1e3a','#3a2e55','#2a1e3a'],
+    accent:'#c4b0f0',accentSoft:'rgba(196,176,240,.3)',
+    nameCol:'#d8c8f8',msgCol:'#a890c8',dateCol:'rgba(196,176,240,.42)',
+    borderCol:'rgba(196,176,240,.22)',shadowCol:'rgba(0,0,0,.45)',
+    pillBg:'rgba(28,18,44,.92)',pillTxt:'#c4b0f0',
+    filmStrip:true,darkBg:true,
+    watermark:'포토부스  ·  Noir',
+  },
+  cotton:{
+    bg0:'#f0faff',bg1:'#edf8f4',
+    h:['#a8d4f5','#a8e6cf','#fcd5b5'],
+    f:['#fcd5b5','#a8e6cf','#a8d4f5'],
+    accent:'#4a9aaa',accentSoft:'rgba(168,212,245,.45)',
+    nameCol:'#2a7a8a',msgCol:'#6aacb8',dateCol:'rgba(80,160,180,.52)',
+    borderCol:'rgba(168,212,245,.42)',shadowCol:'rgba(100,180,200,.14)',
+    pillBg:'rgba(255,255,255,.9)',pillTxt:'#4a9aaa',
+    filmStrip:false,darkBg:false,
+    watermark:'포토부스  ·  Cotton',
+  },
+  gold:{
+    bg0:'#fffbf0',bg1:'#fff8e4',
+    h:['#f5c842','#e8a030','#e8955a'],
+    f:['#e8955a','#e8a030','#f5c842'],
+    accent:'#b06010',accentSoft:'rgba(245,200,66,.42)',
+    nameCol:'#8a5010',msgCol:'#c08030',dateCol:'rgba(180,130,40,.52)',
+    borderCol:'rgba(245,200,66,.38)',shadowCol:'rgba(200,150,30,.16)',
+    pillBg:'rgba(255,255,255,.9)',pillTxt:'#c08030',
+    filmStrip:false,darkBg:false,
+    watermark:'포토부스  ·  Gold',
+  },
+};
 
-// ── Start ──
-function startBooth() {
-  const name = document.getElementById('userName').value.trim();
-  if (!name) {
-    const el = document.getElementById('userName');
-    el.style.borderColor = '#e8698a';
-    el.focus();
-    setTimeout(() => el.style.borderColor = '', 1200);
-    return;
-  }
-  userName = name;
-  userMessage = document.getElementById('userMessage').value.trim() || '오늘도 행복하게';
-  switchScreen('welcomeScreen', 'cameraScreen');
-  setStepDots(2);
-  initCamera();
+/* ═══ HELPERS ═══ */
+function pickTheme(btn){
+  document.querySelectorAll('.theme-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');selTheme=btn.dataset.theme;
+}
+function go(a,b){
+  document.getElementById(a).classList.add('hidden');
+  const el=document.getElementById(b);
+  el.classList.remove('hidden','step-screen');void el.offsetWidth;el.classList.add('step-screen');
+}
+function dots(active){
+  [1,2,3].forEach(i=>{
+    const d=document.getElementById('dot'+i);d.classList.remove('active','done');
+    if(i<active)d.classList.add('done');if(i===active)d.classList.add('active');
+  });
+  [1,2].forEach(i=>document.getElementById('ln'+i).classList.toggle('done',i<active));
 }
 
-// ── Camera ──
-async function initCamera() {
-  try {
-    stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'user', width: { ideal: 1080 }, height: { ideal: 1440 } },
-      audio: false
+/* ═══ SCREEN 1 ═══ */
+function startBooth(){
+  const n=document.getElementById('userName').value.trim();
+  if(!n){const el=document.getElementById('userName');el.style.borderColor='#e8698a';el.focus();setTimeout(()=>el.style.borderColor='',1400);return;}
+  userName=n;
+  userMessage=document.getElementById('userMessage').value.trim()||'오늘도 행복하게';
+  go('welcomeScreen','cameraScreen');dots(2);initCam();
+}
+
+/* ═══ CAMERA ═══ */
+async function initCam(){
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:'user',width:{ideal:1080},height:{ideal:1440}},audio:false
     });
-    video.srcObject = stream;
-  } catch (err) {
-    alert('Camera access needed.\n\n' + err.message);
-  }
+    document.getElementById('video').srcObject=stream;
+  }catch(e){alert('Camera access needed.\n\n'+e.message);}
 }
-
-function startCountdown() {
-  if (isCounting || photosTaken >= MAX_PHOTOS) return;
-  isCounting = true;
-  captureBtn.disabled = true;
-  let count = 3;
-  showCountNum(count);
-  const iv = setInterval(() => {
-    count--;
-    if (count > 0) showCountNum(count);
-    else { clearInterval(iv); capturePhoto(); }
-  }, 1000);
+function startCountdown(){
+  if(isCounting||photosTaken>=3)return;
+  isCounting=true;
+  document.getElementById('captureBtn').disabled=true;
+  let c=3;showCd(c);
+  const iv=setInterval(()=>{c--;if(c>0)showCd(c);else{clearInterval(iv);doCapture();}},1000);
 }
-
-function showCountNum(n) {
-  countdownNum.textContent = n;
-  countdownNum.classList.remove('show');
-  void countdownNum.offsetWidth;
-  countdownNum.classList.add('show');
+function showCd(n){
+  const el=document.getElementById('cdNum');el.textContent=n;el.classList.remove('show');void el.offsetWidth;el.classList.add('show');
 }
+function doCapture(){
+  const fl=document.getElementById('flashOverlay');fl.classList.remove('flash');void fl.offsetWidth;fl.classList.add('flash');
 
-function capturePhoto() {
-  flashOverlay.classList.remove('flash');
-  void flashOverlay.offsetWidth;
-  flashOverlay.classList.add('flash');
+  const vid=document.getElementById('video');
+  const cap=document.getElementById('captureCanvas');
+  const vw=vid.videoWidth||720, vh=vid.videoHeight||960;
 
-  const canvas = document.getElementById('captureCanvas');
-  // Use 3:4 portrait ratio
-  const srcW = video.videoWidth || 720;
-  const srcH = video.videoHeight || 960;
-
-  // Crop to portrait 3:4 from center
-  let cropW = srcW, cropH = Math.round(srcW * 4 / 3);
-  if (cropH > srcH) { cropH = srcH; cropW = Math.round(srcH * 3 / 4); }
-  const cropX = (srcW - cropW) / 2;
-  const cropY = (srcH - cropH) / 2;
-
-  canvas.width = cropW;
-  canvas.height = cropH;
-  const ctx = canvas.getContext('2d');
-  ctx.translate(canvas.width, 0);
-  ctx.scale(-1, 1);
-  ctx.drawImage(video, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
-
-  const dataURL = canvas.toDataURL('image/jpeg', 0.95);
-  capturedImages.push(dataURL);
-  photosTaken++;
-
-  document.getElementById('ch' + photosTaken).classList.add('taken');
-
-  const img = document.createElement('img');
-  img.src = dataURL;
-  img.className = 'thumb';
-  thumbnails.appendChild(img);
-
-  isCounting = false;
-
-  if (photosTaken >= MAX_PHOTOS) {
-    captureBtn.textContent = 'Generating your strip…';
-    setTimeout(() => { stopCamera(); generateStrip(); }, 700);
+  /* ── Precise 3:4 center-crop from any camera resolution ── */
+  let cw,ch;
+  if(vw*4 > vh*3){
+    // Wider than 3:4 → constrain by height, crop width
+    ch=vh; cw=Math.round(vh*3/4);
   } else {
-    captureBtn.disabled = false;
-    photoNumSpan.textContent = photosTaken + 1;
-    captureBtn.innerHTML = 'Take Photo <span id="photoNum">' + (photosTaken + 1) + '</span> of 3';
+    // Taller than 3:4 → constrain by width, crop height
+    cw=vw; ch=Math.round(vw*4/3);
+  }
+  const cx=Math.round((vw-cw)/2), cy=Math.round((vh-ch)/2);
+
+  cap.width=cw; cap.height=ch;
+  const ctx=cap.getContext('2d');
+  ctx.save();ctx.translate(cw,0);ctx.scale(-1,1);
+  ctx.drawImage(vid,cx,cy,cw,ch,0,0,cw,ch);
+  ctx.restore();
+
+  const url=cap.toDataURL('image/jpeg',.95);
+  capturedImages.push(url);photosTaken++;
+
+  document.getElementById('ch'+photosTaken).classList.add('taken');
+  const img=new Image();img.src=url;img.className='thumb';
+  document.getElementById('thumbnails').appendChild(img);
+  isCounting=false;
+
+  if(photosTaken>=3){
+    document.getElementById('captureBtn').textContent='Generating strip…';
+    setTimeout(()=>{stopCam();buildStrip();},700);
+  } else {
+    const btn=document.getElementById('captureBtn');btn.disabled=false;
+    btn.innerHTML='Take Photo <span id="pNum">'+(photosTaken+1)+'</span> of 3';
   }
 }
+function stopCam(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}}
 
-function stopCamera() {
-  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
-}
+/* ═══ STRIP BUILDER ═══ */
+function buildStrip(){
+  go('cameraScreen','stripSection');dots(3);
+  const th=T[selTheme];
+  const cv=document.getElementById('stripCanvas');
+  const ctx=cv.getContext('2d');
+  const DPR=2;
 
-// ── Generate Strip ──
-function generateStrip() {
-  switchScreen('cameraScreen', 'stripSection');
-  setStepDots(3);
+  /* Layout */
+  const SW=320;
+  const PADX=26;
+  const PW=SW-PADX*2;          // 268
+  const PH=Math.round(PW*4/3); // 357  — strict 3:4
+  const HDR=54;
+  const GAP=13;
+  const FTR=152;
+  const PTOP=18;
+  const SH=HDR+PTOP+(PH*3)+(GAP*2)+FTR;
 
-  const canvas = document.getElementById('stripCanvas');
-  const ctx = canvas.getContext('2d');
+  cv.width=SW*DPR; cv.height=SH*DPR;
+  cv.style.width=SW+'px'; cv.style.height=SH+'px';
+  ctx.scale(DPR,DPR);
 
-  const DPR = 2;
-  const stripW = 300;
-  const photoW = 240;
-  const photoH = Math.round(photoW * 4 / 3); // 320px — strict 3:4
-  const padX = (stripW - photoW) / 2;         // 30
-  const padTop = 32;
-  const gap = 12;
-  const headerH = 44;
-  const footerH = 110;
-  const stripH = headerH + padTop + (photoH * 3) + (gap * 2) + footerH;
+  /* Background */
+  const bg=ctx.createLinearGradient(0,0,SW,SH);
+  bg.addColorStop(0,th.bg0);bg.addColorStop(1,th.bg1);
+  ctx.fillStyle=bg;ctx.fillRect(0,0,SW,SH);
 
-  canvas.width = stripW * DPR;
-  canvas.height = stripH * DPR;
-  canvas.style.width = stripW + 'px';
-  canvas.style.height = stripH + 'px';
-  ctx.scale(DPR, DPR);
+  /* Film strip holes for Noir */
+  if(th.filmStrip) drawFilm(ctx,SW,SH,HDR);
+  else drawSideDash(ctx,SW,SH,HDR,FTR,th.accentSoft);
 
-  // ── Background ──
-  ctx.fillStyle = '#fff';
-  ctx.fillRect(0, 0, stripW, stripH);
-
-  // Soft background gradient
-  const bgG = ctx.createLinearGradient(0, 0, stripW, stripH);
-  bgG.addColorStop(0, '#fff9fc'); bgG.addColorStop(1, '#fdf4ff');
-  ctx.fillStyle = bgG; ctx.fillRect(0, 0, stripW, stripH);
-
-  // ── Header band ──
+  /* Header */
   ctx.save();
-  roundRect(ctx, 0, 0, stripW, headerH, 0);
-  const hG = ctx.createLinearGradient(0, 0, stripW, 0);
-  hG.addColorStop(0, '#f9a8c9'); hG.addColorStop(0.5, '#c4b0f0'); hG.addColorStop(1, '#a8d4f5');
-  ctx.fillStyle = hG; ctx.fill(); ctx.restore();
-
+  const hg=ctx.createLinearGradient(0,0,SW,0);
+  hg.addColorStop(0,th.h[0]);hg.addColorStop(.5,th.h[1]);hg.addColorStop(1,th.h[2]);
+  ctx.fillStyle=hg;ctx.fillRect(0,0,SW,HDR);ctx.restore();
+  // Header decoration dots
+  for(let i=0;i<11;i++){ctx.beginPath();ctx.arc(15+i*28,HDR-10,1.4,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,.38)';ctx.fill();}
   // Header text
-  ctx.textAlign = 'center';
-  ctx.font = 'bold 13px "DM Sans", sans-serif';
-  ctx.fillStyle = 'rgba(255,255,255,0.95)';
-  ctx.fillText('포토부스  ·  photo booth', stripW / 2, headerH / 2 + 5);
+  ctx.textAlign='center';ctx.font='600 11.5px "DM Sans",sans-serif';
+  ctx.fillStyle='rgba(255,255,255,.95)';ctx.fillText(th.watermark,SW/2,HDR/2+4);
 
-  // ── Corner decorations (subtle) ──
-  drawCornerDots(ctx, stripW, stripH, headerH, footerH);
+  /* Load & draw photos */
+  Promise.all(capturedImages.map(s=>loadImg(s))).then(imgs=>{
 
-  // ── Draw photos ──
-  const imgPromises = capturedImages.map(src => new Promise(res => {
-    const img = new Image(); img.onload = () => res(img); img.src = src;
-  }));
+    imgs.forEach((img,i)=>{
+      const py=HDR+PTOP+i*(PH+GAP);
 
-  Promise.all(imgPromises).then(images => {
-    images.forEach((img, i) => {
-      const y = headerH + padTop + i * (photoH + gap);
-
-      // Shadow
-      ctx.save();
-      ctx.shadowColor = 'rgba(180,100,180,0.15)';
-      ctx.shadowBlur = 14; ctx.shadowOffsetY = 5;
-      ctx.fillStyle = '#fff';
-      roundRect(ctx, padX - 1, y - 1, photoW + 2, photoH + 2, 8);
-      ctx.fill();
-      ctx.restore();
+      // Shadow card
+      ctx.save();ctx.shadowColor=th.shadowCol;ctx.shadowBlur=18;ctx.shadowOffsetY=7;
+      ctx.fillStyle=th.darkBg?'#1a1525':'#fff';
+      rr(ctx,PADX-2,py-2,PW+4,PH+4,10);ctx.fill();ctx.restore();
 
       // Photo clip
-      ctx.save();
-      roundRect(ctx, padX, y, photoW, photoH, 7);
-      ctx.clip();
-      ctx.drawImage(img, padX, y, photoW, photoH);
+      ctx.save();rr(ctx,PADX,py,PW,PH,8);ctx.clip();
+      ctx.drawImage(img,PADX,py,PW,PH);
+      // Noir tint
+      if(th.darkBg){ctx.fillStyle='rgba(40,10,70,.1)';ctx.fillRect(PADX,py,PW,PH);}
       ctx.restore();
 
-      // Subtle inner border
-      ctx.save();
-      roundRect(ctx, padX, y, photoW, photoH, 7);
-      ctx.strokeStyle = 'rgba(200,170,220,0.4)'; ctx.lineWidth = 1.5;
-      ctx.stroke(); ctx.restore();
+      // Photo border
+      ctx.save();rr(ctx,PADX,py,PW,PH,8);ctx.strokeStyle=th.borderCol;ctx.lineWidth=1.5;ctx.stroke();ctx.restore();
 
-      // Small photo number label
+      // Photo number pill — bottom left
       ctx.save();
-      ctx.fillStyle = 'rgba(255,255,255,0.9)';
-      roundRect(ctx, padX + 6, y + photoH - 22, 18, 16, 5);
-      ctx.fill();
-      ctx.font = 'bold 10px "DM Sans", sans-serif';
-      ctx.fillStyle = '#b070c0';
-      ctx.textAlign = 'center';
-      ctx.fillText(i + 1, padX + 6 + 9, y + photoH - 10);
-      ctx.restore();
+      rr(ctx,PADX+6,py+PH-22,22,15,5);
+      ctx.fillStyle=th.pillBg;ctx.fill();
+      ctx.font='bold 9px "DM Sans",sans-serif';ctx.fillStyle=th.pillTxt;ctx.textAlign='center';
+      ctx.fillText('0'+(i+1),PADX+6+11,py+PH-11);ctx.restore();
+
+      // Date stamp on photo 3 — bottom right
+      if(i===2){
+        const ds=fmtDate();
+        ctx.save();ctx.font='400 8px "DM Sans",sans-serif';ctx.textAlign='right';
+        const tw=ctx.measureText(ds).width+10;
+        rr(ctx,PADX+PW-tw-4,py+PH-21,tw+2,14,4);
+        ctx.fillStyle=th.pillBg;ctx.fill();
+        ctx.fillStyle=th.pillTxt;ctx.fillText(ds,PADX+PW-6,py+PH-10);ctx.restore();
+      }
     });
 
-    // ── Decorative divider ──
-    const fY = headerH + padTop + 3 * (photoH + gap) - gap + 8;
-    drawDivider(ctx, padX, fY, photoW);
+    /* Divider between photos and footer */
+    const divY=HDR+PTOP+3*(PH+GAP)-GAP+10;
+    drawFadeRule(ctx,PADX,divY,PW,th.accentSoft);
 
-    // ── Footer ──
-    const footerStart = stripH - footerH;
+    /* ─── FOOTER ─── */
+    const FY=SH-FTR+10;
+
+    // Decorative dot row
+    for(let i=0;i<9;i++){
+      ctx.beginPath();ctx.arc(SW/2-64+i*16,FY+6,1.6,0,Math.PI*2);
+      ctx.fillStyle=th.accentSoft;ctx.fill();
+    }
 
     // Name
-    ctx.textAlign = 'center';
-    ctx.font = 'italic 600 22px "Playfair Display", serif';
-    ctx.fillStyle = '#7a5a9a';
-    ctx.fillText(userName, stripW / 2, footerStart + 28);
+    ctx.textAlign='center';
+    ctx.font='italic 700 26px "Cormorant Garamond",serif';
+    ctx.fillStyle=th.nameCol;ctx.fillText(userName,SW/2,FY+36);
 
-    // Heart row
-    ctx.font = '12px serif';
-    ctx.fillStyle = 'rgba(196,176,240,0.8)';
-    ctx.fillText('· · · ♡ · · ·', stripW / 2, footerStart + 48);
+    // Thin rule under name
+    drawFadeRule(ctx,PADX+20,FY+44,PW-40,th.accentSoft);
+
+    // Corner brackets
+    drawBracket(ctx,PADX+8,FY+52,th.accentSoft,false);
+    drawBracket(ctx,SW-PADX-8,FY+52,th.accentSoft,true);
 
     // Message
-    ctx.font = '400 12px "DM Sans", sans-serif';
-    ctx.fillStyle = '#b090c8';
-    const words = userMessage.split(' ');
-    let line = '', lines = [];
-    for (const w of words) {
-      const test = line + (line ? ' ' : '') + w;
-      if (ctx.measureText(test).width > photoW - 8 && line) { lines.push(line); line = w; }
-      else line = test;
-    }
-    lines.push(line);
-    lines.slice(0, 2).forEach((l, i) => ctx.fillText(l, stripW / 2, footerStart + 66 + i * 16));
+    ctx.font='400 12px "DM Sans",sans-serif';ctx.fillStyle=th.msgCol;
+    const wlines=wrapText(ctx,userMessage,PW-8);
+    wlines.slice(0,2).forEach((l,i)=>ctx.fillText(l,SW/2,FY+70+i*18));
 
-    // Date
-    const today = new Date();
-    const dateStr = today.getFullYear() + '.' + String(today.getMonth()+1).padStart(2,'0') + '.' + String(today.getDate()).padStart(2,'0');
-    ctx.font = '400 10px "DM Sans", sans-serif';
-    ctx.fillStyle = 'rgba(180,160,200,0.65)';
-    ctx.fillText(dateStr, stripW / 2, footerStart + 90);
+    // Date + heart
+    ctx.font='400 10px "DM Sans",sans-serif';ctx.fillStyle=th.dateCol;
+    ctx.fillText('♡   '+fmtDate()+'   ♡',SW/2,FY+112);
 
-    // ── Bottom band ──
+    // Spot sticker circles (theme accents)
+    if(!th.darkBg) drawSpotAccents(ctx,SW,FY+90,th.accentSoft);
+
+    /* Footer color band */
     ctx.save();
-    const bG = ctx.createLinearGradient(0, 0, stripW, 0);
-    bG.addColorStop(0, '#a8d4f5'); bG.addColorStop(0.5, '#c4b0f0'); bG.addColorStop(1, '#f9a8c9');
-    ctx.fillStyle = bG;
-    ctx.beginPath();
-    ctx.moveTo(0, stripH - 16);
-    ctx.lineTo(stripW, stripH - 16);
-    ctx.lineTo(stripW, stripH);
-    ctx.lineTo(0, stripH);
-    ctx.closePath();
-    ctx.fill();
+    const fg=ctx.createLinearGradient(0,0,SW,0);
+    fg.addColorStop(0,th.f[0]);fg.addColorStop(.5,th.f[1]);fg.addColorStop(1,th.f[2]);
+    ctx.fillStyle=fg;ctx.fillRect(0,SH-20,SW,20);
+    ctx.font='500 9px "DM Sans",sans-serif';ctx.fillStyle='rgba(255,255,255,.88)';
+    ctx.textAlign='center';ctx.fillText('포토부스  ✦  photo booth  ✦  '+fmtDate(),SW/2,SH-7);
     ctx.restore();
   });
 }
 
-function drawCornerDots(ctx, sw, sh, hH, fH) {
-  const positions = [
-    [16, hH + 14], [sw - 16, hH + 14],
-    [16, sh - fH - 14], [sw - 16, sh - fH - 14]
-  ];
-  positions.forEach(([x, y]) => {
-    ctx.beginPath();
-    ctx.arc(x, y, 2.5, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(196,176,240,0.45)';
-    ctx.fill();
+/* ─── Canvas utils ─── */
+function loadImg(src){return new Promise(res=>{const i=new Image();i.onload=()=>res(i);i.src=src;})}
+function rr(c,x,y,w,h,r){
+  c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.quadraticCurveTo(x+w,y,x+w,y+r);
+  c.lineTo(x+w,y+h-r);c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  c.lineTo(x+r,y+h);c.quadraticCurveTo(x,y+h,x,y+h-r);
+  c.lineTo(x,y+r);c.quadraticCurveTo(x,y,x+r,y);c.closePath();
+}
+function drawFadeRule(ctx,x,y,w,col){
+  const g=ctx.createLinearGradient(x,0,x+w,0);
+  g.addColorStop(0,'transparent');g.addColorStop(.5,col);g.addColorStop(1,'transparent');
+  ctx.strokeStyle=g;ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+w,y);ctx.stroke();
+}
+function drawBracket(ctx,x,y,col,flip){
+  const d=flip?-1:1;ctx.save();ctx.strokeStyle=col;ctx.lineWidth=1.2;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(x+d*12,y);ctx.lineTo(x,y);ctx.lineTo(x,y+12);ctx.stroke();ctx.restore();
+}
+function drawSpotAccents(ctx,sw,y,col){
+  [[18,y+12,4],[sw-18,y+12,4],[18,y-12,2.5],[sw-18,y-12,2.5]].forEach(([x,cy,r])=>{
+    ctx.beginPath();ctx.arc(x,cy,r,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();
   });
 }
-
-function drawDivider(ctx, x, y, w) {
-  const g = ctx.createLinearGradient(x, 0, x + w, 0);
-  g.addColorStop(0, 'rgba(196,176,240,0)');
-  g.addColorStop(0.5, 'rgba(196,176,240,0.5)');
-  g.addColorStop(1, 'rgba(196,176,240,0)');
-  ctx.strokeStyle = g; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + w, y); ctx.stroke();
+function drawFilm(ctx,sw,sh,hdr){
+  const hw=10,hh=18,hr=3,count=10;
+  const avail=sh-hdr-22;const sp=avail/count;
+  for(let i=0;i<count;i++){
+    const hy=hdr+12+i*sp;
+    [[5,hy],[sw-15,hy]].forEach(([hx,hy2])=>{
+      rr(ctx,hx,hy2,hw,hh,hr);
+      ctx.fillStyle='rgba(0,0,0,.4)';ctx.fill();
+      ctx.strokeStyle='rgba(255,255,255,.08)';ctx.lineWidth=.5;ctx.stroke();
+    });
+  }
+}
+function drawSideDash(ctx,sw,sh,hdr,ftr,col){
+  ctx.save();ctx.setLineDash([3,5]);ctx.strokeStyle=col;ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(10,hdr+8);ctx.lineTo(10,sh-ftr-8);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(sw-10,hdr+8);ctx.lineTo(sw-10,sh-ftr-8);ctx.stroke();
+  ctx.setLineDash([]);ctx.restore();
+}
+function wrapText(ctx,text,maxW){
+  const words=text.split(' ');let line='',lines=[];
+  for(const w of words){const t=line+(line?' ':'')+w;if(ctx.measureText(t).width>maxW&&line){lines.push(line);line=w;}else line=t;}
+  lines.push(line);return lines;
+}
+function fmtDate(){
+  const d=new Date();
+  return d.getFullYear()+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0');
 }
 
-function roundRect(ctx, x, y, w, h, r) {
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-  ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-  ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-  ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y);
-  ctx.closePath();
+/* ═══ DOWNLOAD ═══ */
+function downloadStrip(){
+  const cv=document.getElementById('stripCanvas');
+  const a=document.createElement('a');
+  const safe=(userName||'booth').replace(/[^a-z0-9가-힣]/gi,'_');
+  a.download='포토부스_'+safe+'_'+selTheme+'_'+Date.now()+'.png';
+  a.href=cv.toDataURL('image/png');a.click();
 }
 
-// ── Download ──
-function downloadStrip() {
-  const canvas = document.getElementById('stripCanvas');
-  const link = document.createElement('a');
-  const safe = (userName || 'photobooth').replace(/[^a-z0-9가-힣]/gi, '_');
-  link.download = '포토부스_' + safe + '_' + Date.now() + '.png';
-  link.href = canvas.toDataURL('image/png');
-  link.click();
+/* ═══ RESTART ═══ */
+function restartBooth(){
+  photosTaken=0;capturedImages.length=0;isCounting=false;
+  document.getElementById('thumbnails').innerHTML='';
+  ['ch1','ch2','ch3'].forEach(id=>document.getElementById(id).classList.remove('taken'));
+  const btn=document.getElementById('captureBtn');btn.disabled=false;
+  btn.innerHTML='Take Photo <span id="pNum">1</span> of 3';
+  go('stripSection','welcomeScreen');dots(1);
 }
 
-// ── Restart ──
-function restartBooth() {
-  photosTaken = 0; capturedImages.length = 0; isCounting = false;
-  thumbnails.innerHTML = '';
-  ['ch1','ch2','ch3'].forEach(id => document.getElementById(id).classList.remove('taken'));
-  captureBtn.disabled = false;
-  captureBtn.innerHTML = 'Take Photo <span id="photoNum">1</span> of 3';
-  switchScreen('stripSection', 'welcomeScreen');
-  setStepDots(1);
-}
-
-// ── Helpers ──
-function switchScreen(fromId, toId) {
-  document.getElementById(fromId).classList.add('hidden');
-  const to = document.getElementById(toId);
-  to.classList.remove('hidden', 'step-screen');
-  void to.offsetWidth;
-  to.classList.add('step-screen');
-}
-
-function setStepDots(active) {
-  [1,2,3].forEach(i => {
-    const dot = document.getElementById('dot' + i);
-    dot.classList.remove('active','done');
-    if (i < active) { dot.classList.add('done'); }
-    if (i === active) dot.classList.add('active');
-  });
-  [1,2].forEach(i => {
-    const line = document.getElementById('line' + i);
-    line.classList.toggle('done', i < active);
-  });
-}
-
-document.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !document.getElementById('welcomeScreen').classList.contains('hidden')) startBooth();
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&!document.getElementById('welcomeScreen').classList.contains('hidden'))startBooth();
 });
 </script>
 </body>
