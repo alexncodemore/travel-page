@@ -386,7 +386,9 @@ async function initCam(){
 function startCountdown(){
   if(isCounting||photosTaken>=3)return;
   isCounting=true;
-  document.getElementById('captureBtn').disabled=true;
+  const btn=document.getElementById('captureBtn');
+  btn.disabled=true;
+  btn.innerHTML='Photo '+(photosTaken+1)+' of 3 — smile!';
   let c=3;showCd(c);
   const iv=setInterval(()=>{c--;if(c>0)showCd(c);else{clearInterval(iv);doCapture();}},1000);
 }
@@ -429,8 +431,11 @@ function doCapture(){
     document.getElementById('captureBtn').textContent='Generating strip…';
     setTimeout(()=>{stopCam();buildStrip();},700);
   } else {
-    const btn=document.getElementById('captureBtn');btn.disabled=false;
-    btn.innerHTML='Take Photo <span id="pNum">'+(photosTaken+1)+'</span> of 3';
+    // Show next photo label briefly, then auto-start countdown after 1s
+    const btn=document.getElementById('captureBtn');
+    btn.disabled=true;
+    btn.innerHTML='Get ready… photo <span id="pNum">'+(photosTaken+1)+'</span> of 3';
+    setTimeout(()=>{ startCountdown(); },1000);
   }
 }
 function stopCam(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}}
