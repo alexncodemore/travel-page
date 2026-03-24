@@ -1,56 +1,364 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Pay ₹1 ₹2 ₹3</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pay with Razorpay</title>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d0f14; --card: #151821; --border: #232635;
+      --accent: #4f7dff; --accent2: #7c5cfc;
+      --text: #e8eaf2; --muted: #7b80a0; --success: #22d3a4; --radius: 18px;
+    }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'DM Sans', sans-serif; min-height: 100vh;
+      display: flex; align-items: center; justify-content: center; padding: 24px;
+      background-image:
+        radial-gradient(ellipse at 20% 10%, rgba(79,125,255,0.10) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 80%, rgba(124,92,252,0.10) 0%, transparent 60%);
+    }
+    .wrapper { width: 100%; max-width: 440px; }
+    .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 32px; }
+    .brand-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px;
+    }
+    .brand-name { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; }
+    .card-title { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; margin-bottom: 6px; letter-spacing: -0.5px; }
+    .card-sub { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 12px; font-weight: 500; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .field input { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; transition: border-color 0.2s; }
+    .field input:focus { border-color: var(--accent); }
+    .field input::placeholder { color: var(--muted); }
+    .divider { height: 1px; background: var(--border); margin: 24px 0; }
+    .amount-label { font-size: 12px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 14px; }
+    .amount-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+    .amt-btn {
+      background: var(--bg); border: 1.5px solid var(--border); border-radius: 12px;
+      padding: 16px 8px; color: var(--text); font-family: 'Syne', sans-serif;
+      font-size: 20px; font-weight: 800; cursor: pointer; transition: all 0.18s;
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .amt-btn span { display: block; font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 500; color: var(--muted); margin-top: 2px; }
+    .amt-btn:hover { border-color: var(--accent); background: rgba(79,125,255,0.07); }
+    .amt-btn.selected { border-color: var(--accent); background: rgba(79,125,255,0.13); box-shadow: 0 0 0 3px rgba(79,125,255,0.15); }
+    .amt-btn.selected::after { content: '✓'; position: absolute; top: 6px; right: 8px; font-size: 11px; color: var(--accent); font-family: 'DM Sans', sans-serif; font-weight: 700; }
+    .pay-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; border-radius: 12px; color: #fff; font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; cursor: pointer; letter-spacing: 0.02em; transition: opacity 0.2s, transform 0.15s; }
+    .pay-btn:hover { opacity: 0.92; transform: translateY(-1px); }
+    .pay-btn:active { transform: translateY(0); }
+    .pay-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+    .status { margin-top: 16px; padding: 12px 16px; border-radius: 10px; font-size: 13px; display: none; line-height: 1.6; }
+    .status.success { background: rgba(34,211,164,0.1); border: 1px solid rgba(34,211,164,0.3); color: var(--success); display: block; }
+    .status.error { background: rgba(255,90,90,0.1); border: 1px solid rgba(255,90,90,0.3); color: #ff7a7a; display: block; }
+    .note { margin-top: 14px; font-size: 11px; color: var(--muted); text-align: center; line-height: 1.6; }
+
+    /* Invoice Modal */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+    .modal-overlay.open { display: flex; }
+    .invoice { background: #fff; color: #111; border-radius: 16px; width: 100%; max-width: 480px; font-family: 'DM Sans', sans-serif; overflow: hidden; animation: slideUp 0.3s ease; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    .inv-header { background: linear-gradient(135deg, #4f7dff, #7c5cfc); padding: 28px 32px; color: #fff; display: flex; justify-content: space-between; align-items: flex-start; }
+    .inv-header h2 { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
+    .inv-header p { font-size: 13px; opacity: 0.8; margin-top: 2px; }
+    .inv-badge { background: rgba(255,255,255,0.2); border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 600; text-align: right; }
+    .inv-badge strong { display: block; font-size: 15px; }
+    .inv-body { padding: 28px 32px; }
+    .inv-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
+    .inv-row:last-child { border-bottom: none; }
+    .inv-row .lbl { color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .inv-row .val { font-weight: 500; color: #222; text-align: right; max-width: 260px; word-break: break-all; }
+    .inv-total { background: #f7f9ff; border-radius: 10px; padding: 16px 20px; margin: 20px 0; display: flex; justify-content: space-between; align-items: center; }
+    .inv-total .lbl { font-size: 14px; font-weight: 600; color: #555; }
+    .inv-total .val { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: #4f7dff; }
+    .inv-actions { display: flex; gap: 10px; padding: 0 32px 24px; }
+    .inv-btn { flex: 1; padding: 12px; border-radius: 10px; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; border: none; transition: opacity 0.2s; }
+    .inv-btn:hover { opacity: 0.85; }
+    .inv-btn.primary { background: linear-gradient(135deg, #4f7dff, #7c5cfc); color: #fff; }
+    .inv-btn.secondary { background: #f0f4ff; color: #4f7dff; }
+    .inv-footer { text-align: center; padding: 0 32px 24px; font-size: 12px; color: #999; line-height: 1.7; }
+
+    @media print {
+      body > .wrapper, .modal-overlay { display: block !important; position: static !important; background: none !important; padding: 0 !important; }
+      .wrapper { display: none; }
+      .invoice { box-shadow: none; border-radius: 0; max-width: 100%; }
+      .inv-actions, .inv-footer { display: none; }
+    }
+  </style>
 </head>
 <body>
 
-<h2>Select Amount</h2>
+<div class="wrapper">
+  <div class="brand">
+    <div class="brand-icon">₹</div>
+    <div class="brand-name">QuickPay</div>
+  </div>
 
-<button onclick="pay(1)">Pay ₹1</button>
-<button onclick="pay(2)">Pay ₹2</button>
-<button onclick="pay(3)">Pay ₹3</button>
+  <div class="card">
+    <div class="card-title">Make a Payment</div>
+    <div class="card-sub">Fill in your details — invoice emailed right after payment</div>
 
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <div class="field">
+      <label>Your Name</label>
+      <input type="text" id="cust_name" placeholder="e.g. Ravi Kumar" />
+    </div>
+    <div class="field">
+      <label>Email <span style="color:#ff7a7a;font-size:10px;">required for invoice</span></label>
+      <input type="email" id="cust_email" placeholder="you@email.com" />
+    </div>
+    <div class="field">
+      <label>Phone</label>
+      <input type="tel" id="cust_phone" placeholder="9876543210" />
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="amount-label">Select Amount</div>
+    <div class="amount-grid">
+      <button class="amt-btn" data-amount="100" onclick="selectAmount(this)">
+        ₹1 <span>One Rupee</span>
+      </button>
+      <button class="amt-btn" data-amount="200" onclick="selectAmount(this)">
+        ₹2 <span>Two Rupees</span>
+      </button>
+      <button class="amt-btn" data-amount="300" onclick="selectAmount(this)">
+        ₹3 <span>Three Rupees</span>
+      </button>
+    </div>
+
+    <button class="pay-btn" id="pay-btn" onclick="startPayment()" disabled>
+      Select an Amount to Pay
+    </button>
+
+    <div class="status" id="status-msg"></div>
+
+    <div class="note">
+      🔒 Secured by Razorpay &nbsp;·&nbsp; 📧 Invoice emailed automatically
+    </div>
+  </div>
+</div>
+
+<!-- Invoice Modal -->
+<div class="modal-overlay" id="invoice-modal">
+  <div class="invoice" id="invoice-content">
+    <div class="inv-header">
+      <div>
+        <h2>QuickPay ₹</h2>
+        <p>Official Payment Invoice</p>
+      </div>
+      <div class="inv-badge">
+        <span style="opacity:0.8;font-size:11px;">Invoice No.</span>
+        <strong id="inv-id">#QP-000000</strong>
+      </div>
+    </div>
+
+    <div class="inv-body">
+      <div class="inv-row">
+        <span class="lbl">Date &amp; Time</span>
+        <span class="val" id="inv-date">—</span>
+      </div>
+      <div class="inv-row">
+        <span class="lbl">Customer Name</span>
+        <span class="val" id="inv-name">—</span>
+      </div>
+      <div class="inv-row">
+        <span class="lbl">Email</span>
+        <span class="val" id="inv-email-field">—</span>
+      </div>
+      <div class="inv-row">
+        <span class="lbl">Phone</span>
+        <span class="val" id="inv-phone">—</span>
+      </div>
+      <div class="inv-row">
+        <span class="lbl">Payment ID</span>
+        <span class="val" id="inv-payment-id">—</span>
+      </div>
+      <div class="inv-row">
+        <span class="lbl">Description</span>
+        <span class="val">QuickPay Transaction</span>
+      </div>
+      <div class="inv-row">
+        <span class="lbl">Status</span>
+        <span class="val" style="color:#22a870;font-weight:700;">✅ PAID</span>
+      </div>
+      <div class="inv-total">
+        <span class="lbl">Total Amount Paid</span>
+        <span class="val" id="inv-amount">₹0</span>
+      </div>
+    </div>
+
+    <div class="inv-actions">
+      <button class="inv-btn primary" onclick="printInvoice()">🖨 Print / Save PDF</button>
+      <button class="inv-btn secondary" onclick="closeInvoice()">✕ Close</button>
+    </div>
+
+    <div class="inv-footer" id="inv-email-status">
+      📤 Sending invoice to your email...
+    </div>
+  </div>
+</div>
 
 <script>
-async function pay(amount) {
+  // ── CONFIG — update these if you regenerate keys ─────
+  const RAZORPAY_KEY     = "rzp_live_SV68ifsBjM5tPz";
+  const EMAILJS_KEY      = "7rgj4t_06JrmsxgHC";
+  const EMAILJS_SERVICE  = "service_8o8nozh";
+  const EMAILJS_TEMPLATE = "template_xui60z6";
+  // ─────────────────────────────────────────────────────
 
-    const res = await fetch("http://localhost:5000/create-order", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ amount: amount })
+  emailjs.init(EMAILJS_KEY);
+
+  let selectedAmount = null;
+
+  function selectAmount(btn) {
+    document.querySelectorAll('.amt-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedAmount = parseInt(btn.dataset.amount);
+    const payBtn = document.getElementById('pay-btn');
+    payBtn.disabled = false;
+    payBtn.textContent = `Pay ₹${selectedAmount / 100} Now →`;
+  }
+
+  function showStatus(msg, type) {
+    const el = document.getElementById('status-msg');
+    el.innerHTML = msg;
+    el.className = 'status ' + type;
+  }
+
+  function generateInvoiceId() {
+    return 'QP-' + Date.now().toString().slice(-7);
+  }
+
+  function formatDate(d) {
+    return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+      + ' at ' + d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function showInvoice(paymentId, name, email, phone, amountPaise) {
+    const now       = new Date();
+    const invoiceId = generateInvoiceId();
+    const rupees    = amountPaise / 100;
+
+    document.getElementById('inv-id').textContent           = '#' + invoiceId;
+    document.getElementById('inv-date').textContent         = formatDate(now);
+    document.getElementById('inv-name').textContent         = name  || 'Customer';
+    document.getElementById('inv-email-field').textContent  = email || '—';
+    document.getElementById('inv-phone').textContent        = phone || '—';
+    document.getElementById('inv-payment-id').textContent   = paymentId;
+    document.getElementById('inv-amount').textContent       = '₹' + rupees;
+    document.getElementById('inv-email-status').textContent = '📤 Sending invoice to your email...';
+
+    document.getElementById('invoice-modal').classList.add('open');
+    return { invoiceId, rupees, dateStr: formatDate(now) };
+  }
+
+  function closeInvoice() {
+    document.getElementById('invoice-modal').classList.remove('open');
+  }
+
+  function printInvoice() { window.print(); }
+
+  function sendInvoiceEmail({ name, email, phone, paymentId, invoiceId, rupees, dateStr }) {
+    if (!email) return;
+
+    // Build a clean HTML invoice to embed in the email message field
+    const invoiceHTML = `
+<div style="font-family:Arial,sans-serif;max-width:520px;margin:auto;border:1px solid #e0e0e0;border-radius:12px;overflow:hidden;">
+  <div style="background:linear-gradient(135deg,#4f7dff,#7c5cfc);padding:24px 28px;color:#fff;">
+    <h2 style="margin:0;font-size:22px;">QuickPay ₹ — Invoice</h2>
+    <p style="margin:4px 0 0;opacity:0.85;font-size:13px;">Invoice #${invoiceId}</p>
+  </div>
+  <div style="padding:24px 28px;background:#fff;">
+    <p style="font-size:15px;margin:0 0 18px;">Hi <strong>${name}</strong>, your payment was successful! 🎉</p>
+    <table style="width:100%;border-collapse:collapse;font-size:14px;">
+      <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:9px 0;color:#888;font-size:12px;text-transform:uppercase;">Date</td><td style="padding:9px 0;font-weight:600;text-align:right;">${dateStr}</td></tr>
+      <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:9px 0;color:#888;font-size:12px;text-transform:uppercase;">Customer</td><td style="padding:9px 0;font-weight:600;text-align:right;">${name}</td></tr>
+      <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:9px 0;color:#888;font-size:12px;text-transform:uppercase;">Email</td><td style="padding:9px 0;font-weight:600;text-align:right;">${email}</td></tr>
+      <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:9px 0;color:#888;font-size:12px;text-transform:uppercase;">Phone</td><td style="padding:9px 0;font-weight:600;text-align:right;">${phone || '—'}</td></tr>
+      <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:9px 0;color:#888;font-size:12px;text-transform:uppercase;">Payment ID</td><td style="padding:9px 0;font-weight:600;text-align:right;word-break:break-all;">${paymentId}</td></tr>
+      <tr><td style="padding:9px 0;color:#888;font-size:12px;text-transform:uppercase;">Status</td><td style="padding:9px 0;font-weight:700;text-align:right;color:#22a870;">✅ PAID</td></tr>
+    </table>
+    <div style="background:#f0f4ff;border-radius:10px;padding:14px 18px;margin:18px 0;display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-weight:600;color:#555;">Amount Paid</span>
+      <span style="font-size:26px;font-weight:800;color:#4f7dff;">₹${rupees}</span>
+    </div>
+  </div>
+  <div style="text-align:center;padding:14px 24px 20px;color:#aaa;font-size:12px;background:#fafafa;">
+    Thank you for your payment! This is an auto-generated invoice.<br/>
+    Powered by <strong>QuickPay</strong> &amp; Razorpay
+  </div>
+</div>`;
+
+    emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
+      name:    name,
+      email:   email,
+      message: invoiceHTML
+    }).then(() => {
+      document.getElementById('inv-email-status').innerHTML =
+        `✅ Invoice successfully sent to <strong>${email}</strong>`;
+      showStatus(
+        `✅ Payment successful! Invoice emailed to <strong>${email}</strong> · Payment ID: ${paymentId}`,
+        'success'
+      );
+    }).catch(err => {
+      console.error('EmailJS error:', err);
+      document.getElementById('inv-email-status').textContent =
+        '⚠ Email delivery failed — please screenshot this invoice.';
     });
+  }
 
-    const order = await res.json();
+  function startPayment() {
+    if (!selectedAmount) {
+      showStatus('⚠ Please select an amount.', 'error');
+      return;
+    }
+    const name  = document.getElementById('cust_name').value.trim() || 'Customer';
+    const email = document.getElementById('cust_email').value.trim();
+    const phone = document.getElementById('cust_phone').value.trim();
 
-    var options = {
-        "key": "rzp_live_SV68ifsBjM5tPz",
-        "amount": order.amount,
-        "currency": "INR",
-        "name": "My Payment App",
-        "description": "Test Payment",
-        "order_id": order.id,
-        "handler": function (response){
-            alert("Payment Successful!");
-            console.log(response);
-        },
-        "prefill": {
-            "name": "Test User",
-            "email": "dakshitkalitkar@gmail.com",
-            "contact": "9220059256"
-        },
-        "theme": {
-            "color": "#3399cc"
+    if (!email) {
+      showStatus('⚠ Please enter your email — it\'s needed to send the invoice.', 'error');
+      return;
+    }
+
+    const options = {
+      key:      RAZORPAY_KEY,
+      amount:   selectedAmount,
+      currency: "INR",
+      name:     "QuickPay",
+      description: `Payment of ₹${selectedAmount / 100}`,
+      prefill:  { name, email, contact: phone },
+      notes:    { source: "QuickPay App" },
+      theme:    { color: "#4f7dff" },
+      handler: function (response) {
+        const paymentId = response.razorpay_payment_id;
+        const { invoiceId, rupees, dateStr } = showInvoice(paymentId, name, email, phone, selectedAmount);
+        sendInvoiceEmail({ name, email, phone, paymentId, invoiceId, rupees, dateStr });
+      },
+      modal: {
+        ondismiss: function () {
+          showStatus('Payment was cancelled.', 'error');
         }
+      }
     };
 
-    var rzp = new Razorpay(options);
-    rzp.open();
-}
+    try {
+      const rzp = new Razorpay(options);
+      rzp.on('payment.failed', function (r) {
+        showStatus(`❌ Payment failed: ${r.error.description}`, 'error');
+      });
+      rzp.open();
+    } catch (e) {
+      showStatus('❌ Could not open Razorpay. Please refresh and try again.', 'error');
+    }
+  }
 </script>
-
 </body>
 </html>
