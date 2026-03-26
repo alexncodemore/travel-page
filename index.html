@@ -3,92 +3,1293 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adventure Travel Booking</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Wanderlust Travel — Discover India</title>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --cream: #faf7f2;
+            --sand: #f0ebe0;
+            --terracotta: #c4622d;
+            --terracotta-dark: #a04e22;
+            --forest: #2d4a3e;
+            --forest-light: #3d6b5c;
+            --gold: #c9952a;
+            --gold-light: #e8b84b;
+            --charcoal: #1c1c1e;
+            --mid: #5a5a5a;
+            --light: #9a9a9a;
+            --border: #e0d9ce;
+            --white: #ffffff;
+            --success: #2d7a4f;
+            --error: #c0392b;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--cream);
+            color: var(--charcoal);
+            line-height: 1.6;
+        }
+
+        /* NAV */
+        nav {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(250,247,242,0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 5%;
+            display: flex; align-items: center; justify-content: space-between;
+            height: 68px;
+        }
+        .nav-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem; font-weight: 700;
+            color: var(--forest);
+            text-decoration: none;
+        }
+        .nav-logo span { color: var(--terracotta); }
+        .nav-links { display: flex; gap: 2rem; list-style: none; }
+        .nav-links a {
+            text-decoration: none; color: var(--mid);
+            font-size: 0.875rem; font-weight: 500;
+            letter-spacing: 0.02em;
+            transition: color 0.2s;
+        }
+        .nav-links a:hover { color: var(--terracotta); }
+        .nav-cta {
+            background: var(--terracotta); color: var(--white);
+            padding: 0.55rem 1.4rem; border-radius: 50px;
+            font-size: 0.875rem; font-weight: 600;
+            text-decoration: none; transition: background 0.2s;
+        }
+        .nav-cta:hover { background: var(--terracotta-dark); }
+        .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; border: none; background: none; padding: 4px; }
+        .hamburger span { width: 24px; height: 2px; background: var(--charcoal); display: block; transition: 0.3s; }
+
+        /* HERO */
+        .hero {
+            min-height: 88vh;
+            background: linear-gradient(160deg, var(--forest) 0%, #1a3328 40%, #0f2218 100%);
+            display: flex; align-items: center;
+            padding: 6rem 5% 4rem;
+            position: relative; overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M50 50c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0 5.523-4.477 10-10 10s-10-4.477-10-10 4.477-10 10-10zM10 10c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0 5.523-4.477 10-10 10S0 25.523 0 20s4.477-10 10-10z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        .hero-content { position: relative; max-width: 640px; }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            background: rgba(201,149,42,0.15); border: 1px solid rgba(201,149,42,0.3);
+            color: var(--gold-light); padding: 0.4rem 1rem;
+            border-radius: 50px; font-size: 0.8rem; font-weight: 600;
+            letter-spacing: 0.08em; text-transform: uppercase;
+            margin-bottom: 1.5rem;
+        }
+        .hero-badge svg { width: 14px; height: 14px; }
+        .hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700; line-height: 1.15;
+            color: var(--white); margin-bottom: 1.25rem;
+        }
+        .hero h1 em { color: var(--gold-light); font-style: normal; }
+        .hero p {
+            color: rgba(255,255,255,0.7);
+            font-size: 1.05rem; line-height: 1.7;
+            margin-bottom: 2rem; max-width: 520px;
+        }
+        .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+        .btn-primary {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            background: var(--terracotta); color: var(--white);
+            padding: 0.85rem 2rem; border-radius: 50px;
+            font-weight: 600; font-size: 0.95rem;
+            text-decoration: none; border: none; cursor: pointer;
+            transition: background 0.2s, transform 0.15s;
+        }
+        .btn-primary:hover { background: var(--terracotta-dark); transform: translateY(-1px); }
+        .btn-outline {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            border: 1.5px solid rgba(255,255,255,0.3); color: var(--white);
+            padding: 0.85rem 2rem; border-radius: 50px;
+            font-weight: 600; font-size: 0.95rem;
+            text-decoration: none; cursor: pointer;
+            background: transparent;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .btn-outline:hover { border-color: var(--white); background: rgba(255,255,255,0.08); }
+        .hero-stats {
+            display: flex; gap: 2.5rem; margin-top: 3.5rem;
+            padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.12);
+        }
+        .hero-stat { text-align: left; }
+        .hero-stat strong { display: block; font-size: 1.6rem; color: var(--gold-light); font-family: 'Playfair Display', serif; }
+        .hero-stat span { font-size: 0.8rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.05em; }
+
+        /* SECTION */
+        .section { padding: 5rem 5%; }
+        .section-alt { background: var(--sand); }
+        .section-header { text-align: center; max-width: 600px; margin: 0 auto 3.5rem; }
+        .section-tag {
+            display: inline-block;
+            color: var(--terracotta); font-size: 0.78rem;
+            font-weight: 700; letter-spacing: 0.12em;
+            text-transform: uppercase; margin-bottom: 0.75rem;
+        }
+        .section-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.8rem, 3vw, 2.5rem);
+            font-weight: 700; color: var(--charcoal);
+            line-height: 1.2; margin-bottom: 0.75rem;
+        }
+        .section-header p { color: var(--mid); font-size: 1rem; line-height: 1.7; }
+
+        /* RATING SUMMARY */
+        .rating-banner {
+            background: linear-gradient(135deg, var(--forest) 0%, var(--forest-light) 100%);
+            border-radius: 16px; padding: 2rem;
+            display: flex; align-items: center; gap: 2rem;
+            margin-bottom: 3rem; flex-wrap: wrap;
+        }
+        .rating-big { text-align: center; }
+        .rating-big .num {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem; font-weight: 700; color: var(--white);
+            line-height: 1;
+        }
+        .rating-big .stars-row { color: var(--gold-light); font-size: 1.2rem; margin: 0.3rem 0; }
+        .rating-big .count { color: rgba(255,255,255,0.6); font-size: 0.85rem; }
+        .rating-divider { width: 1px; height: 60px; background: rgba(255,255,255,0.15); }
+        .rating-bars { flex: 1; min-width: 200px; }
+        .rating-bar-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.4rem; }
+        .rating-bar-label { color: rgba(255,255,255,0.7); font-size: 0.8rem; width: 30px; text-align: right; }
+        .rating-bar-track { flex: 1; height: 6px; background: rgba(255,255,255,0.15); border-radius: 3px; overflow: hidden; }
+        .rating-bar-fill { height: 100%; background: var(--gold-light); border-radius: 3px; transition: width 0.8s ease; }
+        .rating-bar-count { color: rgba(255,255,255,0.5); font-size: 0.75rem; width: 24px; }
+
+        /* REVIEW CARDS */
+        .reviews-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.25rem; }
+        .review-card {
+            background: var(--white); border: 1px solid var(--border);
+            border-radius: 12px; padding: 1.4rem;
+            transition: box-shadow 0.2s;
+        }
+        .review-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .review-top { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+        .review-avatar {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--terracotta), var(--gold));
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: 700; font-size: 0.9rem; flex-shrink: 0;
+        }
+        .review-info strong { display: block; font-size: 0.9rem; }
+        .review-info span { color: var(--mid); font-size: 0.78rem; }
+        .review-stars { color: var(--gold); font-size: 0.9rem; margin-bottom: 0.5rem; }
+        .review-text { color: var(--mid); font-size: 0.875rem; line-height: 1.6; }
+        .review-date { color: var(--light); font-size: 0.75rem; margin-top: 0.75rem; }
+
+        /* PRODUCTS GRID */
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+        .product-card {
+            background: var(--white); border: 1px solid var(--border);
+            border-radius: 16px; overflow: hidden;
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+        .product-card:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.1); transform: translateY(-2px); }
+        .product-img {
+            width: 100%; height: 180px; object-fit: cover;
+            background: linear-gradient(135deg, var(--sand), var(--border));
+            display: flex; align-items: center; justify-content: center;
+        }
+        .product-img img { width: 100%; height: 100%; object-fit: cover; }
+        .product-img-placeholder {
+            display: flex; align-items: center; justify-content: center;
+            width: 100%; height: 100%;
+            color: var(--light); font-size: 2rem;
+        }
+        .product-body { padding: 1.25rem; }
+        .product-body h3 { font-family: 'Playfair Display', serif; font-size: 1.1rem; margin-bottom: 0.4rem; }
+        .product-body p { color: var(--mid); font-size: 0.85rem; line-height: 1.5; margin-bottom: 1rem; }
+        .product-footer { display: flex; align-items: center; justify-content: space-between; }
+        .product-price { font-size: 1.3rem; font-weight: 700; color: var(--forest); }
+        .product-price small { font-size: 0.75rem; color: var(--light); font-weight: 400; }
+        .btn-buy {
+            background: var(--terracotta); color: var(--white);
+            padding: 0.55rem 1.25rem; border-radius: 50px;
+            font-size: 0.85rem; font-weight: 600; border: none; cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-buy:hover { background: var(--terracotta-dark); }
+
+        /* FORMS */
+        .form-card {
+            background: var(--white); border: 1px solid var(--border);
+            border-radius: 20px; padding: 2.5rem;
+            max-width: 680px; margin: 0 auto;
+        }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group.full { grid-column: 1 / -1; }
+        label {
+            display: block; font-size: 0.8rem; font-weight: 600;
+            color: var(--charcoal); margin-bottom: 0.4rem;
+            letter-spacing: 0.02em; text-transform: uppercase;
+        }
+        input, textarea, select {
+            width: 100%; padding: 0.7rem 0.95rem;
+            border: 1.5px solid var(--border); border-radius: 10px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.9rem; color: var(--charcoal);
+            background: var(--cream); transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none;
+        }
+        input:focus, textarea:focus, select:focus {
+            border-color: var(--forest); box-shadow: 0 0 0 3px rgba(45,74,62,0.1);
+        }
+        textarea { resize: vertical; min-height: 100px; }
+        .btn-submit {
+            width: 100%; padding: 0.9rem; border-radius: 10px;
+            background: var(--terracotta); color: var(--white);
+            font-size: 0.95rem; font-weight: 700;
+            border: none; cursor: pointer;
+            transition: background 0.2s; letter-spacing: 0.02em;
+            display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+        }
+        .btn-submit:hover { background: var(--terracotta-dark); }
+        .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn-pay {
+            width: 100%; padding: 0.9rem; border-radius: 10px;
+            background: var(--forest); color: var(--white);
+            font-size: 0.95rem; font-weight: 700;
+            border: none; cursor: pointer;
+            transition: background 0.2s; letter-spacing: 0.02em;
+            display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+        }
+        .btn-pay:hover { background: var(--forest-light); }
+
+        /* ITINERARY FORM */
+        .itinerary-section {
+            background: linear-gradient(160deg, var(--forest) 0%, #1a3328 100%);
+            padding: 5rem 5%;
+        }
+        .itinerary-section .section-header h2,
+        .itinerary-section .section-header p { color: var(--white); }
+        .itinerary-section .section-header p { color: rgba(255,255,255,0.65); }
+        .itinerary-section .section-tag { color: var(--gold-light); }
+        .itinerary-section .form-card { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.12); }
+        .itinerary-section label { color: rgba(255,255,255,0.8); }
+        .itinerary-section input,
+        .itinerary-section textarea,
+        .itinerary-section select {
+            background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15);
+            color: var(--white);
+        }
+        .itinerary-section input::placeholder,
+        .itinerary-section textarea::placeholder { color: rgba(255,255,255,0.35); }
+        .itinerary-section select option { background: var(--forest); color: var(--white); }
+        .itinerary-section input:focus,
+        .itinerary-section textarea:focus,
+        .itinerary-section select:focus {
+            border-color: var(--gold-light); box-shadow: 0 0 0 3px rgba(201,149,42,0.2);
+        }
+        .price-badge {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            background: rgba(201,149,42,0.15); border: 1px solid rgba(201,149,42,0.3);
+            color: var(--gold-light); padding: 0.5rem 1rem;
+            border-radius: 50px; font-size: 0.85rem; font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        /* FAQ */
+        .faq-list { max-width: 720px; margin: 0 auto; }
+        .faq-item {
+            background: var(--white); border: 1px solid var(--border);
+            border-radius: 12px; margin-bottom: 0.75rem;
+            overflow: hidden;
+        }
+        .faq-question {
+            width: 100%; padding: 1.1rem 1.4rem;
+            display: flex; align-items: center; justify-content: space-between;
+            background: none; border: none; cursor: pointer;
+            text-align: left; font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem; font-weight: 600; color: var(--charcoal);
+            transition: background 0.15s;
+        }
+        .faq-question:hover { background: var(--cream); }
+        .faq-question svg { flex-shrink: 0; transition: transform 0.25s; color: var(--terracotta); }
+        .faq-item.open .faq-question svg { transform: rotate(45deg); }
+        .faq-answer {
+            max-height: 0; overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s;
+            padding: 0 1.4rem; color: var(--mid); font-size: 0.9rem; line-height: 1.7;
+        }
+        .faq-item.open .faq-answer { max-height: 300px; padding: 0 1.4rem 1.2rem; }
+
+        /* CONTACT */
+        .contact-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 3rem; align-items: start; max-width: 960px; margin: 0 auto; }
+        .contact-info h3 { font-family: 'Playfair Display', serif; font-size: 1.4rem; margin-bottom: 1rem; }
+        .contact-info p { color: var(--mid); font-size: 0.9rem; line-height: 1.7; margin-bottom: 1.5rem; }
+        .contact-detail { display: flex; align-items: flex-start; gap: 0.75rem; margin-bottom: 1rem; }
+        .contact-icon {
+            width: 38px; height: 38px; border-radius: 10px;
+            background: var(--sand); display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .contact-icon svg { width: 16px; height: 16px; color: var(--terracotta); }
+        .contact-detail strong { display: block; font-size: 0.8rem; color: var(--charcoal); margin-bottom: 0.15rem; }
+        .contact-detail span { font-size: 0.875rem; color: var(--mid); }
+
+        /* MODAL */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0; z-index: 200;
+            background: rgba(0,0,0,0.55); backdrop-filter: blur(6px);
+            align-items: center; justify-content: center; padding: 1rem;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: var(--white); border-radius: 20px;
+            width: 100%; max-width: 480px;
+            max-height: 90vh; overflow-y: auto;
+            padding: 2rem;
+            animation: slideUp 0.25s ease;
+        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+        .modal-header h3 { font-family: 'Playfair Display', serif; font-size: 1.2rem; }
+        .modal-close {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: var(--sand); border: none; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--mid); transition: background 0.15s;
+        }
+        .modal-close:hover { background: var(--border); }
+        .modal-product-info {
+            background: var(--cream); border-radius: 12px; padding: 1rem;
+            margin-bottom: 1.25rem; display: flex; align-items: center; gap: 1rem;
+        }
+        .modal-product-info img { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; }
+        .modal-product-info strong { display: block; font-size: 0.95rem; margin-bottom: 0.2rem; }
+        .modal-product-info span { color: var(--forest); font-weight: 700; font-size: 1.1rem; }
+
+        /* TOAST */
+        .toast-container { position: fixed; bottom: 2rem; right: 2rem; z-index: 999; display: flex; flex-direction: column; gap: 0.5rem; }
+        .toast {
+            min-width: 280px; padding: 0.9rem 1.2rem;
+            border-radius: 12px; font-size: 0.875rem;
+            display: flex; align-items: flex-start; gap: 0.75rem;
+            animation: toastIn 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .toast-success { background: #f0faf4; border: 1px solid #a8d8b9; color: var(--success); }
+        .toast-error { background: #fef0f0; border: 1px solid #f5b7b1; color: var(--error); }
+        .toast-icon { font-size: 1rem; flex-shrink: 0; }
+        .toast strong { display: block; font-weight: 600; margin-bottom: 0.1rem; }
+        @keyframes toastIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
+        /* LOADING */
+        .loading-dots { display: flex; gap: 0.4rem; justify-content: center; padding: 2rem; }
+        .loading-dots span {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--border); animation: bounce 1.2s infinite;
+        }
+        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes bounce { 0%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-6px); background: var(--terracotta); } }
+
+        /* FOOTER */
+        footer {
+            background: var(--charcoal); color: rgba(255,255,255,0.5);
+            padding: 2rem 5%; text-align: center; font-size: 0.85rem;
+        }
+        footer a { color: rgba(255,255,255,0.7); text-decoration: none; }
+        footer a:hover { color: var(--white); }
+
+        /* SUCCESS STATE */
+        .success-state { text-align: center; padding: 2rem; }
+        .success-state svg { color: var(--success); width: 48px; height: 48px; margin-bottom: 1rem; }
+        .success-state h3 { font-family: 'Playfair Display', serif; font-size: 1.3rem; margin-bottom: 0.5rem; }
+        .success-state p { color: var(--mid); font-size: 0.9rem; }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .nav-links, .nav-cta { display: none; }
+            .hamburger { display: flex; }
+            .form-grid { grid-template-columns: 1fr; }
+            .contact-grid { grid-template-columns: 1fr; }
+            .hero-stats { gap: 1.5rem; }
+            .rating-divider { display: none; }
+            .mobile-nav {
+                display: none; position: fixed; inset: 0; z-index: 150;
+                background: var(--white); padding: 5rem 2rem 2rem;
+                flex-direction: column; gap: 1.5rem;
+            }
+            .mobile-nav.active { display: flex; }
+            .mobile-nav a { font-size: 1.1rem; color: var(--charcoal); text-decoration: none; font-weight: 500; }
+        }
+        @media (min-width: 769px) { .mobile-nav { display: none !important; } }
+    </style>
 </head>
 <body>
-    <nav class="navbar">
-        <h1 class="logo">ADVENTURE</h1>
-        <ul class="nav-links">
-            <li><a href="#" style="color: red;">Home</a></li>
-            <li><a href="#">Tours</a></li>
-            <li><a href="#">Explore</a></li>
-            <li><a href="#">About</a></li>
-            <li><a href="#" class="ctn">Contact</a></li>
-        </ul>
-        <img src="menu.png" alt="Menu" class="menu-btn">
-    </nav>
-    
-    <header>
-        <div class="header-content">
-            <h2>Explore the colorful world!</h2>
-            <div class="line"></div>
-            <h1>A WONDERFUL GIFT</h1>
-            <a href="#" class="ctn">Learn More</a>
-        </div>
-    </header>
 
-    <section class="events">
-        <div class="title">
-            <h1>Upcoming Events</h1>
-            <div class="line"></div>
-        </div>
-        <div class="row">
-            <div class="col">
-                <img src="mouteverest.png" alt="Everest Base Camp" class="imgs">
-                <h1>Everest Camp Trek</h1>
-                <p>Experience the adventure of a lifetime with our guided trek to Everest Base Camp. Journey through breathtaking landscapes and immerse yourself in local Sherpa culture.</p>
-                <a href="#" class="ctn">Learn more</a>
-            </div>
-            <div class="col">
-                <img src="jeju.png" alt="Himalayan Mountains" class="imgs">
-                <h1>Jeju Island</h1>
-                <p>Discover the majestic beauty of the Himalayas on this unforgettable trekking experience. Perfect for adventurers looking for stunning views and cultural encounters.</p>
-                <a href="#" class="ctn">Learn more</a>
-            </div>
-        </div>
-    </section>
+<!-- NAV -->
+<nav>
+    <a href="#" class="nav-logo">Wander<span>lust</span></a>
+    <ul class="nav-links">
+        <li><a href="#products">Packages</a></li>
+        <li><a href="#itinerary">Custom Itinerary</a></li>
+        <li><a href="#reviews">Reviews</a></li>
+        <li><a href="#faq">FAQ</a></li>
+        <li><a href="#contact">Contact</a></li>
+    </ul>
+    <a href="#itinerary" class="nav-cta">Plan My Trip</a>
+    <button class="hamburger" onclick="toggleMenu()" aria-label="Menu">
+        <span></span><span></span><span></span>
+    </button>
+</nav>
+<div class="mobile-nav" id="mobileNav">
+    <a href="#products" onclick="toggleMenu()">Packages</a>
+    <a href="#itinerary" onclick="toggleMenu()">Custom Itinerary</a>
+    <a href="#reviews" onclick="toggleMenu()">Reviews</a>
+    <a href="#faq" onclick="toggleMenu()">FAQ</a>
+    <a href="#contact" onclick="toggleMenu()">Contact</a>
+</div>
 
-    <section class="explore">
-        <div class="explore-content">
-            <h1>EXPLORE THE WORLD</h1>
-            <div class="line"></div>
-            <p>Join us on an unforgettable journey to discover the most breathtaking destinations on Earth. From tropical beaches to mountain peaks, we have adventures for every type of traveler.</p>
-            <a href="#" class="ctn">Learn More</a>
-        </div>    
-    </section>
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-content">
+        <div class="hero-badge">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Trusted Travel Partner
+        </div>
+        <h1>Discover the <em>Soul of India</em>, One Journey at a Time</h1>
+        <p>Expertly crafted travel experiences — from the peaks of the Himalayas to the shores of Kerala. We plan every detail, you collect memories.</p>
+        <div class="hero-actions">
+            <a href="#itinerary" class="btn-primary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>
+                Plan My Itinerary
+            </a>
+            <a href="#products" class="btn-outline">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                View Packages
+            </a>
+        </div>
+        <div class="hero-stats">
+            <div class="hero-stat"><strong>2,400+</strong><span>Happy Travelers</span></div>
+            <div class="hero-stat"><strong>150+</strong><span>Destinations</span></div>
+            <div class="hero-stat"><strong>4.9</strong><span>Average Rating</span></div>
+        </div>
+    </div>
+</section>
 
-    <section class="tours">
-        <div class="row">
-            <div class="col content-col">
-                <h1>UPCOMING TOURS & DESTINATIONS</h1>
-                <p>Check out our exciting lineup of tours for the coming season. Whether you're looking for a relaxing getaway or an extreme adventure, we have the perfect trip for you.</p>
-                <a href="#" class="ctn">Learn more</a>
+<!-- PRODUCTS -->
+<section class="section" id="products">
+    <div class="section-header">
+        <span class="section-tag">Travel Packages</span>
+        <h2>Curated Journeys Awaiting You</h2>
+        <p>Handpicked travel packages designed by our experts. Each includes a detailed PDF guide to help you make the most of your trip.</p>
+    </div>
+    <div class="products-grid" id="productsList">
+        <div class="loading-dots"><span></span><span></span><span></span></div>
+    </div>
+</section>
+
+<!-- REVIEWS -->
+<section class="section section-alt" id="reviews">
+    <div class="section-header">
+        <span class="section-tag">Traveler Reviews</span>
+        <h2>Stories from the Road</h2>
+        <p>Real experiences shared by our community of travelers.</p>
+    </div>
+    <div class="rating-banner" id="ratingBanner" style="display:none">
+        <div class="rating-big">
+            <div class="num" id="avgNum">0.0</div>
+            <div class="stars-row" id="avgStars"></div>
+            <div class="count" id="avgCount">0 reviews</div>
+        </div>
+        <div class="rating-divider"></div>
+        <div class="rating-bars" id="ratingBars"></div>
+    </div>
+    <div class="reviews-grid" id="reviewsGrid">
+        <div class="loading-dots"><span></span><span></span><span></span></div>
+    </div>
+</section>
+
+<!-- WRITE REVIEW -->
+<section class="section" id="write-review">
+    <div class="section-header">
+        <span class="section-tag">Share Your Experience</span>
+        <h2>Write a Review</h2>
+    </div>
+    <div class="form-card">
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Your Name</label>
+                <input type="text" id="rev_name" placeholder="Full name">
             </div>
-            <div class="col image-col">
-                <div class="img-gallery">
-                    <img src="beach_vacation.png" alt="Beach vacation">
-                    <img src="hiking.png" alt="Mountain hiking">
-                    <img src="cultural_tour.png" alt="Cultural tour">
-                    <img src="safari.png" alt="Safari adventure">
+            <div class="form-group">
+                <label>Place Visited</label>
+                <input type="text" id="rev_place" placeholder="e.g. Goa, Rajasthan">
+            </div>
+            <div class="form-group full">
+                <label>Rating</label>
+                <select id="rev_rating">
+                    <option value="">Select your rating</option>
+                    <option value="5">5 Stars — Exceptional</option>
+                    <option value="4">4 Stars — Very Good</option>
+                    <option value="3">3 Stars — Good</option>
+                    <option value="2">2 Stars — Fair</option>
+                    <option value="1">1 Star — Poor</option>
+                </select>
+            </div>
+            <div class="form-group full">
+                <label>Your Review</label>
+                <textarea id="rev_message" placeholder="Share the highlights of your journey..."></textarea>
+            </div>
+        </div>
+        <button class="btn-submit" onclick="submitReview(this)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            Submit Review
+        </button>
+    </div>
+</section>
+
+<!-- ITINERARY -->
+<section class="itinerary-section" id="itinerary">
+    <div class="section-header">
+        <span class="section-tag">Custom Planning</span>
+        <h2>Request Your Personalized Itinerary</h2>
+        <p>Tell us your travel dreams and our experts will craft a bespoke journey just for you.</p>
+    </div>
+    <div class="form-card">
+        <div class="price-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
+            Only ₹1 to get started
+        </div>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Full Name *</label>
+                <input type="text" id="itin_name" placeholder="Your full name">
+            </div>
+            <div class="form-group">
+                <label>Email *</label>
+                <input type="email" id="itin_email" placeholder="your@email.com">
+            </div>
+            <div class="form-group">
+                <label>Phone *</label>
+                <input type="tel" id="itin_phone" placeholder="+91 XXXXX XXXXX">
+            </div>
+            <div class="form-group">
+                <label>Trip Type *</label>
+                <select id="itin_trip">
+                    <option value="">Select trip type</option>
+                    <option>Adventure</option>
+                    <option>Beach</option>
+                    <option>Cultural</option>
+                    <option>Wildlife</option>
+                    <option>Pilgrimage</option>
+                    <option>Honeymoon</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Destination *</label>
+                <input type="text" id="itin_dest" placeholder="State or city">
+            </div>
+            <div class="form-group">
+                <label>Travel Dates</label>
+                <input type="text" id="itin_dates" placeholder="dd-mm-yyyy">
+            </div>
+            <div class="form-group">
+                <label>No. of Days *</label>
+                <input type="number" id="itin_days" min="1" placeholder="7">
+            </div>
+            <div class="form-group">
+                <label>No. of People *</label>
+                <input type="number" id="itin_people" min="1" placeholder="2">
+            </div>
+            <div class="form-group">
+                <label>Budget (₹/person)</label>
+                <input type="number" id="itin_budget" placeholder="Optional">
+            </div>
+            <div class="form-group">
+                <label>Travel Style</label>
+                <select id="itin_style">
+                    <option value="">Select style</option>
+                    <option>Luxury</option>
+                    <option>Comfort</option>
+                    <option>Budget</option>
+                    <option>Backpacker</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Food Preference</label>
+                <select id="itin_food">
+                    <option>No Preference</option>
+                    <option>Vegetarian</option>
+                    <option>Vegan</option>
+                    <option>Non-Vegetarian</option>
+                    <option>Halal</option>
+                    <option>Kosher</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Children Travelling</label>
+                <select id="itin_kids">
+                    <option>No children</option>
+                    <option>1 child</option>
+                    <option>2 children</option>
+                    <option>3+ children</option>
+                </select>
+            </div>
+            <div class="form-group full">
+                <label>Special Requirements</label>
+                <textarea id="itin_special" placeholder="Accessibility needs, dietary restrictions, must-see places..."></textarea>
+            </div>
+        </div>
+        <button class="btn-pay" onclick="processItineraryPayment(this)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+            Pay ₹1 &amp; Submit Itinerary Request
+        </button>
+    </div>
+</section>
+
+<!-- FAQ -->
+<section class="section section-alt" id="faq">
+    <div class="section-header">
+        <span class="section-tag">Help Center</span>
+        <h2>Frequently Asked Questions</h2>
+        <p>Everything you need to know before you book.</p>
+    </div>
+    <div class="faq-list" id="faqList"></div>
+</section>
+
+<!-- CONTACT -->
+<section class="section" id="contact">
+    <div class="section-header">
+        <span class="section-tag">Get In Touch</span>
+        <h2>We're Here to Help</h2>
+    </div>
+    <div class="contact-grid">
+        <div class="contact-info">
+            <h3>Plan your perfect trip with us</h3>
+            <p>Have questions about a package or need help planning your trip? Our team of travel experts is ready to help you every step of the way.</p>
+            <div class="contact-detail">
+                <div class="contact-icon">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                </div>
+                <div><strong>Email</strong><span>hello@wanderlust.in</span></div>
+            </div>
+            <div class="contact-detail">
+                <div class="contact-icon">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+                </div>
+                <div><strong>Phone</strong><span>+91 98765 43210</span></div>
+            </div>
+            <div class="contact-detail">
+                <div class="contact-icon">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                </div>
+                <div><strong>Office</strong><span>Mumbai, Maharashtra, India</span></div>
+            </div>
+        </div>
+        <div class="form-card" style="margin: 0;">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Name *</label>
+                    <input type="text" id="con_name" placeholder="Your name">
+                </div>
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" id="con_email" placeholder="your@email.com">
+                </div>
+                <div class="form-group full">
+                    <label>Phone *</label>
+                    <input type="tel" id="con_phone" placeholder="+91 XXXXX XXXXX">
+                </div>
+                <div class="form-group full">
+                    <label>Message</label>
+                    <textarea id="con_message" placeholder="How can we help you?"></textarea>
                 </div>
             </div>
+            <button class="btn-submit" onclick="submitContact(this)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                Send Message
+            </button>
         </div>
-    </section>
+    </div>
+</section>
 
-    <footer>
-        <p>Adventure Travel Agency | 123 Adventure Lane, Mountain View, CA 94041</p>
-        <p>Phone: (123) 456-7890 | Email: info@adventure.com</p>
-        <p>© 2025 Adventure Travel. All rights reserved.</p>
-    </footer>
+<!-- FOOTER -->
+<footer>
+    <p style="font-family:'Playfair Display',serif; font-size:1.1rem; color:rgba(255,255,255,0.8); margin-bottom:0.5rem;">Wanderlust Travel</p>
+    <p>Crafting unforgettable journeys across India. &copy; 2025 All rights reserved.</p>
+    <p style="margin-top:0.5rem;"><a href="admin.html">Admin</a></p>
+</footer>
 
-    <script>
-        const menuBtn = document.querySelector('.menu-btn');
-        const navLinks = document.querySelector('.nav-links');
+<!-- PURCHASE MODAL -->
+<div class="modal-overlay" id="purchaseModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3>Complete Your Purchase</h3>
+            <button class="modal-close" onclick="closeModal()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+            </button>
+        </div>
+        <div class="modal-product-info" id="modalProductInfo"></div>
+        <input type="hidden" id="sel_id">
+        <input type="hidden" id="sel_pdf">
+        <input type="hidden" id="sel_price">
+        <div class="form-group">
+            <label>Full Name *</label>
+            <input type="text" id="buy_name" placeholder="Your full name">
+        </div>
+        <div class="form-group">
+            <label>Email *</label>
+            <input type="email" id="buy_email" placeholder="your@email.com">
+        </div>
+        <div class="form-group">
+            <label>Phone *</label>
+            <input type="tel" id="buy_phone" placeholder="+91 XXXXX XXXXX">
+        </div>
+        <div class="form-group">
+            <label>Number of Travelers *</label>
+            <input type="number" id="buy_travelers" min="1" value="1">
+        </div>
+        <div class="form-group">
+            <label>Message (Optional)</label>
+            <textarea id="buy_message" rows="2" placeholder="Any special requirements?"></textarea>
+        </div>
+        <button class="btn-pay" id="modalPayBtn" onclick="processProductPayment(this)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+            <span id="modalPayLabel">Proceed to Pay</span>
+        </button>
+    </div>
+</div>
 
-        menuBtn.addEventListener('click', () => {
-            navLinks.classList.toggle('mobile-menu');
-        });
-    </script>
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+emailjs.init("7rgj4t_06JrmsxgHC");
+
+const sb = window.supabase.createClient(
+    "https://eyekpbzcdouhkquqjjae.supabase.co",
+    "sb_publishable_hONe7ntkTZaGeyFsLV0iMQ_9aTXtOBE"
+);
+
+const RAZORPAY_KEY = "rzp_live_SV68ifsBjM5tPz";
+let currentProduct = null;
+let pendingFormData = null;
+
+// ── TOAST ────────────────────────────────────────────────────────────────────
+function toast(title, msg, type = 'success') {
+    const c = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    t.className = `toast toast-${type}`;
+    t.innerHTML = `
+        <span class="toast-icon">${type === 'success' ? '✓' : '✕'}</span>
+        <div><strong>${title}</strong>${msg ? `<span>${msg}</span>` : ''}</div>`;
+    c.appendChild(t);
+    setTimeout(() => t.remove(), 4500);
+}
+
+// ── FAQ DATA ──────────────────────────────────────────────────────────────────
+const faqs = [
+    { q: "How does the custom itinerary service work?", a: "Fill out the itinerary request form with your travel preferences. After a small ₹1 booking fee, our team will prepare a fully personalized travel plan and send it to your email within 24 hours." },
+    { q: "What happens after I pay for a travel package?", a: "You will receive an instant PDF download in your browser as well as an email with your purchase confirmation and the PDF document attached. The PDF contains your complete travel guide." },
+    { q: "Is my payment information secure?", a: "Yes. All payments are processed by Razorpay, a PCI-DSS compliant payment gateway used by thousands of Indian businesses. We never store your card or bank details." },
+    { q: "Can I get a refund if I'm not satisfied?", a: "We offer a full refund within 7 days of purchase if the product does not match its description. Contact us at hello@wanderlust.in with your payment ID and we will process it promptly." },
+    { q: "How long does it take to receive a custom itinerary?", a: "Our travel experts typically deliver your personalized itinerary within 24 hours of receiving your request. For complex or group itineraries, it may take up to 48 hours." },
+    { q: "What payment methods are accepted?", a: "We accept all major credit/debit cards, UPI (Google Pay, PhonePe, Paytm), net banking, and EMI options — all through Razorpay's secure checkout." },
+    { q: "Can I modify my itinerary after submitting?", a: "Yes, once our team sends you the draft itinerary via email, you can request up to 2 revisions free of charge. Just reply to the email with your feedback." },
+    { q: "Are the travel packages suitable for families with children?", a: "Absolutely. Our packages cover all travel styles. When filling the itinerary form, mention the number of children and any special requirements, and we will tailor the plan accordingly." },
+];
+
+function buildFAQ() {
+    const el = document.getElementById('faqList');
+    el.innerHTML = faqs.map((f, i) => `
+        <div class="faq-item" id="faq${i}">
+            <button class="faq-question" onclick="toggleFAQ(${i})">
+                <span>${f.q}</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            </button>
+            <div class="faq-answer">${f.a}</div>
+        </div>`).join('');
+}
+
+function toggleFAQ(i) {
+    const item = document.getElementById('faq' + i);
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(el => el.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
+}
+
+// ── REVIEWS ───────────────────────────────────────────────────────────────────
+async function loadReviews() {
+    try {
+        const { data, error } = await sb.from('reviews').select('*').order('created_at', { ascending: false });
+        if (error) throw error;
+
+        const grid = document.getElementById('reviewsGrid');
+        const banner = document.getElementById('ratingBanner');
+
+        if (!data || data.length === 0) {
+            grid.innerHTML = '<p style="color:var(--mid);text-align:center;padding:2rem">No reviews yet. Be the first!</p>';
+            return;
+        }
+
+        banner.style.display = 'flex';
+        const avg = (data.reduce((s, r) => s + r.rating, 0) / data.length);
+        document.getElementById('avgNum').textContent = avg.toFixed(1);
+        document.getElementById('avgCount').textContent = `${data.length} review${data.length !== 1 ? 's' : ''}`;
+
+        const stars = Math.round(avg);
+        document.getElementById('avgStars').textContent = '★'.repeat(stars) + '☆'.repeat(5 - stars);
+
+        const counts = [5,4,3,2,1].map(n => ({ n, c: data.filter(r => r.rating === n).length }));
+        document.getElementById('ratingBars').innerHTML = counts.map(({ n, c }) => `
+            <div class="rating-bar-row">
+                <span class="rating-bar-label">${n}</span>
+                <div class="rating-bar-track"><div class="rating-bar-fill" style="width:${data.length ? (c/data.length*100) : 0}%"></div></div>
+                <span class="rating-bar-count">${c}</span>
+            </div>`).join('');
+
+        grid.innerHTML = data.map(r => `
+            <div class="review-card">
+                <div class="review-top">
+                    <div class="review-avatar">${(r.name||'?')[0].toUpperCase()}</div>
+                    <div class="review-info">
+                        <strong>${esc(r.name)}</strong>
+                        <span>Visited ${esc(r.travel_place)}</span>
+                    </div>
+                </div>
+                <div class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
+                <div class="review-text">${esc(r.message) || 'No written review.'}</div>
+                <div class="review-date">${new Date(r.created_at).toLocaleDateString('en-IN',{year:'numeric',month:'long',day:'numeric'})}</div>
+            </div>`).join('');
+    } catch (e) {
+        console.error(e);
+        document.getElementById('reviewsGrid').innerHTML = '<p style="color:var(--error);text-align:center">Could not load reviews.</p>';
+    }
+}
+
+async function submitReview(btn) {
+    const name = document.getElementById('rev_name').value.trim();
+    const place = document.getElementById('rev_place').value.trim();
+    const rating = parseInt(document.getElementById('rev_rating').value);
+    const message = document.getElementById('rev_message').value.trim();
+
+    if (!name || !place || !rating) { toast('Missing Fields', 'Please fill all required fields.', 'error'); return; }
+
+    btn.disabled = true; btn.textContent = 'Submitting...';
+    const { error } = await sb.from('reviews').insert([{ name, travel_place: place, rating, message }]);
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Submit Review`;
+
+    if (error) { toast('Error', error.message, 'error'); return; }
+    toast('Review Submitted', 'Thank you for sharing your experience!');
+    ['rev_name','rev_place','rev_message'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('rev_rating').value = '';
+    loadReviews();
+}
+
+// ── PRODUCTS ──────────────────────────────────────────────────────────────────
+async function loadProducts() {
+    try {
+        const { data, error } = await sb.from('products').select('*').order('created_at', { ascending: false });
+        if (error) throw error;
+        const div = document.getElementById('productsList');
+        if (!data || data.length === 0) {
+            div.innerHTML = '<p style="color:var(--mid);text-align:center;padding:2rem;grid-column:1/-1">No packages available yet.</p>';
+            return;
+        }
+        div.innerHTML = data.map(p => `
+            <div class="product-card">
+                <div class="product-img">
+                    ${p.image_url
+                        ? `<img src="${p.image_url}" alt="${esc(p.title)}" onerror="this.parentElement.innerHTML='<div class=product-img-placeholder><svg width=40 height=40 viewBox=&quot;0 0 24 24&quot; fill=&quot;currentColor&quot;><path d=&quot;M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z&quot;/></svg></div>'">`
+                        : `<div class="product-img-placeholder"><svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg></div>`}
+                </div>
+                <div class="product-body">
+                    <h3>${esc(p.title)}</h3>
+                    <p>${esc(p.description) || 'A carefully curated travel package.'}</p>
+                    <div class="product-footer">
+                        <div class="product-price">₹${parseFloat(p.price).toFixed(0)}<br><small>per person</small></div>
+                        <button class="btn-buy" onclick="openModal(${p.id},'${esc(p.title)}',${p.price},'${p.pdf_url||''}','${p.image_url||''}')">Buy Now</button>
+                    </div>
+                </div>
+            </div>`).join('');
+    } catch (e) {
+        console.error(e);
+        document.getElementById('productsList').innerHTML = '<p style="color:var(--error);text-align:center">Could not load packages.</p>';
+    }
+}
+
+// ── MODAL ─────────────────────────────────────────────────────────────────────
+function openModal(id, title, price, pdfUrl, imgUrl) {
+    currentProduct = { id, title, price, pdfUrl, imgUrl };
+    document.getElementById('sel_id').value = id;
+    document.getElementById('sel_pdf').value = pdfUrl;
+    document.getElementById('sel_price').value = price;
+    document.getElementById('modalPayLabel').textContent = `Proceed to Pay ₹${parseFloat(price).toFixed(0)}`;
+    document.getElementById('modalProductInfo').innerHTML = `
+        ${imgUrl ? `<img src="${imgUrl}" onerror="this.style.display='none'" alt="">` : ''}
+        <div><strong>${esc(title)}</strong><span>₹${parseFloat(price).toFixed(0)}</span></div>`;
+    ['buy_name','buy_email','buy_phone','buy_message'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('buy_travelers').value = 1;
+    document.getElementById('purchaseModal').classList.add('active');
+}
+function closeModal() { document.getElementById('purchaseModal').classList.remove('active'); }
+
+// ── PRODUCT PAYMENT ───────────────────────────────────────────────────────────
+function processProductPayment(btn) {
+    const name = document.getElementById('buy_name').value.trim();
+    const email = document.getElementById('buy_email').value.trim();
+    const phone = document.getElementById('buy_phone').value.trim();
+    const travelers = parseInt(document.getElementById('buy_travelers').value) || 1;
+    const message = document.getElementById('buy_message').value.trim();
+
+    if (!name || !email || !phone) { toast('Missing Fields', 'Please fill all required fields.', 'error'); return; }
+    if (!validateEmail(email)) { toast('Invalid Email', 'Please enter a valid email address.', 'error'); return; }
+
+    pendingFormData = { buyer_name: name, buyer_email: email, buyer_phone: phone, travelers, message };
+    closeModal();
+
+    const rzp = new Razorpay({
+        key: RAZORPAY_KEY,
+        amount: Math.round(currentProduct.price * 100),
+        currency: "INR",
+        name: "Wanderlust Travel",
+        description: currentProduct.title,
+        image: currentProduct.imgUrl || '',
+        prefill: { name, email, contact: phone },
+        theme: { color: '#2d4a3e' },
+        handler: handleProductSuccess,
+        modal: { ondismiss: () => { pendingFormData = null; } }
+    });
+    rzp.open();
+}
+
+async function handleProductSuccess(response) {
+    const paymentId = response.razorpay_payment_id;
+    if (!pendingFormData) return;
+
+    const { error } = await sb.from('product_orders').insert([{
+        product_id: currentProduct.id,
+        product_name: currentProduct.title,
+        product_price: currentProduct.price,
+        buyer_name: pendingFormData.buyer_name,
+        buyer_email: pendingFormData.buyer_email,
+        buyer_phone: pendingFormData.buyer_phone,
+        travelers: pendingFormData.travelers,
+        message: pendingFormData.message,
+        payment_status: 'Paid',
+        payment_id: paymentId,
+        payment_amount: currentProduct.price,
+        payment_date: new Date().toISOString()
+    }]);
+
+    if (error) { toast('DB Error', error.message, 'error'); return; }
+
+    toast('Payment Successful', `Payment ID: ${paymentId}`);
+
+    // Download PDF immediately
+    if (currentProduct.pdfUrl && currentProduct.pdfUrl !== 'null' && currentProduct.pdfUrl !== '') {
+        downloadFile(currentProduct.pdfUrl, currentProduct.title);
+    } else {
+        generateReceiptPDF(pendingFormData.buyer_name, currentProduct.title, currentProduct.price, paymentId);
+    }
+
+    // Send email with PDF link
+    await sendEmailNotification(
+        pendingFormData.buyer_email, pendingFormData.buyer_name,
+        currentProduct.title, currentProduct.price, paymentId,
+        currentProduct.pdfUrl
+    );
+
+    pendingFormData = null;
+}
+
+// ── ITINERARY PAYMENT ─────────────────────────────────────────────────────────
+function processItineraryPayment(btn) {
+    const name = document.getElementById('itin_name').value.trim();
+    const email = document.getElementById('itin_email').value.trim();
+    const phone = document.getElementById('itin_phone').value.trim();
+    const trip = document.getElementById('itin_trip').value;
+    const dest = document.getElementById('itin_dest').value.trim();
+    const days = document.getElementById('itin_days').value;
+    const people = document.getElementById('itin_people').value;
+    const budget = document.getElementById('itin_budget').value;
+    const dates = document.getElementById('itin_dates').value.trim();
+    const style = document.getElementById('itin_style').value;
+    const food = document.getElementById('itin_food').value;
+    const kids = document.getElementById('itin_kids').value;
+    const special = document.getElementById('itin_special').value.trim();
+
+    if (!name || !email || !phone || !trip || !dest || !days || !people) {
+        toast('Missing Fields', 'Please fill all required fields.', 'error'); return;
+    }
+    if (!validateEmail(email)) { toast('Invalid Email', 'Please enter a valid email.', 'error'); return; }
+
+    pendingFormData = {
+        full_name: name, email, phone, trip_type: trip, destination: dest,
+        days: parseInt(days), people: parseInt(people),
+        budget: budget ? parseFloat(budget) : null,
+        travel_dates: dates, travel_style: style,
+        food_preference: food, kids_travelling: kids, special_requirements: special
+    };
+
+    const rzp = new Razorpay({
+        key: RAZORPAY_KEY,
+        amount: 100,
+        currency: "INR",
+        name: "Wanderlust Travel",
+        description: "Custom Itinerary Request",
+        prefill: { name, email, contact: phone },
+        theme: { color: '#2d4a3e' },
+        handler: handleItinerarySuccess,
+        modal: { ondismiss: () => { pendingFormData = null; } }
+    });
+    rzp.open();
+}
+
+async function handleItinerarySuccess(response) {
+    const paymentId = response.razorpay_payment_id;
+    if (!pendingFormData) return;
+
+    const { error } = await sb.from('itinerary_requests').insert([{
+        ...pendingFormData,
+        payment_status: 'Paid',
+        payment_id: paymentId,
+        payment_amount: 1,
+        payment_date: new Date().toISOString()
+    }]);
+
+    if (error) { toast('Error', error.message, 'error'); return; }
+
+    toast('Itinerary Requested', 'Our team will contact you within 24 hours!');
+
+    // Generate and download itinerary confirmation PDF
+    generateItineraryPDF(pendingFormData, paymentId);
+
+    // Send email
+    await sendItineraryEmail(pendingFormData.email, pendingFormData.full_name, paymentId, pendingFormData);
+
+    clearItineraryForm();
+    pendingFormData = null;
+}
+
+// ── PDF GENERATION ────────────────────────────────────────────────────────────
+function generateReceiptPDF(name, product, amount, paymentId) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Header block
+    doc.setFillColor(45, 74, 62);
+    doc.rect(0, 0, 210, 45, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(22);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Wanderlust Travel', 20, 20);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Payment Confirmation', 20, 30);
+    doc.text(`Date: ${new Date().toLocaleDateString('en-IN')}`, 20, 38);
+
+    // Body
+    doc.setTextColor(28, 28, 30);
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Dear ' + name + ',', 20, 60);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Thank you for your purchase. Your payment has been confirmed.', 20, 70);
+
+    // Detail box
+    doc.setFillColor(240, 235, 224);
+    doc.roundedRect(20, 80, 170, 70, 4, 4, 'F');
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.text('PURCHASE DETAILS', 30, 93);
+    doc.setDrawColor(196, 98, 45);
+    doc.line(30, 95, 180, 95);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.text(`Product:`, 30, 105);
+    doc.text(product, 80, 105);
+    doc.text(`Amount Paid:`, 30, 115);
+    doc.text(`INR ${parseFloat(amount).toFixed(2)}`, 80, 115);
+    doc.text(`Payment ID:`, 30, 125);
+    doc.text(paymentId, 80, 125);
+    doc.text(`Status:`, 30, 135);
+    doc.setTextColor(45, 122, 79);
+    doc.text('CONFIRMED', 80, 135);
+    doc.setTextColor(28, 28, 30);
+
+    doc.setFontSize(10);
+    doc.text('Our team will be in touch shortly with further details.', 20, 165);
+    doc.text('For support: hello@wanderlust.in', 20, 175);
+
+    // Footer
+    doc.setFillColor(240, 235, 224);
+    doc.rect(0, 275, 210, 22, 'F');
+    doc.setFontSize(9);
+    doc.setTextColor(90, 90, 90);
+    doc.text('Wanderlust Travel  |  Mumbai, India  |  hello@wanderlust.in', 105, 285, { align: 'center' });
+
+    doc.save(`Receipt_${name.replace(/\s/g,'_')}_${paymentId}.pdf`);
+}
+
+function generateItineraryPDF(data, paymentId) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    doc.setFillColor(45, 74, 62);
+    doc.rect(0, 0, 210, 45, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(22);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Wanderlust Travel', 20, 20);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Itinerary Request Confirmation', 20, 30);
+    doc.text(`Date: ${new Date().toLocaleDateString('en-IN')}`, 20, 38);
+
+    doc.setTextColor(28, 28, 30);
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Dear ' + data.full_name + ',', 20, 60);
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Your custom itinerary request has been received and payment confirmed!', 20, 70);
+    doc.text('Our experts will prepare your personalized plan within 24 hours.', 20, 78);
+
+    doc.setFillColor(240, 235, 224);
+    doc.roundedRect(20, 88, 170, 110, 4, 4, 'F');
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.text('ITINERARY DETAILS', 30, 100);
+    doc.setDrawColor(196, 98, 45);
+    doc.line(30, 102, 180, 102);
+    doc.setFont('helvetica', 'normal');
+
+    const fields = [
+        ['Destination', data.destination],
+        ['Trip Type', data.trip_type],
+        ['Duration', `${data.days} Days`],
+        ['Travelers', `${data.people} People`],
+        ['Travel Style', data.travel_style || 'Not specified'],
+        ['Food Preference', data.food_preference],
+        ['Budget (per person)', data.budget ? `INR ${data.budget}` : 'Not specified'],
+        ['Payment ID', paymentId],
+    ];
+    fields.forEach(([k, v], i) => {
+        doc.text(k + ':', 30, 112 + i * 10);
+        doc.text(v || '-', 90, 112 + i * 10);
+    });
+
+    doc.setFontSize(10);
+    doc.text('Questions? Reply to the confirmation email or contact us:', 20, 215);
+    doc.setTextColor(196, 98, 45);
+    doc.text('hello@wanderlust.in', 20, 223);
+
+    doc.setFillColor(240, 235, 224);
+    doc.rect(0, 275, 210, 22, 'F');
+    doc.setFontSize(9);
+    doc.setTextColor(90, 90, 90);
+    doc.text('Wanderlust Travel  |  Mumbai, India  |  hello@wanderlust.in', 105, 285, { align: 'center' });
+
+    doc.save(`Itinerary_${data.full_name.replace(/\s/g,'_')}_${paymentId}.pdf`);
+}
+
+function downloadFile(url, title) {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${title.replace(/[^a-z0-9]/gi,'_')}.pdf`;
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
+
+// ── EMAIL ─────────────────────────────────────────────────────────────────────
+async function sendEmailNotification(email, name, product, amount, paymentId, pdfUrl) {
+    const html = `<div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;border:1px solid #e0d9ce;border-radius:12px;overflow:hidden"><div style="background:#2d4a3e;padding:24px;color:#fff;text-align:center"><h2 style="margin:0;font-family:Georgia,serif">Payment Confirmed</h2></div><div style="padding:24px"><p>Dear <strong>${esc(name)}</strong>,</p><p>Your purchase of <strong>${esc(product)}</strong> is confirmed.</p><table style="width:100%;border-collapse:collapse;margin:16px 0"><tr><td style="padding:8px;border:1px solid #e0d9ce;background:#faf7f2"><strong>Amount</strong></td><td style="padding:8px;border:1px solid #e0d9ce">₹${amount}</td></tr><tr><td style="padding:8px;border:1px solid #e0d9ce;background:#faf7f2"><strong>Payment ID</strong></td><td style="padding:8px;border:1px solid #e0d9ce">${paymentId}</td></tr><tr><td style="padding:8px;border:1px solid #e0d9ce;background:#faf7f2"><strong>Status</strong></td><td style="padding:8px;border:1px solid #e0d9ce;color:#2d7a4f"><strong>Paid</strong></td></tr></table>${pdfUrl && pdfUrl !== 'null' ? `<p><a href="${pdfUrl}" style="display:inline-block;background:#c4622d;color:#fff;padding:10px 20px;text-decoration:none;border-radius:8px">Download Your PDF</a></p>` : ''}<p>Your PDF receipt has also been downloaded to your device.</p></div><div style="background:#f0ebe0;padding:12px;text-align:center;font-size:12px;color:#666">Wanderlust Travel — hello@wanderlust.in</div></div>`;
+    try {
+        await emailjs.send("service_8o8nozh", "template_xui60z6", { name, email, message: html });
+    } catch (e) { console.error('Email error:', e); }
+}
+
+async function sendItineraryEmail(email, name, paymentId, data) {
+    const html = `<div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;border:1px solid #e0d9ce;border-radius:12px;overflow:hidden"><div style="background:#2d4a3e;padding:24px;color:#fff;text-align:center"><h2 style="margin:0;font-family:Georgia,serif">Itinerary Request Received</h2></div><div style="padding:24px"><p>Dear <strong>${esc(name)}</strong>,</p><p>Thank you for submitting your itinerary request. Payment confirmed!</p><table style="width:100%;border-collapse:collapse;margin:16px 0"><tr><td style="padding:8px;border:1px solid #e0d9ce;background:#faf7f2"><strong>Destination</strong></td><td style="padding:8px;border:1px solid #e0d9ce">${esc(data.destination)}</td></tr><tr><td style="padding:8px;border:1px solid #e0d9ce;background:#faf7f2"><strong>Duration</strong></td><td style="padding:8px;border:1px solid #e0d9ce">${data.days} days</td></tr><tr><td style="padding:8px;border:1px solid #e0d9ce;background:#faf7f2"><strong>Travelers</strong></td><td style="padding:8px;border:1px solid #e0d9ce">${data.people} people</td></tr><tr><td style="padding:8px;border:1px solid #e0d9ce;background:#faf7f2"><strong>Payment ID</strong></td><td style="padding:8px;border:1px solid #e0d9ce">${paymentId}</td></tr></table><p>Our travel experts will prepare your personalized itinerary and contact you <strong>within 24 hours</strong>.</p><p>A confirmation PDF has been downloaded to your device.</p></div><div style="background:#f0ebe0;padding:12px;text-align:center;font-size:12px;color:#666">Wanderlust Travel — hello@wanderlust.in</div></div>`;
+    try {
+        await emailjs.send("service_8o8nozh", "template_xui60z6", { name, email, message: html });
+    } catch (e) { console.error('Email error:', e); }
+}
+
+// ── CONTACT ───────────────────────────────────────────────────────────────────
+async function submitContact(btn) {
+    const name = document.getElementById('con_name').value.trim();
+    const email = document.getElementById('con_email').value.trim();
+    const phone = document.getElementById('con_phone').value.trim();
+    const message = document.getElementById('con_message').value.trim();
+
+    if (!name || !email || !phone) { toast('Missing Fields', 'Please fill all required fields.', 'error'); return; }
+    if (!validateEmail(email)) { toast('Invalid Email', 'Please enter a valid email address.', 'error'); return; }
+
+    btn.disabled = true; btn.textContent = 'Sending...';
+    const { error } = await sb.from('contact_messages').insert([{ name, email, contact: phone, message }]);
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg> Send Message`;
+
+    if (error) { toast('Error', error.message, 'error'); return; }
+    toast('Message Sent', "We'll get back to you shortly!");
+    ['con_name','con_email','con_phone','con_message'].forEach(id => document.getElementById(id).value = '');
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function esc(t) {
+    if (!t) return '';
+    const d = document.createElement('div');
+    d.textContent = t;
+    return d.innerHTML;
+}
+
+function validateEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+
+function clearItineraryForm() {
+    ['itin_name','itin_email','itin_phone','itin_dest','itin_days','itin_people','itin_budget','itin_dates','itin_special']
+        .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    ['itin_trip','itin_style'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    document.getElementById('itin_food').value = 'No Preference';
+    document.getElementById('itin_kids').value = 'No children';
+}
+
+function toggleMenu() {
+    document.getElementById('mobileNav').classList.toggle('active');
+}
+
+// Close modal on overlay click
+document.getElementById('purchaseModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadReviews();
+    loadProducts();
+    buildFAQ();
+});
+</script>
 </body>
 </html>
