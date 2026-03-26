@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adventure Travel Booking</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <h1 class="logo">ADVENTURE</h1>
+        <ul class="nav-links">
+            <li><a href="#" style="color: red;">Home</a></li>
+            <li><a href="#">Tours</a></li>
+            <li><a href="#">Explore</a></li>
+            <li><a href="#">About</a></li>
+            <li><a href="#" class="ctn">Contact</a></li>
+        </ul>
+        <img src="menu.png" alt="Menu" class="menu-btn">
+    </nav>
+    
+    <header>
+        <div class="header-content">
+            <h2>Explore the colorful world!</h2>
+            <div class="line"></div>
+            <h1>A WONDERFUL GIFT</h1>
+            <a href="#" class="ctn">Learn More</a>
+        </div>
+    </header>
+
+    <section class="events">
+        <div class="title">
+            <h1>Upcoming Events</h1>
+            <div class="line"></div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <img src="mouteverest.png" alt="Everest Base Camp" class="imgs">
+                <h1>Everest Camp Trek</h1>
+                <p>Experience the adventure of a lifetime with our guided trek to Everest Base Camp. Journey through breathtaking landscapes and immerse yourself in local Sherpa culture.</p>
+                <a href="#" class="ctn">Learn more</a>
+            </div>
+            <div class="col">
+                <img src="jeju.png" alt="Himalayan Mountains" class="imgs">
+                <h1>Jeju Island</h1>
+                <p>Discover the majestic beauty of the Himalayas on this unforgettable trekking experience. Perfect for adventurers looking for stunning views and cultural encounters.</p>
+                <a href="#" class="ctn">Learn more</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="explore">
+        <div class="explore-content">
+            <h1>EXPLORE THE WORLD</h1>
+            <div class="line"></div>
+            <p>Join us on an unforgettable journey to discover the most breathtaking destinations on Earth. From tropical beaches to mountain peaks, we have adventures for every type of traveler.</p>
+            <a href="#" class="ctn">Learn More</a>
+        </div>    
+    </section>
+
+    <section class="tours">
+        <div class="row">
+            <div class="col content-col">
+                <h1>UPCOMING TOURS & DESTINATIONS</h1>
+                <p>Check out our exciting lineup of tours for the coming season. Whether you're looking for a relaxing getaway or an extreme adventure, we have the perfect trip for you.</p>
+                <a href="#" class="ctn">Learn more</a>
+            </div>
+            <div class="col image-col">
+                <div class="img-gallery">
+                    <img src="beach_vacation.png" alt="Beach vacation">
+                    <img src="hiking.png" alt="Mountain hiking">
+                    <img src="cultural_tour.png" alt="Cultural tour">
+                    <img src="safari.png" alt="Safari adventure">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>Adventure Travel Agency | 123 Adventure Lane, Mountain View, CA 94041</p>
+        <p>Phone: (123) 456-7890 | Email: info@adventure.com</p>
+        <p>© 2025 Adventure Travel. All rights reserved.</p>
+    </footer>
+
+    <script>
+        const menuBtn = document.querySelector('.menu-btn');
+        const navLinks = document.querySelector('.nav-links');
+
+        menuBtn.addEventListener('click', () => {
+            navLinks.classList.toggle('mobile-menu');
+        });
+    </script>
+</body>
+</html>
