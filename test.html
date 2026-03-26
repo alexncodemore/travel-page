@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Package - Buy & Download Itinerary</title>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>Travel Package: Kerala Backwaters</h1>
+    <p>Price: ₹2,499 per person</p>
+    <p>Complete the form below, make payment, and instantly download your detailed itinerary PDF.</p>
+
+    <hr>
+
+    <div id="formContainer">
+        <div>
+            <label>Full Name *</label><br>
+            <input type="text" id="fullName" placeholder="Enter your full name">
+            <span id="nameError" style="color:red; font-size:12px; display:none;">Name required (min 2 chars)</span>
+        </div>
+        <br>
+
+        <div>
+            <label>Email *</label><br>
+            <input type="email" id="email" placeholder="you@example.com">
+            <span id="emailError" style="color:red; font-size:12px; display:none;">Valid email required</span>
+        </div>
+        <br>
+
+        <div>
+            <label>Phone *</label><br>
+            <input type="tel" id="phone" placeholder="+91 9876543210">
+            <span id="phoneError" style="color:red; font-size:12px; display:none;">Valid phone number required</span>
+        </div>
+        <br>
+
+        <div>
+            <label>Number of Travelers *</label><br>
+            <input type="number" id="travelers" min="1" value="1">
+            <span id="travelersError" style="color:red; font-size:12px; display:none;">At least 1 traveler required</span>
+        </div>
+        <br>
+
+        <button id="payBtn" style="padding:10px 20px; background:#007bff; color:white; border:none; cursor:pointer;">Pay ₹2,499 & Download Itinerary</button>
+    </div>
+
+    <div id="status" style="margin-top:20px; padding:10px; display:none;"></div>
+
+    <script>
+        // Supabase configuration (replace with your actual credentials)
+        const supabaseUrl = 'https://eyekpbzcdouhkquqjjae.supabase.co';
+        const supabaseKey = 'sb_publishable_hONe7ntkTZaGeyFsLV0iMQ_9aTXtOBE';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        // Razorpay key
+        const RAZORPAY_KEY = 'rzp_live_SV68ifsBjM5tPz';
+
+        // Product details
+        const PRODUCT = {
+            id: 1,
+            name: 'Kerala Backwaters Tour',
+            price: 2499,
+            pdfUrl: 'https://eyekpbzcdouhkquqjjae.supabase.co/storage/v1/object/public/travel-pdfs/kerala_itinerary.pdf' // Replace with your actual PDF URL
+        };
+
+        let paymentInProgress = false;
+
+        // Validation functions
+        function validateName(name) {
+            return name && name.trim().length >= 2;
+        }
+
+        function validateEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        function validatePhone(phone) {
+            return /^[+]?[\d\s\-()]{10,15}$/.test(phone) && /\d{10,}/.test(phone);
+        }
+
+        function validateTravelers(count) {
+            const num = parseInt(count);
+            return !isNaN(num) && num >= 1;
+        }
+
+        function validateForm() {
+            let isValid = true;
+
+            const name = document.getElementById('fullName').value;
+            if (!validateName(name)) {
+                document.getElementById('nameError').style.display = 'inline';
+                isValid = false;
+            } else {
+                document.getElementById('nameError').style.display = 'none';
+            }
+
+            const email = document.getElementById('email').value;
+            if (!validateEmail(email)) {
+                document.getElementById('emailError').style.display = 'inline';
+                isValid = false;
+            } else {
+                document.getElementById('emailError').style.display = 'none';
+            }
+
+            const phone = document.getElementById('phone').value;
+            if (!validatePhone(phone)) {
+                document.getElementById('phoneError').style.display = 'inline';
+                isValid = false;
+            } else {
+                document.getElementById('phoneError').style.display = 'none';
+            }
+
+            const travelers = document.getElementById('travelers').value;
+            if (!validateTravelers(travelers)) {
+                document.getElementById('travelersError').style.display = 'inline';
+                isValid = false;
+            } else {
+                document.getElementById('travelersError').style.display = 'none';
+            }
+
+            return isValid;
+        }
+
+        // Download PDF function
+        function downloadItinerary(pdfUrl, fileName) {
+            return new Promise((resolve, reject) => {
+                try {
+                    const a = document.createElement('a');
+                    a.href = pdfUrl;
+                    a.download = fileName || 'itinerary.pdf';
+                    a.target = '_blank';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    resolve();
+                } catch (error) {
+                    reject(error);
+                }
+            });
+        }
+
+        // Save order to Supabase
+        async function saveOrder(paymentId, formData) {
+            const { error } = await supabase.from('product_orders').insert([{
+                product_id: PRODUCT.id,
+                product_name: PRODUCT.name,
+                product_price: PRODUCT.price,
+                buyer_name: formData.name,
+                buyer_email: formData.email,
+                buyer_phone: formData.phone,
+                travelers: formData.travelers,
+                payment_status: 'Paid',
+                payment_id: paymentId,
+                payment_amount: PRODUCT.price,
+                payment_date: new Date().toISOString()
+            }]);
+
+            if (error) {
+                console.error('Failed to save order:', error);
+                throw error;
+            }
+        }
+
+        // Handle successful payment
+        async function handlePaymentSuccess(response, formData) {
+            const statusDiv = document.getElementById('status');
+            const payBtn = document.getElementById('payBtn');
+            
+            try {
+                // Step 1: Show processing status
+                statusDiv.style.display = 'block';
+                statusDiv.innerHTML = '✅ Payment successful! Downloading your itinerary...';
+                statusDiv.style.background = '#d4edda';
+                statusDiv.style.color = '#155724';
+                
+                // Step 2: Download itinerary PDF
+                await downloadItinerary(PRODUCT.pdfUrl, `${PRODUCT.name}_Itinerary.pdf`);
+                
+                // Step 3: Save order to database (optional - can be skipped if not needed)
+                try {
+                    await saveOrder(response.razorpay_payment_id, formData);
+                } catch (dbError) {
+                    console.warn('Order not saved to database:', dbError);
+                }
+                
+                // Step 4: Success message
+                statusDiv.innerHTML = '🎉 Download complete! Your itinerary has been saved. Check your downloads folder.';
+                
+                // Reset form
+                document.getElementById('fullName').value = '';
+                document.getElementById('email').value = '';
+                document.getElementById('phone').value = '';
+                document.getElementById('travelers').value = '1';
+                
+            } catch (error) {
+                console.error('Download failed:', error);
+                statusDiv.innerHTML = '❌ Payment successful but download failed. Please contact support.';
+                statusDiv.style.background = '#f8d7da';
+                statusDiv.style.color = '#721c24';
+            } finally {
+                paymentInProgress = false;
+                payBtn.disabled = false;
+                payBtn.textContent = 'Pay ₹2,499 & Download Itinerary';
+            }
+        }
+
+        // Initialize payment
+        function initiatePayment() {
+            if (paymentInProgress) {
+                alert('Payment already in progress. Please wait.');
+                return;
+            }
+
+            // Validate form first
+            if (!validateForm()) {
+                alert('Please fill all fields correctly before proceeding.');
+                return;
+            }
+
+            // Collect form data
+            const formData = {
+                name: document.getElementById('fullName').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                phone: document.getElementById('phone').value.trim(),
+                travelers: parseInt(document.getElementById('travelers').value)
+            };
+
+            paymentInProgress = true;
+            const payBtn = document.getElementById('payBtn');
+            payBtn.disabled = true;
+            payBtn.textContent = 'Processing...';
+
+            const statusDiv = document.getElementById('status');
+            statusDiv.style.display = 'block';
+            statusDiv.innerHTML = '⏳ Redirecting to payment gateway...';
+            statusDiv.style.background = '#cce5ff';
+            statusDiv.style.color = '#004085';
+
+            // Calculate amount in paise
+            const totalAmount = PRODUCT.price * formData.travelers;
+            const amountInPaise = Math.round(totalAmount * 100);
+
+            // Razorpay options
+            const options = {
+                key: RAZORPAY_KEY,
+                amount: amountInPaise,
+                currency: 'INR',
+                name: 'Travel Package',
+                description: `${PRODUCT.name} - ${formData.travelers} traveler(s)`,
+                prefill: {
+                    name: formData.name,
+                    email: formData.email,
+                    contact: formData.phone
+                },
+                theme: {
+                    color: '#007bff'
+                },
+                handler: function(response) {
+                    handlePaymentSuccess(response, formData);
+                },
+                modal: {
+                    ondismiss: function() {
+                        paymentInProgress = false;
+                        payBtn.disabled = false;
+                        payBtn.textContent = 'Pay ₹2,499 & Download Itinerary';
+                        statusDiv.style.display = 'none';
+                        alert('Payment cancelled.');
+                    }
+                }
+            };
+
+            const rzp = new Razorpay(options);
+            rzp.open();
+        }
+
+        // Attach event listener
+        document.getElementById('payBtn').addEventListener('click', initiatePayment);
+
+        // Real-time validation feedback
+        function setupRealTimeValidation() {
+            const nameInput = document.getElementById('fullName');
+            const emailInput = document.getElementById('email');
+            const phoneInput = document.getElementById('phone');
+            const travelersInput = document.getElementById('travelers');
+
+            nameInput.addEventListener('input', () => {
+                if (nameInput.value.trim().length >= 2) {
+                    document.getElementById('nameError').style.display = 'none';
+                } else if (nameInput.value.length > 0) {
+                    document.getElementById('nameError').style.display = 'inline';
+                }
+            });
+
+            emailInput.addEventListener('input', () => {
+                if (validateEmail(emailInput.value)) {
+                    document.getElementById('emailError').style.display = 'none';
+                } else if (emailInput.value.length > 0) {
+                    document.getElementById('emailError').style.display = 'inline';
+                }
+            });
+
+            phoneInput.addEventListener('input', () => {
+                if (validatePhone(phoneInput.value)) {
+                    document.getElementById('phoneError').style.display = 'none';
+                } else if (phoneInput.value.length > 0) {
+                    document.getElementById('phoneError').style.display = 'inline';
+                }
+            });
+
+            travelersInput.addEventListener('input', () => {
+                if (validateTravelers(travelersInput.value)) {
+                    document.getElementById('travelersError').style.display = 'none';
+                } else {
+                    document.getElementById('travelersError').style.display = 'inline';
+                }
+            });
+        }
+
+        setupRealTimeValidation();
+    </script>
+</body>
+</html>
