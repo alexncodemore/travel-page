@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wanderlust Travel — Discover India</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Wanderlust Travel — Secure Booking Flow</title>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
             --ink: #0d1117; --ink2: #1c2333;
             --sage: #2a4a3a; --sage2: #3a6b54;
@@ -20,1309 +20,476 @@
             --paper: #f8f5ef; --paper2: #eee9df;
             --stone: #c9c2b4; --mist: #8a8275;
             --white: #ffffff;
-            --success: #1e7a4a; --error: #c0392b;
-            --field-error: #fef0f0; --field-error-border: #e74c3c;
+            --error: #c0392b;
+            --success: #1e7a4a;
+            --border-light: #e2dbcf;
             --r8: 8px; --r12: 12px; --r16: 16px; --r24: 24px; --r999: 999px;
         }
-        html { scroll-behavior: smooth; }
-        body { font-family: 'Outfit', sans-serif; background: var(--paper); color: var(--ink); line-height: 1.6; }
-
-        /* ── NAV ── */
-        nav {
-            position: sticky; top: 0; z-index: 100;
-            background: rgba(248,245,239,0.92); backdrop-filter: blur(16px);
-            border-bottom: 1px solid var(--paper2);
-            padding: 0 5%; height: 68px;
-            display: flex; align-items: center; justify-content: space-between;
-        }
-        .nav-logo { font-family: 'Cormorant Garamond', serif; font-size: 1.7rem; font-weight: 700; color: var(--sage); text-decoration: none; letter-spacing: -0.01em; }
+        body { font-family: 'Outfit', sans-serif; background: var(--paper); color: var(--ink); line-height: 1.5; }
+        /* layout */
+        nav { position: sticky; top: 0; z-index: 100; background: rgba(248,245,239,0.94); backdrop-filter: blur(16px); border-bottom: 1px solid var(--paper2); padding: 0 5%; height: 68px; display: flex; align-items: center; justify-content: space-between; }
+        .nav-logo { font-family: 'Cormorant Garamond', serif; font-size: 1.7rem; font-weight: 700; color: var(--sage); text-decoration: none; }
         .nav-logo em { color: var(--rust); font-style: normal; }
-        .nav-links { display: flex; gap: 2.25rem; list-style: none; }
-        .nav-links a { text-decoration: none; color: var(--mist); font-size: 0.875rem; font-weight: 500; transition: color 0.2s; letter-spacing: 0.01em; }
+        .nav-links { display: flex; gap: 2rem; list-style: none; }
+        .nav-links a { text-decoration: none; color: var(--mist); font-weight: 500; transition: color 0.2s; font-size: 0.85rem; }
         .nav-links a:hover { color: var(--sage); }
-        .nav-cta { background: var(--sage); color: var(--white); padding: 0.55rem 1.5rem; border-radius: var(--r999); font-size: 0.875rem; font-weight: 600; text-decoration: none; transition: background 0.2s, transform 0.15s; }
-        .nav-cta:hover { background: var(--sage2); transform: translateY(-1px); }
-        .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; border: none; background: none; padding: 4px; }
-        .hamburger span { width: 24px; height: 2px; background: var(--ink); display: block; transition: 0.3s; }
+        .nav-cta { background: var(--sage); color: white; padding: 0.5rem 1.5rem; border-radius: var(--r999); font-weight: 600; text-decoration: none; transition: background 0.2s; }
+        .nav-cta:hover { background: var(--sage2); }
+        .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; }
+        .hamburger span { width: 24px; height: 2px; background: var(--ink); display: block; }
+        .mobile-nav { display: none; position: fixed; inset: 0; background: var(--paper); z-index: 200; padding: 5rem 2rem; flex-direction: column; gap: 1.5rem; }
+        .mobile-nav a { font-size: 1.2rem; color: var(--ink); text-decoration: none; font-weight: 500; }
+        @media (max-width: 768px) { .nav-links, .nav-cta { display: none; } .hamburger { display: flex; } }
 
-        /* ── HERO ── */
-        .hero { min-height: 92vh; position: relative; overflow: hidden; display: flex; align-items: center; background: var(--ink2); }
-        .hero-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 80% 60% at 70% 50%, rgba(42,74,58,0.6) 0%, transparent 70%), radial-gradient(ellipse 40% 40% at 20% 80%, rgba(196,80,42,0.15) 0%, transparent 60%), linear-gradient(160deg, #0d1117 0%, #1a2f22 50%, #0f1a14 100%); }
-        .hero-grain { position: absolute; inset: 0; opacity: 0.035; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
-        .hero-content { position: relative; z-index: 2; padding: 6rem 5% 4rem; max-width: 760px; }
-        .hero-chip { display: inline-flex; align-items: center; gap: 0.5rem; border: 1px solid rgba(212,168,67,0.35); color: var(--amber2); background: rgba(212,168,67,0.08); padding: 0.4rem 1rem; border-radius: var(--r999); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 1.75rem; }
-        .hero h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(3rem, 6vw, 5.5rem); font-weight: 700; line-height: 1.05; color: var(--white); margin-bottom: 1.5rem; letter-spacing: -0.02em; }
+        /* hero */
+        .hero { min-height: 88vh; background: linear-gradient(125deg, #0f1a14 0%, #1f2e26 100%); position: relative; display: flex; align-items: center; padding: 4rem 5%; }
+        .hero-content { max-width: 720px; position: relative; z-index: 2; }
+        .hero h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.8rem, 6vw, 5rem); color: white; line-height: 1.05; margin-bottom: 1.25rem; }
         .hero h1 em { color: var(--amber2); font-style: italic; }
-        .hero p { color: rgba(255,255,255,0.6); font-size: 1.05rem; line-height: 1.75; max-width: 520px; margin-bottom: 2.5rem; }
-        .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
-        .btn-hero-primary { display: inline-flex; align-items: center; gap: 0.5rem; background: var(--rust); color: var(--white); padding: 0.9rem 2.25rem; border-radius: var(--r999); font-weight: 600; font-size: 0.95rem; text-decoration: none; border: none; cursor: pointer; transition: background 0.2s, transform 0.15s; }
-        .btn-hero-primary:hover { background: var(--rust2); transform: translateY(-2px); }
-        .btn-hero-outline { display: inline-flex; align-items: center; gap: 0.5rem; border: 1.5px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.85); padding: 0.9rem 2.25rem; border-radius: var(--r999); font-weight: 600; font-size: 0.95rem; text-decoration: none; background: rgba(255,255,255,0.04); transition: all 0.2s; }
-        .btn-hero-outline:hover { border-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.08); }
-        .hero-stats { display: flex; gap: 3rem; margin-top: 4rem; padding-top: 2.5rem; border-top: 1px solid rgba(255,255,255,0.1); flex-wrap: wrap; }
-        .hero-stat strong { display: block; font-family: 'Cormorant Garamond', serif; font-size: 2.5rem; font-weight: 700; color: var(--amber2); line-height: 1; }
-        .hero-stat span { font-size: 0.78rem; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.2rem; display: block; }
-        #heroRating { display: none; }
+        .hero p { color: rgba(255,255,255,0.7); font-size: 1rem; margin-bottom: 2rem; max-width: 520px; }
+        .btn-primary { background: var(--rust); color: white; padding: 0.8rem 2rem; border-radius: var(--r999); font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; border: none; cursor: pointer; transition: 0.2s; }
+        .btn-primary:hover { background: var(--rust2); transform: translateY(-2px); }
 
-        /* ── SECTION ── */
-        .section { padding: 5.5rem 5%; }
+        /* products grid */
+        .section { padding: 5rem 5%; }
         .section-sand { background: var(--paper2); }
-        .section-dark { background: var(--ink2); }
-        .section-head { text-align: center; max-width: 580px; margin: 0 auto 4rem; }
-        .section-chip { display: inline-block; color: var(--rust); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 0.9rem; }
-        .section-head h2 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2rem, 3.5vw, 3rem); font-weight: 700; color: var(--ink); line-height: 1.15; margin-bottom: 0.9rem; letter-spacing: -0.02em; }
-        .section-dark .section-head h2 { color: var(--white); }
-        .section-dark .section-chip { color: var(--amber2); }
-        .section-head p { color: var(--mist); font-size: 1rem; line-height: 1.7; }
-        .section-dark .section-head p { color: rgba(255,255,255,0.5); }
-
-        /* ── PRODUCTS ── */
-        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.75rem; }
-        .product-card { background: var(--white); border: 1px solid var(--paper2); border-radius: var(--r16); overflow: hidden; transition: box-shadow 0.25s, transform 0.25s; }
-        .product-card:hover { box-shadow: 0 16px 48px rgba(13,17,23,0.12); transform: translateY(-3px); }
-        .product-img-wrap { position: relative; height: 200px; background: var(--paper2); overflow: hidden; }
-        .product-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
-        .product-card:hover .product-img-wrap img { transform: scale(1.04); }
-        .product-img-placeholder { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--stone); }
-        .product-pdf-badge { position: absolute; top: 12px; right: 12px; background: rgba(13,17,23,0.75); color: var(--amber2); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em; padding: 0.25rem 0.6rem; border-radius: var(--r999); backdrop-filter: blur(6px); display: flex; align-items: center; gap: 0.3rem; }
+        .section-head { text-align: center; max-width: 580px; margin: 0 auto 3rem; }
+        .section-head h2 { font-family: 'Cormorant Garamond', serif; font-size: 2.4rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 2rem; }
+        .product-card { background: white; border-radius: var(--r16); overflow: hidden; border: 1px solid var(--paper2); transition: 0.2s; cursor: pointer; }
+        .product-card:hover { transform: translateY(-4px); box-shadow: 0 20px 35px -12px rgba(0,0,0,0.12); }
+        .product-img { height: 190px; background: #e4ded2; background-size: cover; background-position: center; position: relative; }
+        .product-badge { position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.65); backdrop-filter: blur(4px); color: var(--amber2); font-size: 0.7rem; padding: 0.2rem 0.7rem; border-radius: 30px; font-weight: 600; }
         .product-body { padding: 1.5rem; }
-        .product-body h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.35rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.01em; }
-        .product-body p { color: var(--mist); font-size: 0.875rem; line-height: 1.6; margin-bottom: 1.25rem; }
-        .product-footer { display: flex; align-items: center; justify-content: space-between; }
-        .product-price { font-size: 1.5rem; font-weight: 700; color: var(--sage); font-family: 'Cormorant Garamond', serif; line-height: 1; }
-        .product-price small { font-size: 0.72rem; color: var(--mist); font-weight: 400; font-family: 'Outfit', sans-serif; display: block; margin-top: 2px; }
-        .btn-buy { background: var(--sage); color: var(--white); padding: 0.6rem 1.4rem; border-radius: var(--r999); font-size: 0.875rem; font-weight: 600; border: none; cursor: pointer; transition: background 0.2s; font-family: 'Outfit', sans-serif; }
-        .btn-buy:hover { background: var(--sage2); }
+        .product-body h3 { font-size: 1.3rem; font-weight: 600; margin-bottom: 0.4rem; }
+        .product-price { font-size: 1.6rem; font-weight: 700; color: var(--sage); font-family: 'Cormorant Garamond', serif; }
+        .btn-buy-now { background: var(--sage); color: white; border: none; padding: 0.6rem 1.3rem; border-radius: var(--r999); font-weight: 600; cursor: pointer; width: 100%; margin-top: 1rem; transition: 0.2s; }
+        .btn-buy-now:hover { background: var(--sage2); }
 
-        /* ── RATING BANNER ── */
-        .rating-banner { background: linear-gradient(135deg, var(--sage) 0%, var(--sage2) 100%); border-radius: var(--r16); padding: 2.25rem 2.5rem; display: flex; align-items: center; gap: 2.5rem; flex-wrap: wrap; margin-bottom: 3.5rem; }
-        .rating-big { text-align: center; min-width: 100px; }
-        .rating-big .num { font-family: 'Cormorant Garamond', serif; font-size: 4rem; font-weight: 700; color: var(--white); line-height: 1; }
-        .rating-big .stars-row { color: var(--amber2); font-size: 1.1rem; margin: 0.3rem 0; letter-spacing: 0.05em; }
-        .rating-big .count { color: rgba(255,255,255,0.5); font-size: 0.82rem; }
-        .rating-divider { width: 1px; height: 70px; background: rgba(255,255,255,0.15); }
-        .rating-bars { flex: 1; min-width: 200px; }
-        .rating-bar-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; }
-        .rating-bar-label { color: rgba(255,255,255,0.6); font-size: 0.78rem; width: 28px; text-align: right; }
-        .rating-bar-track { flex: 1; height: 6px; background: rgba(255,255,255,0.12); border-radius: 3px; overflow: hidden; }
-        .rating-bar-fill { height: 100%; background: var(--amber2); border-radius: 3px; transition: width 0.9s cubic-bezier(0.4,0,0.2,1); }
-        .rating-bar-count { color: rgba(255,255,255,0.45); font-size: 0.73rem; width: 22px; }
-
-        /* ── REVIEW CARDS ── */
-        .reviews-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 1.25rem; }
-        .review-card { background: var(--white); border: 1px solid var(--paper2); border-radius: var(--r12); padding: 1.5rem; transition: box-shadow 0.2s; }
-        .review-card:hover { box-shadow: 0 8px 28px rgba(13,17,23,0.08); }
-        .review-top { display: flex; align-items: center; gap: 0.85rem; margin-bottom: 1rem; }
-        .review-avatar { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, var(--rust), var(--amber)); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.95rem; flex-shrink: 0; font-family: 'Cormorant Garamond', serif; }
-        .review-info strong { display: block; font-size: 0.9rem; font-weight: 600; }
-        .review-info span { color: var(--mist); font-size: 0.78rem; }
-        .review-stars { color: var(--amber); font-size: 0.88rem; margin-bottom: 0.6rem; letter-spacing: 0.05em; }
-        .review-text { color: var(--mist); font-size: 0.875rem; line-height: 1.65; }
-        .review-date { color: var(--stone); font-size: 0.73rem; margin-top: 0.85rem; }
-
-        /* ── FORMS + VALIDATION ── */
-        .form-card { background: var(--white); border: 1px solid var(--paper2); border-radius: var(--r24); padding: 2.5rem; max-width: 700px; margin: 0 auto; }
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-        .form-group { margin-bottom: 1rem; }
-        .form-group.full { grid-column: 1 / -1; }
-        label { display: block; font-size: 0.72rem; font-weight: 600; color: var(--ink); margin-bottom: 0.4rem; letter-spacing: 0.06em; text-transform: uppercase; }
-        input, textarea, select { width: 100%; padding: 0.75rem 1rem; border: 1.5px solid var(--paper2); border-radius: var(--r8); font-family: 'Outfit', sans-serif; font-size: 0.9rem; color: var(--ink); background: var(--paper); outline: none; transition: border-color 0.2s, box-shadow 0.2s, background 0.2s; }
-        input:focus, textarea:focus, select:focus { border-color: var(--sage); box-shadow: 0 0 0 3px rgba(42,74,58,0.1); }
-        textarea { resize: vertical; min-height: 100px; }
-
-        /* Field validation states */
-        .field-wrap { position: relative; }
-        .field-err-msg { display: none; font-size: 0.72rem; color: var(--error); margin-top: 0.3rem; font-weight: 500; }
-        .form-group.has-error input,
-        .form-group.has-error textarea,
-        .form-group.has-error select { border-color: var(--field-error-border); background: var(--field-error); box-shadow: 0 0 0 3px rgba(231,76,60,0.08); }
-        .form-group.has-error .field-err-msg { display: block; }
-        .form-group.is-valid input,
-        .form-group.is-valid textarea,
-        .form-group.is-valid select { border-color: #4caf7d; }
-
-        .btn-submit { width: 100%; padding: 0.95rem; border-radius: var(--r8); background: var(--rust); color: var(--white); font-size: 0.95rem; font-weight: 600; font-family: 'Outfit', sans-serif; border: none; cursor: pointer; transition: background 0.2s, opacity 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
-        .btn-submit:hover:not(:disabled) { background: var(--rust2); }
-        .btn-submit:disabled { opacity: 0.55; cursor: not-allowed; }
-        .btn-pay { width: 100%; padding: 0.95rem; border-radius: var(--r8); background: var(--sage); color: var(--white); font-size: 0.95rem; font-weight: 600; font-family: 'Outfit', sans-serif; border: none; cursor: pointer; transition: background 0.2s, opacity 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.5rem; position: relative; }
-        .btn-pay:hover:not(:disabled) { background: var(--sage2); }
-        .btn-pay:disabled { opacity: 0.55; cursor: not-allowed; }
-
-        /* Pay button lock indicator */
-        .btn-pay-lock { display: flex; align-items: center; gap: 0.5rem; }
-        .lock-icon { opacity: 0.7; }
-
-        /* ── ITINERARY SECTION ── */
-        .section-dark .form-card { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.1); }
-        .section-dark label { color: rgba(255,255,255,0.75); }
-        .section-dark input, .section-dark textarea, .section-dark select { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.12); color: var(--white); }
-        .section-dark input::placeholder, .section-dark textarea::placeholder { color: rgba(255,255,255,0.3); }
-        .section-dark select option { background: var(--ink2); color: var(--white); }
-        .section-dark input:focus, .section-dark textarea:focus, .section-dark select:focus { border-color: var(--amber2); box-shadow: 0 0 0 3px rgba(212,168,67,0.15); }
-        .section-dark .form-group.has-error input,
-        .section-dark .form-group.has-error textarea,
-        .section-dark .form-group.has-error select { border-color: #ff6b6b; background: rgba(255,107,107,0.08); }
-        .section-dark .field-err-msg { color: #ff8a80; }
-        .section-dark .form-group.is-valid input,
-        .section-dark .form-group.is-valid select { border-color: #4caf7d; }
-        .price-pill { display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(212,168,67,0.12); border: 1px solid rgba(212,168,67,0.3); color: var(--amber2); padding: 0.5rem 1.1rem; border-radius: var(--r999); font-size: 0.82rem; font-weight: 600; margin-bottom: 1.75rem; }
-
-        /* ── VALIDATION SUMMARY (shows above pay button) ── */
-        .validation-hint { display: none; background: rgba(231,76,60,0.08); border: 1px solid rgba(231,76,60,0.25); border-radius: var(--r8); padding: 0.75rem 1rem; margin-bottom: 1rem; color: var(--error); font-size: 0.82rem; }
-        .section-dark .validation-hint { background: rgba(255,107,107,0.08); border-color: rgba(255,107,107,0.25); color: #ff8a80; }
-        .validation-hint.visible { display: flex; align-items: center; gap: 0.5rem; }
-
-        /* ── DOWNLOAD PROGRESS ── */
-        .download-status { display: none; position: fixed; bottom: 6rem; right: 2rem; z-index: 998; background: var(--ink2); color: var(--white); border-radius: var(--r12); padding: 1rem 1.25rem; min-width: 280px; box-shadow: 0 8px 32px rgba(13,17,23,0.3); }
-        .download-status.active { display: block; animation: toastIn 0.3s ease; }
-        .dl-step { display: flex; align-items: center; gap: 0.6rem; font-size: 0.82rem; padding: 0.3rem 0; color: rgba(255,255,255,0.5); transition: color 0.3s; }
-        .dl-step.active { color: var(--amber2); }
-        .dl-step.done { color: #4caf7d; }
-        .dl-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
-        .dl-step.active .dl-dot { animation: pulse 1s infinite; }
-        @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.75)} }
-
-        /* ── FAQ ── */
-        .faq-list { max-width: 740px; margin: 0 auto; }
-        .faq-item { background: var(--white); border: 1px solid var(--paper2); border-radius: var(--r12); margin-bottom: 0.75rem; overflow: hidden; }
-        .faq-question { width: 100%; padding: 1.1rem 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; background: none; border: none; cursor: pointer; text-align: left; font-family: 'Outfit', sans-serif; font-size: 0.95rem; font-weight: 500; color: var(--ink); transition: background 0.15s; }
-        .faq-question:hover { background: var(--paper); }
-        .faq-question svg { flex-shrink: 0; color: var(--rust); transition: transform 0.25s; }
-        .faq-item.open .faq-question svg { transform: rotate(45deg); }
-        .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s; padding: 0 1.5rem; color: var(--mist); font-size: 0.9rem; line-height: 1.75; }
-        .faq-item.open .faq-answer { max-height: 300px; padding: 0 1.5rem 1.25rem; }
-
-        /* ── CONTACT ── */
-        .contact-grid { display: grid; grid-template-columns: 1fr 1.6fr; gap: 3.5rem; align-items: start; max-width: 980px; margin: 0 auto; }
-        .contact-info h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; margin-bottom: 0.85rem; font-weight: 700; }
-        .contact-info p { color: var(--mist); font-size: 0.9rem; line-height: 1.75; margin-bottom: 1.75rem; }
-        .contact-detail { display: flex; align-items: flex-start; gap: 0.85rem; margin-bottom: 1rem; }
-        .contact-icon { width: 40px; height: 40px; border-radius: var(--r8); background: var(--paper2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--rust); }
-        .contact-detail strong { display: block; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink); margin-bottom: 0.15rem; }
-        .contact-detail span { font-size: 0.875rem; color: var(--mist); }
-
-        /* ── MODAL ── */
-        .modal-overlay { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(13,17,23,0.65); backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 1rem; }
+        /* modal + forms */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(13,17,23,0.7); backdrop-filter: blur(5px); z-index: 300; align-items: center; justify-content: center; padding: 1rem; }
         .modal-overlay.active { display: flex; }
-        .modal-box { background: var(--white); border-radius: var(--r24); width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; padding: 2rem; animation: slideUp 0.25s ease; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
-        .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
-        .modal-header h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 700; }
-        .modal-close { width: 34px; height: 34px; border-radius: 50%; background: var(--paper2); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--mist); transition: background 0.15s; }
-        .modal-close:hover { background: var(--stone); }
-        .modal-product-info { background: var(--paper); border-radius: var(--r12); padding: 1rem 1.25rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 1rem; }
-        .modal-product-info img { width: 64px; height: 64px; border-radius: var(--r8); object-fit: cover; }
-        .modal-product-info strong { display: block; font-size: 0.95rem; margin-bottom: 0.2rem; }
-        .modal-product-info .mprice { color: var(--sage); font-weight: 700; font-size: 1.2rem; font-family: 'Cormorant Garamond', serif; }
+        .modal-card { background: white; border-radius: var(--r24); width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; padding: 1.8rem; animation: fadeUp 0.25s ease; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
+        .modal-header h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; }
+        .close-modal { background: var(--paper2); border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; }
+        .product-preview { background: var(--paper); border-radius: var(--r12); padding: 1rem; display: flex; gap: 1rem; margin-bottom: 1.5rem; align-items: center; }
+        .product-preview img { width: 65px; height: 65px; object-fit: cover; border-radius: var(--r8); background: #ddd; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--mist); display: block; margin-bottom: 0.3rem; }
+        input, select, textarea { width: 100%; padding: 0.7rem 1rem; border: 1.5px solid var(--paper2); border-radius: var(--r8); background: var(--paper); font-family: 'Outfit', sans-serif; font-size: 0.9rem; outline: none; transition: 0.2s; }
+        input:focus, select:focus { border-color: var(--sage); box-shadow: 0 0 0 3px rgba(42,74,58,0.1); }
+        .field-error { border-color: var(--error) !important; background: #fff6f5; }
+        .error-msg { color: var(--error); font-size: 0.7rem; margin-top: 0.2rem; display: none; }
+        .field-group.invalid .error-msg { display: block; }
+        .field-group.invalid input, .field-group.invalid select { border-color: var(--error); background: #fff6f5; }
+        .btn-pay { background: var(--rust); color: white; width: 100%; padding: 0.9rem; border: none; border-radius: var(--r12); font-weight: 700; font-size: 1rem; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.6rem; margin-top: 0.5rem; }
+        .btn-pay:disabled { opacity: 0.5; cursor: not-allowed; background: var(--mist); }
+        .validation-summary { background: #fee9e6; border-left: 4px solid var(--error); padding: 0.7rem 1rem; border-radius: var(--r8); margin-bottom: 1rem; font-size: 0.8rem; color: #b53b2a; display: none; }
+        .validation-summary.show { display: flex; align-items: center; gap: 0.5rem; }
 
-        /* ── TOAST ── */
-        .toast-container { position: fixed; bottom: 2rem; right: 2rem; z-index: 999; display: flex; flex-direction: column; gap: 0.5rem; }
-        .toast { min-width: 290px; padding: 1rem 1.25rem; border-radius: var(--r12); font-size: 0.875rem; display: flex; align-items: flex-start; gap: 0.75rem; animation: toastIn 0.3s ease; box-shadow: 0 8px 32px rgba(13,17,23,0.18); }
-        .toast-success { background: #f0faf4; border: 1px solid #9fd4b4; color: var(--success); }
-        .toast-error { background: #fff0f0; border: 1px solid #f5b7b1; color: var(--error); }
-        .toast strong { display: block; font-weight: 600; }
-        @keyframes toastIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        /* download progress toast */
+        .dl-toast { position: fixed; bottom: 2rem; right: 2rem; background: var(--ink2); color: white; border-radius: var(--r12); padding: 1rem 1.3rem; min-width: 260px; z-index: 400; box-shadow: 0 10px 25px rgba(0,0,0,0.2); display: none; flex-direction: column; gap: 0.6rem; }
+        .dl-toast.active { display: flex; }
+        .dl-step { display: flex; align-items: center; gap: 0.6rem; font-size: 0.8rem; color: #aaa; }
+        .dl-step.active { color: var(--amber2); font-weight: 500; }
+        .dl-step.done { color: #4caf7d; }
+        .dl-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
 
-        /* ── LOADING ── */
-        .loading-dots { display: flex; gap: 0.4rem; justify-content: center; padding: 2.5rem; }
-        .loading-dots span { width: 8px; height: 8px; border-radius: 50%; background: var(--stone); animation: ldots 1.2s infinite; }
-        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
-        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes ldots { 0%,80%,100%{transform:translateY(0);background:var(--stone)} 40%{transform:translateY(-7px);background:var(--rust)} }
-        .empty-msg { text-align: center; padding: 3rem; color: var(--mist); font-size: 0.9rem; grid-column: 1/-1; }
-
-        /* ── FOOTER ── */
-        footer { background: var(--ink); color: rgba(255,255,255,0.4); padding: 2.25rem 5%; text-align: center; font-size: 0.82rem; }
-        footer .footer-logo { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; color: rgba(255,255,255,0.7); margin-bottom: 0.5rem; }
-        footer .footer-logo em { color: var(--rust2); font-style: normal; }
-        footer a { color: rgba(255,255,255,0.5); text-decoration: none; }
-        footer a:hover { color: var(--white); }
-
-        /* ── MOBILE ── */
-        @media (max-width: 768px) {
-            .nav-links, .nav-cta { display: none; }
-            .hamburger { display: flex; }
-            .form-grid { grid-template-columns: 1fr; }
-            .contact-grid { grid-template-columns: 1fr; }
-            .hero-stats { gap: 1.75rem; }
-            .rating-divider { display: none; }
-            .mobile-nav { display: none; position: fixed; inset: 0; z-index: 150; background: var(--paper); padding: 5.5rem 2rem 2rem; flex-direction: column; gap: 1.5rem; }
-            .mobile-nav.active { display: flex; }
-            .mobile-nav a { font-size: 1.1rem; color: var(--ink); text-decoration: none; font-weight: 500; }
-        }
-        @media (min-width: 769px) { .mobile-nav { display: none !important; } }
+        .toast-container { position: fixed; bottom: 2rem; left: 2rem; z-index: 500; display: flex; flex-direction: column; gap: 0.5rem; }
+        .toast { background: white; border-radius: var(--r12); padding: 0.8rem 1.2rem; box-shadow: 0 5px 20px rgba(0,0,0,0.1); border-left: 4px solid; font-size: 0.85rem; max-width: 320px; }
+        .toast.success { border-left-color: var(--success); }
+        .toast.error { border-left-color: var(--error); }
+        footer { background: var(--ink); color: #aaa; text-align: center; padding: 2rem; font-size: 0.8rem; }
     </style>
 </head>
 <body>
 
-<!-- NAV -->
 <nav>
     <a href="#" class="nav-logo">Wander<em>lust</em></a>
-    <ul class="nav-links">
-        <li><a href="#products">Packages</a></li>
-        <li><a href="#itinerary">Custom Itinerary</a></li>
-        <li><a href="#reviews">Reviews</a></li>
-        <li><a href="#faq">FAQ</a></li>
-        <li><a href="#contact">Contact</a></li>
-    </ul>
-    <a href="#itinerary" class="nav-cta">Plan My Trip</a>
-    <button class="hamburger" onclick="toggleMenu()" aria-label="Menu"><span></span><span></span><span></span></button>
+    <ul class="nav-links"><li><a href="#products">Packages</a></li><li><a href="#contact">Contact</a></li></ul>
+    <a href="#products" class="nav-cta">Book Now</a>
+    <button class="hamburger" onclick="toggleMobileMenu()"><span></span><span></span><span></span></button>
 </nav>
-<div class="mobile-nav" id="mobileNav">
-    <a href="#products" onclick="toggleMenu()">Packages</a>
-    <a href="#itinerary" onclick="toggleMenu()">Custom Itinerary</a>
-    <a href="#reviews" onclick="toggleMenu()">Reviews</a>
-    <a href="#faq" onclick="toggleMenu()">FAQ</a>
-    <a href="#contact" onclick="toggleMenu()">Contact</a>
-</div>
+<div class="mobile-nav" id="mobileNav"><a href="#products" onclick="toggleMobileMenu()">Packages</a><a href="#contact" onclick="toggleMobileMenu()">Contact</a></div>
 
-<!-- HERO -->
 <section class="hero">
-    <div class="hero-bg"></div>
-    <div class="hero-grain"></div>
     <div class="hero-content">
-        <div class="hero-chip">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
-            Trusted Travel Partner · India
-        </div>
-        <h1>Discover the <em>Soul of India,</em><br>One Journey at a Time</h1>
-        <p>Expertly crafted travel experiences — from the peaks of the Himalayas to the shores of Kerala. Every detail planned. Every memory yours.</p>
-        <div class="hero-actions">
-            <a href="#itinerary" class="btn-hero-primary">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>
-                Plan My Itinerary
-            </a>
-            <a href="#products" class="btn-hero-outline">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>
-                View Packages
-            </a>
-        </div>
-        <div class="hero-stats">
-            <div class="hero-stat"><strong>2,400+</strong><span>Happy Travelers</span></div>
-            <div class="hero-stat"><strong>150+</strong><span>Destinations</span></div>
-            <div class="hero-stat" id="heroRating">
-                <strong id="heroRatingNum">—</strong>
-                <span id="heroRatingLabel">Avg Rating</span>
-            </div>
-        </div>
+        <h1>Journeys that <em>transform</em><br>the soul of India</h1>
+        <p>Handpicked travel packages with instant PDF guides. Pay securely, get itinerary PDF + invoice in one seamless flow.</p>
+        <a href="#products" class="btn-primary">✨ Explore Packages</a>
     </div>
 </section>
 
-<!-- PRODUCTS -->
 <section class="section" id="products">
-    <div class="section-head">
-        <span class="section-chip">Travel Packages</span>
-        <h2>Curated Journeys Awaiting You</h2>
-        <p>Handpicked packages designed by our experts. Each includes a detailed PDF guide — downloaded instantly after payment.</p>
-    </div>
-    <div class="products-grid" id="productsList">
-        <div class="loading-dots"><span></span><span></span><span></span></div>
+    <div class="section-head"><h2>Curated travel experiences</h2><p>Choose your adventure, pay securely, and receive your detailed itinerary PDF instantly.</p></div>
+    <div class="products-grid" id="productsGrid"><div style="text-align:center;padding:2rem">Loading packages...</div></div>
+</section>
+
+<section class="section section-sand" id="contact">
+    <div class="section-head"><h2>Need help?</h2><p>Reach out — our travel experts are here for you.</p></div>
+    <div style="max-width:600px;margin:0 auto;background:white;border-radius:var(--r24);padding:2rem;border:1px solid var(--paper2)">
+        <div class="form-group" id="contactNameGroup"><label>Full name *</label><input type="text" id="contactName" placeholder="Your name"><div class="error-msg">Name required</div></div>
+        <div class="form-group" id="contactEmailGroup"><label>Email *</label><input type="email" id="contactEmail" placeholder="you@example.com"><div class="error-msg">Valid email required</div></div>
+        <div class="form-group"><label>Message</label><textarea id="contactMsg" rows="3" placeholder="Ask about custom itineraries..."></textarea></div>
+        <button class="btn-pay" id="sendContactBtn" style="background:var(--sage);margin-top:0">Send message</button>
     </div>
 </section>
 
-<!-- REVIEWS -->
-<section class="section section-sand" id="reviews">
-    <div class="section-head">
-        <span class="section-chip">Traveler Reviews</span>
-        <h2>Stories from the Road</h2>
-        <p>Real experiences shared by our community of explorers.</p>
-    </div>
-    <div class="rating-banner" id="ratingBanner" style="display:none">
-        <div class="rating-big">
-            <div class="num" id="avgNum">0.0</div>
-            <div class="stars-row" id="avgStars"></div>
-            <div class="count" id="avgCount">0 reviews</div>
-        </div>
-        <div class="rating-divider"></div>
-        <div class="rating-bars" id="ratingBars"></div>
-    </div>
-    <div class="reviews-grid" id="reviewsGrid">
-        <div class="loading-dots"><span></span><span></span><span></span></div>
-    </div>
-</section>
+<footer><div class="footer-logo" style="font-family:'Cormorant Garamond';font-size:1.2rem">Wander<em>lust</em></div><p>© 2025 — explore responsibly</p></footer>
 
-<!-- WRITE REVIEW -->
-<section class="section" id="write-review">
-    <div class="section-head">
-        <span class="section-chip">Share Your Experience</span>
-        <h2>Write a Review</h2>
-    </div>
-    <div class="form-card">
-        <div class="form-grid">
-            <div class="form-group" id="fg_rev_name">
-                <label>Your Name *</label>
-                <input type="text" id="rev_name" placeholder="Full name" oninput="liveValidate('rev_name','fg_rev_name','name')">
-                <div class="field-err-msg">Please enter your name</div>
-            </div>
-            <div class="form-group" id="fg_rev_place">
-                <label>Place Visited *</label>
-                <input type="text" id="rev_place" placeholder="e.g. Goa, Rajasthan" oninput="liveValidate('rev_place','fg_rev_place','required')">
-                <div class="field-err-msg">Please enter the place you visited</div>
-            </div>
-            <div class="form-group full" id="fg_rev_rating">
-                <label>Rating *</label>
-                <select id="rev_rating" onchange="liveValidate('rev_rating','fg_rev_rating','required')">
-                    <option value="">Select your rating</option>
-                    <option value="5">★★★★★ — Exceptional</option>
-                    <option value="4">★★★★☆ — Very Good</option>
-                    <option value="3">★★★☆☆ — Good</option>
-                    <option value="2">★★☆☆☆ — Fair</option>
-                    <option value="1">★☆☆☆☆ — Poor</option>
-                </select>
-                <div class="field-err-msg">Please select a rating</div>
-            </div>
-            <div class="form-group full">
-                <label>Your Review</label>
-                <textarea id="rev_message" placeholder="Share the highlights of your journey..."></textarea>
-            </div>
-        </div>
-        <button class="btn-submit" onclick="submitReview(this)">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-            Submit Review
-        </button>
-    </div>
-</section>
-
-<!-- ITINERARY -->
-<section class="section section-dark" id="itinerary">
-    <div class="section-head">
-        <span class="section-chip">Custom Planning</span>
-        <h2>Request Your Personalised Itinerary</h2>
-        <p>Tell us your travel dreams and our experts craft a bespoke journey just for you.</p>
-    </div>
-    <div class="form-card">
-        <div class="price-pill">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
-            Only ₹1 to get started — Itinerary PDF delivered within 24 hours
-        </div>
-        <div class="form-grid">
-            <div class="form-group" id="fg_itin_name">
-                <label>Full Name *</label>
-                <input type="text" id="itin_name" placeholder="Your full name" oninput="liveValidate('itin_name','fg_itin_name','name'); itinCheckReady()">
-                <div class="field-err-msg">Please enter your full name</div>
-            </div>
-            <div class="form-group" id="fg_itin_email">
-                <label>Email *</label>
-                <input type="email" id="itin_email" placeholder="your@email.com" oninput="liveValidate('itin_email','fg_itin_email','email'); itinCheckReady()">
-                <div class="field-err-msg">Please enter a valid email address</div>
-            </div>
-            <div class="form-group" id="fg_itin_phone">
-                <label>Phone *</label>
-                <input type="tel" id="itin_phone" placeholder="+91 XXXXX XXXXX" oninput="liveValidate('itin_phone','fg_itin_phone','phone'); itinCheckReady()">
-                <div class="field-err-msg">Please enter a valid 10-digit phone number</div>
-            </div>
-            <div class="form-group" id="fg_itin_trip">
-                <label>Trip Type *</label>
-                <select id="itin_trip" onchange="liveValidate('itin_trip','fg_itin_trip','required'); itinCheckReady()">
-                    <option value="">Select trip type</option>
-                    <option>Adventure</option><option>Beach</option><option>Cultural</option>
-                    <option>Wildlife</option><option>Pilgrimage</option><option>Honeymoon</option>
-                </select>
-                <div class="field-err-msg">Please select a trip type</div>
-            </div>
-            <div class="form-group" id="fg_itin_dest">
-                <label>Destination *</label>
-                <input type="text" id="itin_dest" placeholder="State or city" oninput="liveValidate('itin_dest','fg_itin_dest','required'); itinCheckReady()">
-                <div class="field-err-msg">Please enter a destination</div>
-            </div>
-            <div class="form-group">
-                <label>Travel Dates</label>
-                <input type="text" id="itin_dates" placeholder="dd-mm-yyyy">
-            </div>
-            <div class="form-group" id="fg_itin_days">
-                <label>No. of Days *</label>
-                <input type="number" id="itin_days" min="1" placeholder="7" oninput="liveValidate('itin_days','fg_itin_days','positive'); itinCheckReady()">
-                <div class="field-err-msg">Please enter number of days (min 1)</div>
-            </div>
-            <div class="form-group" id="fg_itin_people">
-                <label>No. of People *</label>
-                <input type="number" id="itin_people" min="1" placeholder="2" oninput="liveValidate('itin_people','fg_itin_people','positive'); itinCheckReady()">
-                <div class="field-err-msg">Please enter number of people (min 1)</div>
-            </div>
-            <div class="form-group">
-                <label>Budget (₹/person)</label>
-                <input type="number" id="itin_budget" placeholder="Optional">
-            </div>
-            <div class="form-group">
-                <label>Travel Style</label>
-                <select id="itin_style"><option value="">Select style</option><option>Luxury</option><option>Comfort</option><option>Budget</option><option>Backpacker</option></select>
-            </div>
-            <div class="form-group">
-                <label>Food Preference</label>
-                <select id="itin_food"><option>No Preference</option><option>Vegetarian</option><option>Vegan</option><option>Non-Vegetarian</option><option>Halal</option><option>Kosher</option></select>
-            </div>
-            <div class="form-group">
-                <label>Children Travelling</label>
-                <select id="itin_kids"><option>No children</option><option>1 child</option><option>2 children</option><option>3+ children</option></select>
-            </div>
-            <div class="form-group full">
-                <label>Special Requirements</label>
-                <textarea id="itin_special" placeholder="Accessibility needs, dietary restrictions, must-see places..."></textarea>
-            </div>
-        </div>
-        <!-- Validation hint shown if user clicks pay without completing form -->
-        <div class="validation-hint" id="itinValidHint">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-            Please complete all required fields before paying.
-        </div>
-        <button class="btn-pay" id="itinPayBtn" onclick="processItineraryPayment(this)" disabled>
-            <span class="btn-pay-lock">
-                <svg class="lock-icon" width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
-                Pay ₹1 &amp; Submit Itinerary Request
-            </span>
-        </button>
-    </div>
-</section>
-
-<!-- FAQ -->
-<section class="section section-sand" id="faq">
-    <div class="section-head">
-        <span class="section-chip">Help Center</span>
-        <h2>Frequently Asked Questions</h2>
-        <p>Everything you need to know before you book.</p>
-    </div>
-    <div class="faq-list" id="faqList"></div>
-</section>
-
-<!-- CONTACT -->
-<section class="section" id="contact">
-    <div class="section-head">
-        <span class="section-chip">Get In Touch</span>
-        <h2>We're Here to Help</h2>
-    </div>
-    <div class="contact-grid">
-        <div class="contact-info">
-            <h3>Plan your perfect trip with us</h3>
-            <p>Have questions about a package or need help planning your trip? Our team of travel experts is ready to help you every step of the way.</p>
-            <div class="contact-detail">
-                <div class="contact-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></div>
-                <div><strong>Email</strong><span><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="fc9499909093bc8b9d9298998e90898f88d29592">[email&#160;protected]</a></span></div>
-            </div>
-            <div class="contact-detail">
-                <div class="contact-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></div>
-                <div><strong>Phone</strong><span>+91 98765 43210</span></div>
-            </div>
-            <div class="contact-detail">
-                <div class="contact-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg></div>
-                <div><strong>Office</strong><span>Mumbai, Maharashtra, India</span></div>
-            </div>
-        </div>
-        <div class="form-card" style="margin:0">
-            <div class="form-grid">
-                <div class="form-group" id="fg_con_name"><label>Name *</label><input type="text" id="con_name" placeholder="Your name" oninput="liveValidate('con_name','fg_con_name','name')"><div class="field-err-msg">Please enter your name</div></div>
-                <div class="form-group" id="fg_con_email"><label>Email *</label><input type="email" id="con_email" placeholder="your@email.com" oninput="liveValidate('con_email','fg_con_email','email')"><div class="field-err-msg">Please enter a valid email</div></div>
-                <div class="form-group full" id="fg_con_phone"><label>Phone *</label><input type="tel" id="con_phone" placeholder="+91 XXXXX XXXXX" oninput="liveValidate('con_phone','fg_con_phone','phone')"><div class="field-err-msg">Please enter a valid phone number</div></div>
-                <div class="form-group full"><label>Message</label><textarea id="con_message" placeholder="How can we help you?"></textarea></div>
-            </div>
-            <button class="btn-submit" onclick="submitContact(this)">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-                Send Message
-            </button>
-        </div>
-    </div>
-</section>
-
-<!-- FOOTER -->
-<footer>
-    <div class="footer-logo">Wander<em>lust</em></div>
-    <p>Crafting unforgettable journeys across India. &copy; 2025 All rights reserved.</p>
-    <p style="margin-top:0.5rem"><a href="admin.html">Admin Portal</a></p>
-</footer>
-
-<!-- PURCHASE MODAL -->
+<!-- PURCHASE MODAL (buy now → fill form → pay → pdfs) -->
 <div class="modal-overlay" id="purchaseModal">
-    <div class="modal-box">
-        <div class="modal-header">
-            <h3>Complete Your Purchase</h3>
-            <button class="modal-close" onclick="closeModal()">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-            </button>
-        </div>
-        <div class="modal-product-info" id="modalProductInfo"></div>
-        <input type="hidden" id="sel_id">
-        <input type="hidden" id="sel_pdf">
-        <input type="hidden" id="sel_price">
-
-        <div class="form-group" id="fg_buy_name">
-            <label>Full Name *</label>
-            <input type="text" id="buy_name" placeholder="Your full name" oninput="liveValidate('buy_name','fg_buy_name','name'); modalCheckReady()">
-            <div class="field-err-msg">Please enter your full name</div>
-        </div>
-        <div class="form-group" id="fg_buy_email">
-            <label>Email *</label>
-            <input type="email" id="buy_email" placeholder="your@email.com" oninput="liveValidate('buy_email','fg_buy_email','email'); modalCheckReady()">
-            <div class="field-err-msg">Please enter a valid email address</div>
-        </div>
-        <div class="form-group" id="fg_buy_phone">
-            <label>Phone *</label>
-            <input type="tel" id="buy_phone" placeholder="+91 XXXXX XXXXX" oninput="liveValidate('buy_phone','fg_buy_phone','phone'); modalCheckReady()">
-            <div class="field-err-msg">Please enter a valid 10-digit phone number</div>
-        </div>
-        <div class="form-group" id="fg_buy_travelers">
-            <label>Number of Travelers *</label>
-            <input type="number" id="buy_travelers" min="1" value="1" oninput="liveValidate('buy_travelers','fg_buy_travelers','positive'); modalCheckReady()">
-            <div class="field-err-msg">Please enter at least 1 traveler</div>
-        </div>
-        <div class="form-group">
-            <label>Message (Optional)</label>
-            <textarea id="buy_message" rows="2" placeholder="Any special requirements?"></textarea>
-        </div>
-
-        <div class="validation-hint" id="modalValidHint">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-            Please complete all required fields before paying.
-        </div>
-
-        <button class="btn-pay" id="modalPayBtn" onclick="processProductPayment(this)" disabled>
-            <span class="btn-pay-lock">
-                <svg class="lock-icon" width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
-                <span id="modalPayLabel">Proceed to Pay</span>
-            </span>
-        </button>
+    <div class="modal-card">
+        <div class="modal-header"><h3>Complete your booking</h3><button class="close-modal" onclick="closePurchaseModal()">✕</button></div>
+        <div id="modalProductPreview" class="product-preview"></div>
+        <div class="validation-summary" id="formValidationMsg">⚠️ Please fill all required fields correctly before payment.</div>
+        
+        <div class="form-group" id="buyerNameGroup"><label>Full name *</label><input type="text" id="buyerName" placeholder="As per ID"><div class="error-msg">Full name required</div></div>
+        <div class="form-group" id="buyerEmailGroup"><label>Email address *</label><input type="email" id="buyerEmail" placeholder="traveler@example.com"><div class="error-msg">Valid email required</div></div>
+        <div class="form-group" id="buyerPhoneGroup"><label>Phone number *</label><input type="tel" id="buyerPhone" placeholder="+91 9876543210"><div class="error-msg">Valid 10-digit phone required</div></div>
+        <div class="form-group" id="travelersGroup"><label>Number of travelers *</label><input type="number" id="travelerCount" min="1" value="1"><div class="error-msg">At least 1 traveler</div></div>
+        <div class="form-group"><label>Special requests (optional)</label><textarea id="specialReq" rows="2" placeholder="Dietary needs, accessibility..."></textarea></div>
+        
+        <button class="btn-pay" id="modalPayBtn" onclick="validateAndInitiatePayment()">🔒 Pay & Get PDFs →</button>
     </div>
 </div>
 
-<!-- DOWNLOAD PROGRESS INDICATOR -->
-<div class="download-status" id="dlStatus">
-    <div style="font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.6rem">Preparing Your Files</div>
-    <div class="dl-step" id="dlStep1"><div class="dl-dot"></div> Downloading Itinerary PDF…</div>
-    <div class="dl-step" id="dlStep2"><div class="dl-dot"></div> Generating Invoice PDF…</div>
-    <div class="dl-step" id="dlStep3"><div class="dl-dot"></div> Sending Confirmation Email…</div>
-</div>
+<!-- Download progress indicator -->
+<div id="downloadProgress" class="dl-toast"><div style="font-weight:600; font-size:0.7rem; letter-spacing:1px;">PREPARING YOUR FILES</div><div id="dlStep1" class="dl-step"><span class="dl-dot"></span> Download itinerary PDF</div><div id="dlStep2" class="dl-step"><span class="dl-dot"></span> Generate invoice PDF</div><div id="dlStep3" class="dl-step"><span class="dl-dot"></span> Confirmation email</div></div>
+<div id="toastContainer" class="toast-container"></div>
 
-<div class="toast-container" id="toastContainer"></div>
+<script>
+    // ----------------------------- INIT SUPABASE & EMAILJS -------------------------
+    emailjs.init("7rgj4t_06JrmsxgHC");
+    const supabase = window.supabase.createClient(
+        "https://eyekpbzcdouhkquqjjae.supabase.co",
+        "sb_publishable_hONe7ntkTZaGeyFsLV0iMQ_9aTXtOBE"
+    );
+    const RAZORPAY_KEY = "rzp_live_SV68ifsBjM5tPz";
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-// ── INIT ──
-emailjs.init("7rgj4t_06JrmsxgHC");
-const sb = window.supabase.createClient(
-    "https://eyekpbzcdouhkquqjjae.supabase.co",
-    "sb_publishable_hONe7ntkTZaGeyFsLV0iMQ_9aTXtOBE"
-);
-const RAZORPAY_KEY = "rzp_live_SV68ifsBjM5tPz";
+    // Payment state machine (avoid double payments)
+    let paymentInProgress = false;
+    let currentSelectedProduct = null;   // { id, title, price, pdf_url, image_url }
+    let pendingOrderData = null;
 
-// Payment state machine — prevents double payments and race conditions
-const PayState = {
-    IDLE: 'idle',
-    PAYING: 'paying',
-    PROCESSING: 'processing',
-    DONE: 'done'
-};
-let payState = PayState.IDLE;
-let currentProduct = null;
-let pendingFormData = null;
+    // ----------------------------- Helper: Toast -----------------------------
+    function showToast(message, type = "success") {
+        const container = document.getElementById("toastContainer");
+        const toast = document.createElement("div");
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `<strong>${type === "success" ? "✓" : "⚠️"}</strong> <span>${message}</span>`;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 4500);
+    }
 
-// ── VALIDATION RULES ──
-const VALIDATORS = {
-    required: (v) => v.trim().length > 0,
-    name: (v) => v.trim().length >= 2,
-    email: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()),
-    phone: (v) => /^[+]?[\d\s\-()]{8,15}$/.test(v.trim()),
-    positive: (v) => parseFloat(v) >= 1
-};
+    // ----------------------------- Form Validation (real-time + final) ----------
+    function validateName(val) { return val.trim().length >= 2; }
+    function validateEmail(val) { return /^[^\s@]+@([^\s@]+\.)+[^\s@]+$/.test(val.trim()); }
+    function validatePhone(val) { return /^[+]?[\d\s\-()]{10,15}$/.test(val.trim()) && /\d{10,}/.test(val); }
+    function validateTravelers(val) { let n = parseInt(val); return !isNaN(n) && n >= 1; }
 
-// Live validation: marks field valid/invalid on user input
-function liveValidate(inputId, groupId, rule) {
-    const el = document.getElementById(inputId);
-    const grp = document.getElementById(groupId);
-    if (!el || !grp) return false;
-    const val = el.value;
-    const valid = VALIDATORS[rule] ? VALIDATORS[rule](val) : val.trim().length > 0;
-    grp.classList.toggle('has-error', val.length > 0 && !valid);
-    grp.classList.toggle('is-valid', valid);
-    return valid;
-}
-
-// Hard validate (on submit/pay click) — marks all fields and returns bool
-function hardValidate(fields) {
-    let allValid = true;
-    fields.forEach(({ inputId, groupId, rule }) => {
-        const el = document.getElementById(inputId);
-        const grp = document.getElementById(groupId);
-        if (!el || !grp) return;
-        const valid = VALIDATORS[rule] ? VALIDATORS[rule](el.value) : el.value.trim().length > 0;
-        if (!valid) {
-            grp.classList.add('has-error');
-            grp.classList.remove('is-valid');
-            allValid = false;
+    function markFieldValid(groupId, isValid) {
+        const group = document.getElementById(groupId);
+        if (!group) return;
+        const input = group.querySelector("input, select, textarea");
+        if (isValid) {
+            group.classList.remove("invalid");
+            if (input) input.classList.remove("field-error");
         } else {
-            grp.classList.remove('has-error');
-            grp.classList.add('is-valid');
+            group.classList.add("invalid");
+            if (input) input.classList.add("field-error");
         }
-    });
-    return allValid;
-}
-
-// ── MODAL FORM READINESS CHECK ──
-const MODAL_FIELDS = [
-    { inputId:'buy_name',     groupId:'fg_buy_name',     rule:'name'     },
-    { inputId:'buy_email',    groupId:'fg_buy_email',    rule:'email'    },
-    { inputId:'buy_phone',    groupId:'fg_buy_phone',    rule:'phone'    },
-    { inputId:'buy_travelers',groupId:'fg_buy_travelers',rule:'positive' }
-];
-function modalCheckReady() {
-    const allOk = MODAL_FIELDS.every(f => {
-        const el = document.getElementById(f.inputId);
-        return el && VALIDATORS[f.rule] && VALIDATORS[f.rule](el.value);
-    });
-    const btn = document.getElementById('modalPayBtn');
-    btn.disabled = !allOk;
-    document.getElementById('modalValidHint').classList.toggle('visible', false);
-}
-
-// ── ITINERARY FORM READINESS CHECK ──
-const ITIN_REQUIRED_FIELDS = [
-    { inputId:'itin_name',   groupId:'fg_itin_name',   rule:'name'     },
-    { inputId:'itin_email',  groupId:'fg_itin_email',  rule:'email'    },
-    { inputId:'itin_phone',  groupId:'fg_itin_phone',  rule:'phone'    },
-    { inputId:'itin_trip',   groupId:'fg_itin_trip',   rule:'required' },
-    { inputId:'itin_dest',   groupId:'fg_itin_dest',   rule:'required' },
-    { inputId:'itin_days',   groupId:'fg_itin_days',   rule:'positive' },
-    { inputId:'itin_people', groupId:'fg_itin_people', rule:'positive' }
-];
-function itinCheckReady() {
-    const allOk = ITIN_REQUIRED_FIELDS.every(f => {
-        const el = document.getElementById(f.inputId);
-        return el && VALIDATORS[f.rule] && VALIDATORS[f.rule](el.value);
-    });
-    const btn = document.getElementById('itinPayBtn');
-    btn.disabled = !allOk;
-    if (allOk) document.getElementById('itinValidHint').classList.remove('visible');
-}
-
-// ── TOAST ──
-function toast(title, msg, type = 'success') {
-    const c = document.getElementById('toastContainer');
-    const t = document.createElement('div');
-    t.className = `toast toast-${type}`;
-    t.innerHTML = `<span style="font-size:1rem">${type==='success'?'✓':'✕'}</span><div><strong>${title}</strong>${msg?`<div style="font-size:0.82rem;margin-top:2px;opacity:0.8">${msg}</div>`:''}</div>`;
-    c.appendChild(t);
-    setTimeout(() => t.remove(), 5000);
-}
-
-// ── DOWNLOAD PROGRESS UI ──
-function showDownloadProgress() {
-    document.getElementById('dlStatus').classList.add('active');
-    ['dlStep1','dlStep2','dlStep3'].forEach(id => {
-        const el = document.getElementById(id);
-        el.classList.remove('active','done');
-    });
-}
-function setDlStep(step) {
-    // step 1, 2, 3
-    for (let i = 1; i <= 3; i++) {
-        const el = document.getElementById('dlStep' + i);
-        el.classList.remove('active','done');
-        if (i < step) el.classList.add('done');
-        if (i === step) el.classList.add('active');
     }
-}
-function hideDownloadProgress() {
-    setTimeout(() => {
-        document.getElementById('dlStatus').classList.remove('active');
-    }, 2000);
-}
 
-// ── REVIEWS ──
-async function loadReviews() {
-    try {
-        const { data, error } = await sb.from('reviews').select('*').order('created_at', { ascending: false });
-        if (error) throw error;
-        const grid = document.getElementById('reviewsGrid');
-        const banner = document.getElementById('ratingBanner');
-        if (!data || data.length === 0) {
-            grid.innerHTML = '<p class="empty-msg">No reviews yet. Be the first!</p>'; return;
-        }
-        const avg = data.reduce((s,r) => s + r.rating, 0) / data.length;
-        const avgFixed = avg.toFixed(1);
-        const stars = Math.round(avg);
-        const heroRatingEl = document.getElementById('heroRating');
-        heroRatingEl.style.display = 'block';
-        document.getElementById('heroRatingNum').textContent = avgFixed + ' ★';
-        document.getElementById('heroRatingLabel').textContent = `Avg Rating (${data.length} reviews)`;
-        banner.style.display = 'flex';
-        document.getElementById('avgNum').textContent = avgFixed;
-        document.getElementById('avgCount').textContent = `${data.length} review${data.length !== 1 ? 's' : ''}`;
-        document.getElementById('avgStars').textContent = '★'.repeat(stars) + '☆'.repeat(5 - stars);
-        const counts = [5,4,3,2,1].map(n => ({ n, c: data.filter(r => r.rating === n).length }));
-        document.getElementById('ratingBars').innerHTML = counts.map(({n,c}) => `
-            <div class="rating-bar-row">
-                <span class="rating-bar-label">${n}</span>
-                <div class="rating-bar-track"><div class="rating-bar-fill" style="width:${data.length?(c/data.length*100):0}%"></div></div>
-                <span class="rating-bar-count">${c}</span>
-            </div>`).join('');
-        grid.innerHTML = data.map(r => `
-            <div class="review-card">
-                <div class="review-top">
-                    <div class="review-avatar">${(r.name||'?')[0].toUpperCase()}</div>
-                    <div class="review-info"><strong>${esc(r.name)}</strong><span>Visited ${esc(r.travel_place)}</span></div>
-                </div>
-                <div class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
-                <div class="review-text">${esc(r.message)||'No written review.'}</div>
-                <div class="review-date">${new Date(r.created_at).toLocaleDateString('en-IN',{year:'numeric',month:'long',day:'numeric'})}</div>
-            </div>`).join('');
-    } catch(e) {
-        document.getElementById('reviewsGrid').innerHTML = '<p class="empty-msg" style="color:var(--error)">Could not load reviews.</p>';
+    function validateModalForm() {
+        const name = document.getElementById("buyerName").value;
+        const email = document.getElementById("buyerEmail").value;
+        const phone = document.getElementById("buyerPhone").value;
+        const travelers = document.getElementById("travelerCount").value;
+        const nameOk = validateName(name);
+        const emailOk = validateEmail(email);
+        const phoneOk = validatePhone(phone);
+        const travelersOk = validateTravelers(travelers);
+        markFieldValid("buyerNameGroup", nameOk);
+        markFieldValid("buyerEmailGroup", emailOk);
+        markFieldValid("buyerPhoneGroup", phoneOk);
+        markFieldValid("travelersGroup", travelersOk);
+        const allValid = nameOk && emailOk && phoneOk && travelersOk;
+        const summary = document.getElementById("formValidationMsg");
+        if (!allValid) summary.classList.add("show");
+        else summary.classList.remove("show");
+        return allValid;
     }
-}
 
-async function submitReview(btn) {
-    const fields = [
-        { inputId:'rev_name',   groupId:'fg_rev_name',   rule:'name'     },
-        { inputId:'rev_place',  groupId:'fg_rev_place',  rule:'required' },
-        { inputId:'rev_rating', groupId:'fg_rev_rating', rule:'required' }
-    ];
-    if (!hardValidate(fields)) { toast('Missing Fields','Please fill all required fields correctly.','error'); return; }
-    const name = document.getElementById('rev_name').value.trim();
-    const place = document.getElementById('rev_place').value.trim();
-    const rating = parseInt(document.getElementById('rev_rating').value);
-    const message = document.getElementById('rev_message').value.trim();
-    btn.disabled = true; btn.textContent = 'Submitting…';
-    const { error } = await sb.from('reviews').insert([{ name, travel_place: place, rating, message }]);
-    btn.disabled = false;
-    btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Submit Review`;
-    if (error) { toast('Error', error.message, 'error'); return; }
-    toast('Review Submitted','Thank you for sharing your experience!');
-    ['rev_name','rev_place','rev_message'].forEach(id => document.getElementById(id).value = '');
-    document.getElementById('rev_rating').value = '';
-    ['fg_rev_name','fg_rev_place','fg_rev_rating'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.classList.remove('is-valid','has-error');
-    });
-    loadReviews();
-}
+    // attach real-time validation listeners
+    function attachModalValidation() {
+        const fields = ["buyerName","buyerEmail","buyerPhone","travelerCount"];
+        fields.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener("input", () => validateModalForm());
+        });
+    }
 
-// ── PRODUCTS ──
-async function loadProducts() {
-    try {
-        const { data, error } = await sb.from('products').select('*').order('created_at', { ascending: false });
-        if (error) throw error;
-        const div = document.getElementById('productsList');
-        if (!data || data.length === 0) { div.innerHTML = '<p class="empty-msg">No packages available yet.</p>'; return; }
-        div.innerHTML = data.map(p => `
-            <div class="product-card">
-                <div class="product-img-wrap">
-                    ${p.image_url ? `<img src="${p.image_url}" alt="${esc(p.title)}" onerror="this.parentElement.innerHTML='<div class=product-img-placeholder><svg width=40 height=40 viewBox=&quot;0 0 24 24&quot; fill=&quot;currentColor&quot;><path d=&quot;M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z&quot;/></svg></div>'">` : `<div class="product-img-placeholder"><svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg></div>`}
-                    ${p.pdf_url ? `<div class="product-pdf-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8.5 7.5c0 .83-.67 1.5-1.5 1.5H9v2H7.5V7H10c.83 0 1.5.67 1.5 1.5v1zm5 2c0 .83-.67 1.5-1.5 1.5h-2.5V7H15c.83 0 1.5.67 1.5 1.5v3zm4-3H19v1h1.5V11H19v2h-1.5V7H20.5v1.5z"/></svg> PDF Included</div>` : ''}
-                </div>
-                <div class="product-body">
-                    <h3>${esc(p.title)}</h3>
-                    <p>${(esc(p.description)||'A carefully curated travel package.').substring(0,90)}${(p.description||'').length>90?'…':''}</p>
-                    <div class="product-footer">
-                        <div class="product-price">₹${parseFloat(p.price).toFixed(0)}<small>per person</small></div>
-                        <button class="btn-buy" onclick='openModal(${p.id},${JSON.stringify(p.title)},${p.price},${JSON.stringify(p.pdf_url||"")},${JSON.stringify(p.image_url||"")})'>Book Now</button>
+    // ----------------------------- Product Loading -----------------------------
+    async function loadProducts() {
+        try {
+            const { data, error } = await supabase.from("products").select("*").order("created_at", { ascending: false });
+            if (error) throw error;
+            const container = document.getElementById("productsGrid");
+            if (!data || data.length === 0) { container.innerHTML = "<p style='text-align:center'>No packages available yet.</p>"; return; }
+            container.innerHTML = data.map(p => `
+                <div class="product-card" data-product='${JSON.stringify(p)}'>
+                    <div class="product-img" style="background-image: url('${p.image_url || ''}'); background-size: cover; background-color:#d9d0c0;">
+                        ${p.pdf_url ? `<div class="product-badge">📄 PDF Guide</div>` : ""}
+                        ${!p.image_url ? `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#8a7a66">🏔️</div>` : ""}
+                    </div>
+                    <div class="product-body">
+                        <h3>${escapeHtml(p.title)}</h3>
+                        <p style="color:var(--mist);font-size:0.85rem">${escapeHtml(p.description || "Discover the best of India with our detailed itinerary.").substring(0,85)}</p>
+                        <div class="product-price">₹${parseFloat(p.price).toFixed(0)} <span style="font-size:0.8rem;color:var(--mist)">/ person</span></div>
+                        <button class="btn-buy-now" onclick="openBuyModal(${p.id}, '${escapeHtml(p.title).replace(/'/g, "\\'")}', ${p.price}, '${p.pdf_url || ""}', '${p.image_url || ""}')">Buy Now →</button>
                     </div>
                 </div>
-            </div>`).join('');
-    } catch(e) {
-        document.getElementById('productsList').innerHTML = '<p class="empty-msg" style="color:var(--error)">Could not load packages.</p>';
-    }
-}
-
-// ── MODAL ──
-function openModal(id, title, price, pdfUrl, imgUrl) {
-    if (payState !== PayState.IDLE) return; // Guard: don't open during payment
-    currentProduct = { id, title, price, pdfUrl, imgUrl };
-    document.getElementById('sel_id').value = id;
-    document.getElementById('sel_pdf').value = pdfUrl;
-    document.getElementById('sel_price').value = price;
-    document.getElementById('modalPayLabel').textContent = `Pay ₹${parseFloat(price).toFixed(0)}`;
-    document.getElementById('modalProductInfo').innerHTML = `
-        ${imgUrl ? `<img src="${imgUrl}" onerror="this.style.display='none'" alt="">` : ''}
-        <div><strong>${esc(title)}</strong><div class="mprice">₹${parseFloat(price).toFixed(0)}</div></div>`;
-    // Reset form state
-    ['buy_name','buy_email','buy_phone','buy_message'].forEach(fid => document.getElementById(fid).value = '');
-    document.getElementById('buy_travelers').value = 1;
-    ['fg_buy_name','fg_buy_email','fg_buy_phone','fg_buy_travelers'].forEach(fid => {
-        const el = document.getElementById(fid);
-        if (el) el.classList.remove('is-valid','has-error');
-    });
-    document.getElementById('modalPayBtn').disabled = true;
-    document.getElementById('modalValidHint').classList.remove('visible');
-    document.getElementById('purchaseModal').classList.add('active');
-}
-
-function closeModal() {
-    if (payState === PayState.PAYING || payState === PayState.PROCESSING) return; // Block close during payment
-    document.getElementById('purchaseModal').classList.remove('active');
-    pendingFormData = null;
-}
-
-// ── PRODUCT PAYMENT ──
-function processProductPayment(btn) {
-    // Hard validate all fields first
-    if (!hardValidate(MODAL_FIELDS)) {
-        document.getElementById('modalValidHint').classList.add('visible');
-        toast('Please fix form errors', 'All required fields must be filled correctly.', 'error');
-        return;
-    }
-    if (payState !== PayState.IDLE) return; // Prevent duplicate payment
-
-    const name     = document.getElementById('buy_name').value.trim();
-    const email    = document.getElementById('buy_email').value.trim();
-    const phone    = document.getElementById('buy_phone').value.trim();
-    const travelers = parseInt(document.getElementById('buy_travelers').value) || 1;
-    const message  = document.getElementById('buy_message').value.trim();
-
-    pendingFormData = { buyer_name: name, buyer_email: email, buyer_phone: phone, travelers, message };
-    payState = PayState.PAYING;
-    btn.disabled = true;
-
-    const rzp = new Razorpay({
-        key: RAZORPAY_KEY,
-        amount: Math.round(currentProduct.price * 100),
-        currency: "INR",
-        name: "Wanderlust Travel",
-        description: currentProduct.title,
-        image: currentProduct.imgUrl || '',
-        prefill: { name, email, contact: phone },
-        theme: { color: '#2a4a3a' },
-        handler: handleProductSuccess,
-        modal: {
-            ondismiss: () => {
-                payState = PayState.IDLE;
-                btn.disabled = false;
-                pendingFormData = null;
-                toast('Payment Cancelled', 'Your payment was not completed.', 'error');
-            }
-        }
-    });
-    closeModal();
-    rzp.open();
-}
-
-async function handleProductSuccess(response) {
-    if (payState !== PayState.PAYING) return; // Guard against duplicate handler
-    payState = PayState.PROCESSING;
-    const paymentId = response.razorpay_payment_id;
-    if (!pendingFormData || !currentProduct) return;
-
-    showDownloadProgress();
-
-    // Step 1: Download admin-uploaded itinerary PDF FIRST (if exists)
-    setDlStep(1);
-    const hasPdf = currentProduct.pdfUrl && currentProduct.pdfUrl !== '' && currentProduct.pdfUrl !== 'null';
-    if (hasPdf) {
-        await downloadFileAsync(currentProduct.pdfUrl, currentProduct.title + '_Itinerary');
-        await sleep(600); // Small gap between downloads
-    } else {
-        await sleep(400); // Simulate step even if no PDF
+            `).join("");
+        } catch(e) { document.getElementById("productsGrid").innerHTML = "<p>Error loading packages.</p>"; console.error(e); }
     }
 
-    // Step 2: Generate + download invoice PDF AFTER itinerary
-    setDlStep(2);
-    await sleep(300);
-    generateInvoicePDF(
-        pendingFormData.buyer_name,
-        currentProduct.title,
-        currentProduct.price,
-        paymentId,
-        pendingFormData.travelers
-    );
-    await sleep(400);
-
-    // Step 3: Save to DB + send email
-    setDlStep(3);
-    const { error } = await sb.from('product_orders').insert([{
-        product_id: currentProduct.id,
-        product_name: currentProduct.title,
-        product_price: currentProduct.price,
-        buyer_name: pendingFormData.buyer_name,
-        buyer_email: pendingFormData.buyer_email,
-        buyer_phone: pendingFormData.buyer_phone,
-        travelers: pendingFormData.travelers,
-        message: pendingFormData.message,
-        payment_status: 'Paid',
-        payment_id: paymentId,
-        payment_amount: currentProduct.price,
-        payment_date: new Date().toISOString()
-    }]);
-    if (error) {
-        toast('Order Save Failed', 'Payment was successful but order could not be saved. Please contact support with ID: ' + paymentId, 'error');
-    }
-
-    await sendEmailNotification(
-        pendingFormData.buyer_email,
-        pendingFormData.buyer_name,
-        currentProduct.title,
-        currentProduct.price,
-        paymentId,
-        currentProduct.pdfUrl
-    );
-
-    hideDownloadProgress();
-    toast('Payment Successful!', `Booking confirmed. Payment ID: ${paymentId}`);
-
-    payState = PayState.IDLE;
-    pendingFormData = null;
-}
-
-// ── ITINERARY PAYMENT ──
-function processItineraryPayment(btn) {
-    // Hard validate required fields
-    if (!hardValidate(ITIN_REQUIRED_FIELDS)) {
-        document.getElementById('itinValidHint').classList.add('visible');
-        toast('Please fix form errors', 'All required fields must be filled correctly.', 'error');
-        // Scroll to first error
-        const firstErr = document.querySelector('#itinerary .has-error input, #itinerary .has-error select');
-        if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        return;
-    }
-    if (payState !== PayState.IDLE) return;
-
-    const name    = document.getElementById('itin_name').value.trim();
-    const email   = document.getElementById('itin_email').value.trim();
-    const phone   = document.getElementById('itin_phone').value.trim();
-    const trip    = document.getElementById('itin_trip').value;
-    const dest    = document.getElementById('itin_dest').value.trim();
-    const days    = document.getElementById('itin_days').value;
-    const people  = document.getElementById('itin_people').value;
-    const budget  = document.getElementById('itin_budget').value;
-    const dates   = document.getElementById('itin_dates').value.trim();
-    const style   = document.getElementById('itin_style').value;
-    const food    = document.getElementById('itin_food').value;
-    const kids    = document.getElementById('itin_kids').value;
-    const special = document.getElementById('itin_special').value.trim();
-
-    pendingFormData = {
-        full_name: name, email, phone, trip_type: trip, destination: dest,
-        days: parseInt(days), people: parseInt(people),
-        budget: budget ? parseFloat(budget) : null,
-        travel_dates: dates, travel_style: style, food_preference: food,
-        kids_travelling: kids, special_requirements: special
+    // ----------------------------- MODAL FLOW (Buy now -> form -> pay) ----------
+    window.openBuyModal = function(id, title, price, pdfUrl, imgUrl) {
+        if (paymentInProgress) { showToast("Another transaction in progress, please wait.", "error"); return; }
+        currentSelectedProduct = { id, title, price: Number(price), pdf_url: pdfUrl, image_url: imgUrl };
+        // reset modal fields
+        document.getElementById("buyerName").value = "";
+        document.getElementById("buyerEmail").value = "";
+        document.getElementById("buyerPhone").value = "";
+        document.getElementById("travelerCount").value = "1";
+        document.getElementById("specialReq").value = "";
+        // reset validation styles
+        ["buyerNameGroup","buyerEmailGroup","buyerPhoneGroup","travelersGroup"].forEach(g => {
+            const grp = document.getElementById(g); if(grp) grp.classList.remove("invalid");
+            const inp = grp?.querySelector("input"); if(inp) inp.classList.remove("field-error");
+        });
+        document.getElementById("formValidationMsg").classList.remove("show");
+        // update preview
+        const previewDiv = document.getElementById("modalProductPreview");
+        previewDiv.innerHTML = `
+            ${imgUrl ? `<img src="${imgUrl}" onerror="this.style.display='none'" alt="">` : `<div style="width:65px;height:65px;background:#e2dbcf;border-radius:12px;display:flex;align-items:center;justify-content:center">📍</div>`}
+            <div><strong>${escapeHtml(title)}</strong><div style="font-size:1.2rem;font-weight:700;color:var(--sage)">₹${Number(price).toFixed(0)}</div></div>
+        `;
+        document.getElementById("purchaseModal").classList.add("active");
+        validateModalForm(); // initial check
     };
 
-    payState = PayState.PAYING;
-    btn.disabled = true;
+    function closePurchaseModal() {
+        if (paymentInProgress) { showToast("Payment in progress, please don't close.", "error"); return; }
+        document.getElementById("purchaseModal").classList.remove("active");
+        currentSelectedProduct = null;
+        pendingOrderData = null;
+    }
 
-    const rzp = new Razorpay({
-        key: RAZORPAY_KEY,
-        amount: 100, // ₹1 in paise
-        currency: "INR",
-        name: "Wanderlust Travel",
-        description: "Custom Itinerary Request",
-        prefill: { name, email, contact: phone },
-        theme: { color: '#2a4a3a' },
-        handler: handleItinerarySuccess,
-        modal: {
-            ondismiss: () => {
-                payState = PayState.IDLE;
-                btn.disabled = false;
-                pendingFormData = null;
-                toast('Payment Cancelled', 'Your request was not submitted.', 'error');
-            }
+    // ---------- Payment + PDF Sequence (strict: pay → download itinerary PDF first → invoice PDF) ----------
+    async function validateAndInitiatePayment() {
+        if (paymentInProgress) { showToast("Please wait, payment already processing.", "error"); return; }
+        if (!currentSelectedProduct) { showToast("Product not selected.", "error"); return; }
+        const isValid = validateModalForm();
+        if (!isValid) {
+            const summary = document.getElementById("formValidationMsg");
+            summary.classList.add("show");
+            summary.scrollIntoView({ behavior: "smooth", block: "center" });
+            return;
         }
-    });
-    rzp.open();
-}
+        // collect data
+        const buyerName = document.getElementById("buyerName").value.trim();
+        const buyerEmail = document.getElementById("buyerEmail").value.trim();
+        const buyerPhone = document.getElementById("buyerPhone").value.trim();
+        const travelers = parseInt(document.getElementById("travelerCount").value);
+        const special = document.getElementById("specialReq").value.trim();
 
-async function handleItinerarySuccess(response) {
-    if (payState !== PayState.PAYING) return;
-    payState = PayState.PROCESSING;
-    const paymentId = response.razorpay_payment_id;
-    if (!pendingFormData) return;
+        pendingOrderData = { buyerName, buyerEmail, buyerPhone, travelers, special, product: currentSelectedProduct };
+        paymentInProgress = true;
+        const payBtn = document.getElementById("modalPayBtn");
+        payBtn.disabled = true;
+        payBtn.innerHTML = "⏳ Redirecting to payment...";
 
-    showDownloadProgress();
-
-    // Step 1: Check if admin has pre-uploaded an itinerary PDF for this request,
-    // download it FIRST before anything else
-    setDlStep(1);
-    const { data: iData } = await sb
-        .from('itinerary_requests')
-        .select('pdf_url')
-        .eq('full_name', pendingFormData.full_name)
-        .order('created_at', { ascending: false })
-        .limit(1);
-
-    const prePdf = iData && iData[0] && iData[0].pdf_url;
-    if (prePdf) {
-        await downloadFileAsync(prePdf, 'Itinerary_' + pendingFormData.destination);
-        await sleep(600);
-    } else {
-        await sleep(400); // Still show step as "checked"
-    }
-    document.getElementById('dlStep1').querySelector('.dl-dot').style.background = '#4caf7d';
-
-    // Step 2: Generate invoice PDF AFTER itinerary
-    setDlStep(2);
-    await sleep(300);
-    generateItineraryInvoicePDF(pendingFormData, paymentId);
-    await sleep(400);
-
-    // Step 3: Save to DB + send email
-    setDlStep(3);
-    const { error } = await sb.from('itinerary_requests').insert([{
-        ...pendingFormData,
-        payment_status: 'Paid',
-        payment_id: paymentId,
-        payment_amount: 1,
-        payment_date: new Date().toISOString()
-    }]);
-    if (error) {
-        toast('Save Failed', 'Payment confirmed but data could not be saved. Please contact us with ID: ' + paymentId, 'error');
+        const amountPaise = Math.round(currentSelectedProduct.price * 100);
+        const options = {
+            key: RAZORPAY_KEY,
+            amount: amountPaise,
+            currency: "INR",
+            name: "Wanderlust Travel",
+            description: currentSelectedProduct.title,
+            prefill: { name: buyerName, email: buyerEmail, contact: buyerPhone },
+            theme: { color: "#2a4a3a" },
+            handler: async (response) => {
+                await handlePaymentSuccess(response.razorpay_payment_id);
+            },
+            modal: {
+                ondismiss: () => {
+                    paymentInProgress = false;
+                    payBtn.disabled = false;
+                    payBtn.innerHTML = "🔒 Pay & Get PDFs →";
+                    showToast("Payment cancelled. No charges were made.", "error");
+                }
+            }
+        };
+        const rzp = new Razorpay(options);
+        rzp.open();
     }
 
-    await sendItineraryEmail(pendingFormData.email, pendingFormData.full_name, paymentId, pendingFormData);
-
-    hideDownloadProgress();
-    toast('Itinerary Requested!', 'Our team will contact you within 24 hours!');
-
-    // Reset form
-    clearItineraryForm();
-    payState = PayState.IDLE;
-    pendingFormData = null;
-
-    // Re-enable pay button after form cleared (it will be disabled by default)
-    const btn = document.getElementById('itinPayBtn');
-    if (btn) { btn.disabled = true; }
-}
-
-// ── FILE DOWNLOAD (async version that resolves after triggering) ──
-async function downloadFileAsync(url, title) {
-    // Cross-origin URLs (e.g. Supabase storage) ignore the <a download> attribute.
-    // Solution: fetch the file as a blob → create a local object URL → download that.
-    const filename = `${(title || 'document').replace(/[^a-z0-9]/gi, '_')}.pdf`;
-    try {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const blob = await res.blob();
-        const objectUrl = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = objectUrl;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        // Revoke after a short delay so the browser finishes reading it
-        setTimeout(() => URL.revokeObjectURL(objectUrl), 10000);
-    } catch (e) {
-        console.error('Blob download failed, falling back to new tab:', e);
-        // Fallback: open in new tab so user can manually save
-        window.open(url, '_blank', 'noopener');
-        toast('Download Note', 'PDF opened in a new tab — use Ctrl+S / ⌘S to save it.', 'success');
+    async function handlePaymentSuccess(paymentId) {
+        if (!pendingOrderData) return;
+        const { buyerName, buyerEmail, buyerPhone, travelers, special, product } = pendingOrderData;
+        // Show progress UI
+        const dlToast = document.getElementById("downloadProgress");
+        dlToast.classList.add("active");
+        const step1 = document.getElementById("dlStep1"), step2 = document.getElementById("dlStep2"), step3 = document.getElementById("dlStep3");
+        const resetSteps = () => {
+            step1.classList.remove("active","done"); step2.classList.remove("active","done"); step3.classList.remove("active","done");
+        };
+        resetSteps();
+        
+        try {
+            // STEP 1: Download Itinerary PDF (admin uploaded) FIRST
+            step1.classList.add("active");
+            if (product.pdf_url && product.pdf_url !== "" && product.pdf_url !== "null") {
+                await downloadFile(product.pdf_url, `${product.title}_Itinerary.pdf`);
+                await sleep(700);
+            } else {
+                // no pdf, simulate short step
+                await sleep(500);
+            }
+            step1.classList.remove("active");
+            step1.classList.add("done");
+            
+            // STEP 2: Generate & download invoice PDF
+            step2.classList.add("active");
+            await sleep(300);
+            generateInvoicePDF(buyerName, product.title, product.price, paymentId, travelers);
+            await sleep(500);
+            step2.classList.remove("active");
+            step2.classList.add("done");
+            
+            // STEP 3: Save order to supabase and send email (background)
+            step3.classList.add("active");
+            const { error: dbError } = await supabase.from("product_orders").insert([{
+                product_id: product.id, product_name: product.title, product_price: product.price,
+                buyer_name: buyerName, buyer_email: buyerEmail, buyer_phone: buyerPhone,
+                travelers: travelers, message: special, payment_status: "Paid",
+                payment_id: paymentId, payment_amount: product.price, payment_date: new Date().toISOString()
+            }]);
+            if (dbError) console.error("DB insert error:", dbError);
+            await sendOrderEmail(buyerEmail, buyerName, product.title, product.price, paymentId, product.pdf_url);
+            step3.classList.remove("active");
+            step3.classList.add("done");
+            
+            showToast(`✅ Payment successful! Itinerary & invoice downloaded. ID: ${paymentId}`, "success");
+        } catch (err) {
+            console.error("PDF/email error:", err);
+            showToast("Payment recorded but files had an issue. Contact support with ID: "+paymentId, "error");
+        } finally {
+            setTimeout(() => dlToast.classList.remove("active"), 3000);
+            paymentInProgress = false;
+            const payBtn = document.getElementById("modalPayBtn");
+            if(payBtn) { payBtn.disabled = false; payBtn.innerHTML = "🔒 Pay & Get PDFs →"; }
+            closePurchaseModal();
+            pendingOrderData = null;
+        }
     }
-}
 
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-// ── PDF: INVOICE ──
-function generateInvoicePDF(name, product, amount, paymentId, travelers) {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    const now = new Date();
-    doc.setFillColor(42, 74, 58);
-    doc.rect(0, 0, 210, 48, 'F');
-    doc.setTextColor(255,255,255);
-    doc.setFontSize(26); doc.setFont('helvetica','bold');
-    doc.text('Wanderlust Travel', 20, 22);
-    doc.setFontSize(10); doc.setFont('helvetica','normal');
-    doc.text('INVOICE', 20, 32);
-    doc.text(`Date: ${now.toLocaleDateString('en-IN')}  |  Time: ${now.toLocaleTimeString('en-IN')}`, 20, 40);
-    doc.setFontSize(9);
-    doc.text(`Invoice #WL-${Date.now().toString().slice(-8)}`, 150, 32);
-    doc.setTextColor(28,28,28);
-    doc.setFontSize(13); doc.setFont('helvetica','bold');
-    doc.text(`Dear ${name},`, 20, 62);
-    doc.setFontSize(10); doc.setFont('helvetica','normal');
-    doc.text('Thank you for your purchase with Wanderlust Travel. Your payment has been confirmed.', 20, 71);
-    doc.setFillColor(248,245,239);
-    doc.roundedRect(20, 80, 80, 30, 3, 3, 'F');
-    doc.setFontSize(8); doc.setFont('helvetica','bold');
-    doc.text('BILLED TO', 25, 89);
-    doc.setFont('helvetica','normal');
-    doc.text(name, 25, 97);
-    doc.text(`Travelers: ${travelers || 1}`, 25, 104);
-    doc.setFillColor(248,245,239);
-    doc.roundedRect(110, 80, 80, 30, 3, 3, 'F');
-    doc.setFontSize(8); doc.setFont('helvetica','bold');
-    doc.text('PAYMENT INFO', 115, 89);
-    doc.setFont('helvetica','normal');
-    doc.setFontSize(7);
-    doc.text(`ID: ${paymentId}`, 115, 97);
-    doc.text('Gateway: Razorpay', 115, 104);
-    doc.setFillColor(42,74,58);
-    doc.rect(20, 122, 170, 10, 'F');
-    doc.setTextColor(255,255,255); doc.setFontSize(9); doc.setFont('helvetica','bold');
-    doc.text('DESCRIPTION', 25, 129);
-    doc.text('QTY', 130, 129);
-    doc.text('AMOUNT', 165, 129);
-    doc.setTextColor(28,28,28); doc.setFont('helvetica','normal'); doc.setFontSize(9);
-    doc.setFillColor(255,255,255);
-    doc.rect(20, 132, 170, 14, 'F');
-    doc.setDrawColor(238,233,223);
-    doc.rect(20, 132, 170, 14);
-    doc.text(product.substring(0,50), 25, 141);
-    doc.text(String(travelers||1), 133, 141);
-    doc.text(`INR ${parseFloat(amount).toFixed(2)}`, 160, 141);
-    doc.setFillColor(42,74,58);
-    doc.rect(120, 150, 70, 14, 'F');
-    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(11);
-    doc.text('TOTAL', 128, 159);
-    doc.text(`INR ${parseFloat(amount).toFixed(2)}`, 160, 159);
-    doc.setTextColor(45,122,79); doc.setFontSize(10); doc.setFont('helvetica','bold');
-    doc.text('✓  PAYMENT STATUS: CONFIRMED', 20, 178);
-    doc.setTextColor(90,90,90); doc.setFontSize(9); doc.setFont('helvetica','normal');
-    doc.text('Your itinerary PDF guide has been downloaded to your device separately.', 20, 192);
-    doc.text('For support: hello@wanderlust.in  |  +91 98765 43210', 20, 201);
-    doc.setFillColor(238,233,223);
-    doc.rect(0, 275, 210, 22, 'F');
-    doc.setFontSize(8); doc.setTextColor(120,115,108);
-    doc.text('Wanderlust Travel  ·  Mumbai, Maharashtra, India  ·  hello@wanderlust.in  ·  wanderlust.in', 105, 284, { align: 'center' });
-    doc.text('This is a computer-generated invoice and does not require a signature.', 105, 291, { align: 'center' });
-    doc.save(`Invoice_${name.replace(/\s/g,'_')}_${paymentId}.pdf`);
-}
-
-// ── PDF: ITINERARY INVOICE ──
-function generateItineraryInvoicePDF(data, paymentId) {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    const now = new Date();
-    doc.setFillColor(42,74,58);
-    doc.rect(0, 0, 210, 48, 'F');
-    doc.setTextColor(255,255,255);
-    doc.setFontSize(26); doc.setFont('helvetica','bold');
-    doc.text('Wanderlust Travel', 20, 22);
-    doc.setFontSize(10); doc.setFont('helvetica','normal');
-    doc.text('ITINERARY REQUEST — INVOICE', 20, 32);
-    doc.text(`Date: ${now.toLocaleDateString('en-IN')}  |  Time: ${now.toLocaleTimeString('en-IN')}`, 20, 40);
-    doc.setFontSize(9);
-    doc.text(`Ref #WL-IT-${Date.now().toString().slice(-8)}`, 150, 32);
-    doc.setTextColor(28,28,28);
-    doc.setFontSize(13); doc.setFont('helvetica','bold');
-    doc.text(`Dear ${data.full_name},`, 20, 62);
-    doc.setFontSize(10); doc.setFont('helvetica','normal');
-    doc.text('Your custom itinerary request is confirmed! Payment received.', 20, 71);
-    doc.text('Our travel experts will prepare your personalised plan within 24 hours.', 20, 79);
-    doc.setFillColor(240,250,244);
-    doc.roundedRect(20, 86, 80, 14, 3, 3, 'F');
-    doc.setDrawColor(159,212,180);
-    doc.roundedRect(20, 86, 80, 14, 3, 3, 'S');
-    doc.setTextColor(30,122,74); doc.setFontSize(9); doc.setFont('helvetica','bold');
-    doc.text(`✓ PAID — INR 1.00`, 25, 95);
-    doc.setTextColor(90,90,90); doc.setFontSize(8); doc.setFont('helvetica','normal');
-    doc.text(`Payment ID: ${paymentId}`, 115, 95);
-    doc.setFillColor(42,74,58);
-    doc.rect(20, 108, 170, 10, 'F');
-    doc.setTextColor(255,255,255); doc.setFontSize(9); doc.setFont('helvetica','bold');
-    doc.text('ITINERARY DETAILS', 25, 115);
-    const fields = [
-        ['Destination', data.destination],['Trip Type', data.trip_type],
-        ['Duration', `${data.days} Days`],['No. of Travelers', `${data.people} People`],
-        ['Travel Dates', data.travel_dates || 'Flexible'],['Travel Style', data.travel_style || 'Not specified'],
-        ['Food Preference', data.food_preference],['Budget (per person)', data.budget ? `INR ${data.budget}` : 'Not specified'],
-        ['Children', data.kids_travelling],['Payment ID', paymentId],
-    ];
-    fields.forEach(([k,v], i) => {
-        const y = 126 + i * 11;
-        if (i % 2 === 0) { doc.setFillColor(248,245,239); doc.rect(20, y - 5, 170, 11, 'F'); }
-        doc.setTextColor(90,90,90); doc.setFontSize(8.5); doc.setFont('helvetica','bold');
-        doc.text(k, 25, y + 1);
-        doc.setTextColor(28,28,28); doc.setFont('helvetica','normal');
-        doc.text(String(v||'—'), 90, y + 1);
-    });
-    if (data.special_requirements) {
-        const y = 126 + fields.length * 11 + 4;
-        doc.setFillColor(255,248,230);
-        doc.roundedRect(20, y, 170, 22, 3, 3, 'F');
-        doc.setDrawColor(212,168,67);
-        doc.roundedRect(20, y, 170, 22, 3, 3, 'S');
-        doc.setTextColor(130,100,20); doc.setFontSize(8); doc.setFont('helvetica','bold');
-        doc.text('SPECIAL REQUIREMENTS:', 25, y + 8);
-        doc.setFont('helvetica','normal'); doc.setTextColor(80,60,10);
-        const wrapped = doc.splitTextToSize(data.special_requirements, 155);
-        doc.text(wrapped[0]||'', 25, y + 15);
+    // Helper: trigger download from URL (async but resolves after click)
+    function downloadFile(url, filename) {
+        return new Promise((resolve) => {
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(resolve, 300);
+        });
     }
-    doc.setFillColor(238,233,223);
-    doc.rect(0, 275, 210, 22, 'F');
-    doc.setFontSize(8); doc.setTextColor(120,115,108);
-    doc.text('Wanderlust Travel  ·  Mumbai, Maharashtra, India  ·  hello@wanderlust.in', 105, 284, { align: 'center' });
-    doc.text('Our team will email your full itinerary within 24 hours of this confirmation.', 105, 291, { align: 'center' });
-    doc.save(`ItineraryRequest_${data.full_name.replace(/\s/g,'_')}_${paymentId}.pdf`);
-}
+    function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-// ── EMAIL ──
-async function sendEmailNotification(email, name, product, amount, paymentId, pdfUrl) {
-    const html = `<div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;border:1px solid #eee9df;border-radius:12px;overflow:hidden"><div style="background:#2a4a3a;padding:24px;color:#fff;text-align:center"><h2 style="margin:0;font-family:Georgia,serif">Payment Confirmed</h2></div><div style="padding:24px"><p>Dear <strong>${esc(name)}</strong>,</p><p>Your purchase of <strong>${esc(product)}</strong> is confirmed.</p><table style="width:100%;border-collapse:collapse;margin:16px 0"><tr><td style="padding:8px;border:1px solid #eee9df;background:#f8f5ef"><strong>Amount</strong></td><td style="padding:8px;border:1px solid #eee9df">₹${amount}</td></tr><tr><td style="padding:8px;border:1px solid #eee9df;background:#f8f5ef"><strong>Payment ID</strong></td><td style="padding:8px;border:1px solid #eee9df">${paymentId}</td></tr><tr><td style="padding:8px;border:1px solid #eee9df;background:#f8f5ef"><strong>Status</strong></td><td style="padding:8px;border:1px solid #eee9df;color:#1e7a4a"><strong>Paid ✓</strong></td></tr></table>${pdfUrl&&pdfUrl!=='null'?`<p><a href="${pdfUrl}" style="display:inline-block;background:#c4502a;color:#fff;padding:10px 20px;text-decoration:none;border-radius:8px">Download Your Itinerary PDF</a></p>`:''}  <p>An invoice PDF has been downloaded to your device automatically.</p></div><div style="background:#eee9df;padding:12px;text-align:center;font-size:12px;color:#666">Wanderlust Travel — hello@wanderlust.in</div></div>`;
-    try { await emailjs.send("service_8o8nozh","template_xui60z6",{ name, email, message: html }); } catch(e) { console.error('Email error:',e); }
-}
+    // Invoice PDF using jspdf
+    function generateInvoicePDF(name, productTitle, amount, paymentId, travelers) {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const now = new Date();
+        doc.setFillColor(42, 74, 58); doc.rect(0, 0, 210, 45, 'F');
+        doc.setTextColor(255,255,255);
+        doc.setFontSize(24); doc.setFont("helvetica","bold");
+        doc.text("Wanderlust Travel", 20, 22);
+        doc.setFontSize(10); doc.text("PAYMENT INVOICE", 20, 32);
+        doc.setTextColor(40,40,40);
+        doc.setFontSize(9); doc.text(`Date: ${now.toLocaleDateString()}`, 150, 32);
+        doc.text(`Ref: WL-${paymentId.slice(-8)}`, 150, 38);
+        doc.setTextColor(0,0,0);
+        doc.setFontSize(11); doc.text(`Dear ${name},`, 20, 60);
+        doc.setFontSize(9); doc.text(`Thank you for purchasing ${productTitle}. Payment confirmed.`, 20, 70);
+        doc.setFillColor(248,245,239);
+        doc.roundedRect(20, 85, 85, 28, 3, 3, 'F');
+        doc.text("BILLED TO", 25, 94);
+        doc.text(name, 25, 102);
+        doc.text(`Travelers: ${travelers}`, 25, 110);
+        doc.roundedRect(115, 85, 75, 28, 3, 3, 'F');
+        doc.text("PAYMENT ID", 120, 94);
+        doc.text(paymentId, 120, 102);
+        doc.text(`Amount: ₹${Number(amount).toFixed(2)}`, 120, 110);
+        doc.setFillColor(42,74,58);
+        doc.rect(20, 125, 170, 12, 'F');
+        doc.setTextColor(255,255,255);
+        doc.text("ITEM", 25, 133);
+        doc.text("TOTAL", 160, 133);
+        doc.setTextColor(0,0,0);
+        doc.rect(20, 137, 170, 12, 'S');
+        doc.text(productTitle, 25, 146);
+        doc.text(`₹${Number(amount).toFixed(2)}`, 160, 146);
+        doc.setFillColor(42,74,58);
+        doc.rect(130, 155, 60, 12, 'F');
+        doc.setTextColor(255,255,255);
+        doc.text("GRAND TOTAL", 135, 163);
+        doc.text(`₹${Number(amount).toFixed(2)}`, 175, 163);
+        doc.setTextColor(30,122,74);
+        doc.text("✓ PAID", 20, 175);
+        doc.setTextColor(100,100,100);
+        doc.setFontSize(8);
+        doc.text("Your itinerary PDF has been downloaded separately.", 20, 190);
+        doc.text("For support: hello@wanderlust.in", 20, 200);
+        doc.save(`Invoice_${name.replace(/\s/g,"_")}_${paymentId}.pdf`);
+    }
 
-async function sendItineraryEmail(email, name, paymentId, data) {
-    const html = `<div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;border:1px solid #eee9df;border-radius:12px;overflow:hidden"><div style="background:#2a4a3a;padding:24px;color:#fff;text-align:center"><h2 style="margin:0;font-family:Georgia,serif">Itinerary Request Received</h2></div><div style="padding:24px"><p>Dear <strong>${esc(name)}</strong>,</p><p>Your itinerary request for <strong>${esc(data.destination)}</strong> has been confirmed. Payment received!</p><table style="width:100%;border-collapse:collapse;margin:16px 0"><tr><td style="padding:8px;border:1px solid #eee9df;background:#f8f5ef"><strong>Destination</strong></td><td style="padding:8px;border:1px solid #eee9df">${esc(data.destination)}</td></tr><tr><td style="padding:8px;border:1px solid #eee9df;background:#f8f5ef"><strong>Duration</strong></td><td style="padding:8px;border:1px solid #eee9df">${data.days} days for ${data.people} people</td></tr><tr><td style="padding:8px;border:1px solid #eee9df;background:#f8f5ef"><strong>Payment ID</strong></td><td style="padding:8px;border:1px solid #eee9df">${paymentId}</td></tr></table><p>Our travel experts will prepare your personalised itinerary and contact you <strong>within 24 hours</strong>.</p><p>An invoice PDF has been downloaded to your device.</p></div><div style="background:#eee9df;padding:12px;text-align:center;font-size:12px;color:#666">Wanderlust Travel — hello@wanderlust.in</div></div>`;
-    try { await emailjs.send("service_8o8nozh","template_xui60z6",{ name, email, message: html }); } catch(e) { console.error('Email error:',e); }
-}
+    async function sendOrderEmail(email, name, product, amount, paymentId, pdfUrl) {
+        const htmlContent = `<div style="font-family:sans-serif"><h2>Booking Confirmed, ${name}!</h2><p>Package: <strong>${product}</strong> | Amount: ₹${amount}</p><p>Payment ID: ${paymentId}</p>${pdfUrl && pdfUrl!=='null' ? `<p><a href="${pdfUrl}" style="background:#c4502a;color:white;padding:8px 16px;text-decoration:none;border-radius:30px">📥 Download Itinerary PDF</a></p>` : ""}<p>Invoice PDF already saved to your device.</p><br/>Happy travels,<br/>Wanderlust Team</div>`;
+        try {
+            await emailjs.send("service_8o8nozh", "template_xui60z6", { name, email, message: htmlContent });
+        } catch(e) { console.warn("emailjs failed", e); }
+    }
 
-// ── CONTACT ──
-async function submitContact(btn) {
-    const fields = [
-        { inputId:'con_name',  groupId:'fg_con_name',  rule:'name'  },
-        { inputId:'con_email', groupId:'fg_con_email', rule:'email' },
-        { inputId:'con_phone', groupId:'fg_con_phone', rule:'phone' }
-    ];
-    if (!hardValidate(fields)) { toast('Missing Fields','Please fill all required fields correctly.','error'); return; }
-    const name    = document.getElementById('con_name').value.trim();
-    const email   = document.getElementById('con_email').value.trim();
-    const phone   = document.getElementById('con_phone').value.trim();
-    const message = document.getElementById('con_message').value.trim();
-    btn.disabled = true; btn.textContent = 'Sending…';
-    const { error } = await sb.from('contact_messages').insert([{ name, email, contact: phone, message }]);
-    btn.disabled = false;
-    btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg> Send Message`;
-    if (error) { toast('Error', error.message, 'error'); return; }
-    toast('Message Sent',"We'll get back to you shortly!");
-    ['con_name','con_email','con_phone','con_message'].forEach(id => document.getElementById(id).value = '');
-    fields.forEach(f => {
-        const el = document.getElementById(f.groupId);
-        if (el) el.classList.remove('is-valid','has-error');
-    });
-}
+    // Contact form
+    async function sendContact() {
+        const name = document.getElementById("contactName").value.trim();
+        const email = document.getElementById("contactEmail").value.trim();
+        const message = document.getElementById("contactMsg").value.trim();
+        if (!validateName(name) || !validateEmail(email)) {
+            showToast("Please provide valid name and email.", "error"); return;
+        }
+        const btn = document.getElementById("sendContactBtn");
+        btn.disabled = true; btn.textContent = "Sending...";
+        const { error } = await supabase.from("contact_messages").insert([{ name, email, contact: "", message }]);
+        btn.disabled = false; btn.textContent = "Send message";
+        if (error) { showToast("Error sending message.", "error"); } 
+        else { showToast("Message sent! We'll reply soon.", "success"); document.getElementById("contactName").value = ""; document.getElementById("contactEmail").value = ""; document.getElementById("contactMsg").value = ""; }
+    }
+    document.getElementById("sendContactBtn")?.addEventListener("click", sendContact);
 
-// ── FAQ ──
-const faqs = [
-    { q:"How does the custom itinerary service work?", a:"Fill out the itinerary request form with your travel preferences. After a small ₹1 booking fee, our team will prepare a fully personalized travel plan and send it to your email within 24 hours." },
-    { q:"What happens after I pay for a travel package?", a:"First, the admin-uploaded itinerary PDF downloads to your device. Then your invoice PDF is generated and downloaded. Finally, a confirmation email is sent to your inbox." },
-    { q:"Is my payment information secure?", a:"Yes. All payments are processed by Razorpay, a PCI-DSS compliant payment gateway used by thousands of Indian businesses. We never store your card or bank details." },
-    { q:"Can I get a refund if I'm not satisfied?", a:"We offer a full refund within 7 days of purchase if the product does not match its description. Contact us at hello@wanderlust.in with your payment ID." },
-    { q:"How long does it take to receive a custom itinerary?", a:"Our travel experts typically deliver your personalised itinerary within 24 hours of receiving your request. For complex or group itineraries, it may take up to 48 hours." },
-    { q:"What payment methods are accepted?", a:"We accept all major credit/debit cards, UPI (Google Pay, PhonePe, Paytm), net banking, and EMI options — all through Razorpay's secure checkout." },
-    { q:"Can I modify my itinerary after submitting?", a:"Yes! Once our team sends you the draft itinerary, you can request up to 2 revisions free of charge. Just reply to the email with your feedback." },
-    { q:"Are the travel packages suitable for families with children?", a:"Absolutely. When filling the itinerary form, mention the number of children and any special requirements, and we will tailor the plan accordingly." },
-];
+    function escapeHtml(str) { if(!str) return ""; return str.replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+    function toggleMobileMenu() { document.getElementById("mobileNav").classList.toggle("active"); }
 
-function buildFAQ() {
-    document.getElementById('faqList').innerHTML = faqs.map((f,i) => `
-        <div class="faq-item" id="faq${i}">
-            <button class="faq-question" onclick="toggleFAQ(${i})">
-                <span>${f.q}</span>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-            </button>
-            <div class="faq-answer">${f.a}</div>
-        </div>`).join('');
-}
-function toggleFAQ(i) {
-    const item = document.getElementById('faq'+i);
-    const isOpen = item.classList.contains('open');
-    document.querySelectorAll('.faq-item').forEach(el => el.classList.remove('open'));
-    if (!isOpen) item.classList.add('open');
-}
-
-// ── UTILS ──
-function esc(t) { if (!t) return ''; const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
-
-function clearItineraryForm() {
-    ['itin_name','itin_email','itin_phone','itin_dest','itin_days','itin_people','itin_budget','itin_dates','itin_special'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-    ['itin_trip','itin_style'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-    document.getElementById('itin_food').value = 'No Preference';
-    document.getElementById('itin_kids').value = 'No children';
-    ITIN_REQUIRED_FIELDS.forEach(f => {
-        const el = document.getElementById(f.groupId);
-        if (el) el.classList.remove('is-valid','has-error');
-    });
-    document.getElementById('itinValidHint').classList.remove('visible');
-}
-
-function toggleMenu() { document.getElementById('mobileNav').classList.toggle('active'); }
-
-// Close modal only when clicking the dark overlay (not the box)
-document.getEleme
+    window.onclick = (e) => { if(e.target === document.getElementById("purchaseModal")) closePurchaseModal(); };
+    attachModalValidation();
+    loadProducts();
+</script>
+</body>
+</html>
