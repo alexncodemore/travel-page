@@ -497,7 +497,7 @@
             <p>Have questions about a package or need help planning your trip? Our team of travel experts is ready to help you every step of the way.</p>
             <div class="contact-detail">
                 <div class="contact-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></div>
-                <div><strong>Email</strong><span>hello@wanderlust.in</span></div>
+                <div><strong>Email</strong><span><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="fc9499909093bc8b9d9298998e90898f88d29592">[email&#160;protected]</a></span></div>
             </div>
             <div class="contact-detail">
                 <div class="contact-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></div>
@@ -594,7 +594,7 @@
 
 <div class="toast-container" id="toastContainer"></div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ── INIT ──
 emailjs.init("7rgj4t_06JrmsxgHC");
 const sb = window.supabase.createClient(
@@ -1080,21 +1080,29 @@ async function handleItinerarySuccess(response) {
 }
 
 // ── FILE DOWNLOAD (async version that resolves after triggering) ──
-function downloadFileAsync(url, title) {
-    return new Promise((resolve) => {
-        try {
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${(title||'document').replace(/[^a-z0-9]/gi,'_')}.pdf`;
-            a.target = '_blank';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        } catch(e) {
-            console.error('Download failed:', e);
-        }
-        resolve(); // Resolve immediately after triggering browser download
-    });
+async function downloadFileAsync(url, title) {
+    // Cross-origin URLs (e.g. Supabase storage) ignore the <a download> attribute.
+    // Solution: fetch the file as a blob → create a local object URL → download that.
+    const filename = `${(title || 'document').replace(/[^a-z0-9]/gi, '_')}.pdf`;
+    try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const blob = await res.blob();
+        const objectUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = objectUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        // Revoke after a short delay so the browser finishes reading it
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 10000);
+    } catch (e) {
+        console.error('Blob download failed, falling back to new tab:', e);
+        // Fallback: open in new tab so user can manually save
+        window.open(url, '_blank', 'noopener');
+        toast('Download Note', 'PDF opened in a new tab — use Ctrl+S / ⌘S to save it.', 'success');
+    }
 }
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
@@ -1317,14 +1325,4 @@ function clearItineraryForm() {
 function toggleMenu() { document.getElementById('mobileNav').classList.toggle('active'); }
 
 // Close modal only when clicking the dark overlay (not the box)
-document.getElementById('purchaseModal').addEventListener('click', e => {
-    if (e.target === document.getElementById('purchaseModal')) closeModal();
-});
-
-// ── INIT ──
-loadProducts();
-loadReviews();
-buildFAQ();
-</script>
-</body>
-</html>
+document.getEleme
