@@ -6,173 +6,115 @@
     <title>Admin — Wanderlust Travel</title>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         :root {
-            --cream: #faf7f2; --sand: #f0ebe0; --terracotta: #c4622d; --terracotta-dark: #a04e22;
-            --forest: #2d4a3e; --forest-light: #3d6b5c; --gold: #c9952a; --gold-light: #e8b84b;
-            --charcoal: #1c1c1e; --mid: #5a5a5a; --light: #9a9a9a; --border: #e0d9ce;
-            --white: #ffffff; --success: #2d7a4f; --error: #c0392b;
+            --ink: #0d1117; --ink2: #1c2333; --sage: #2a4a3a; --sage2: #3a6b54;
+            --amber: #d4a843; --amber2: #f0c56a; --rust: #c4502a; --rust2: #e0673d;
+            --paper: #f8f5ef; --paper2: #eee9df; --stone: #c9c2b4; --mist: #8a8275;
+            --white: #fff; --success: #1e7a4a; --error: #c0392b;
+            --r8: 8px; --r12: 12px; --r16: 16px; --r24: 24px; --r999: 999px;
         }
-        body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--charcoal); min-height: 100vh; }
+        body { font-family: 'Outfit', sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; }
 
-        /* LOGIN SCREEN */
-        #loginScreen {
-            position: fixed; inset: 0; z-index: 999;
-            background: linear-gradient(160deg, var(--forest) 0%, #1a3328 100%);
-            display: flex; align-items: center; justify-content: center;
-            padding: 1.5rem;
-        }
-        .login-card {
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 24px; padding: 2.5rem;
-            width: 100%; max-width: 380px;
-            backdrop-filter: blur(16px);
-        }
-        .login-logo {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.6rem; color: var(--white);
-            margin-bottom: 0.25rem;
-        }
-        .login-logo span { color: var(--gold-light); }
-        .login-subtitle { color: rgba(255,255,255,0.5); font-size: 0.85rem; margin-bottom: 2rem; }
-        .login-label { display: block; color: rgba(255,255,255,0.7); font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.4rem; }
-        .login-input {
-            width: 100%; padding: 0.75rem 1rem;
-            background: rgba(255,255,255,0.08); border: 1.5px solid rgba(255,255,255,0.15);
-            border-radius: 10px; color: var(--white);
-            font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
-            outline: none; margin-bottom: 1rem;
-            transition: border-color 0.2s;
-        }
-        .login-input::placeholder { color: rgba(255,255,255,0.3); }
-        .login-input:focus { border-color: var(--gold-light); }
-        .login-btn {
-            width: 100%; padding: 0.85rem; border-radius: 10px;
-            background: var(--terracotta); color: var(--white);
-            font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 700;
-            border: none; cursor: pointer; transition: background 0.2s;
-        }
-        .login-btn:hover { background: var(--terracotta-dark); }
-        .login-error {
-            background: rgba(192,57,43,0.15); border: 1px solid rgba(192,57,43,0.3);
-            color: #f5b7b1; padding: 0.65rem 0.9rem; border-radius: 8px;
-            font-size: 0.85rem; margin-top: 0.75rem; display: none;
-        }
+        /* ── LOGIN ── */
+        #loginScreen { position: fixed; inset: 0; z-index: 999; background: linear-gradient(160deg, var(--ink2) 0%, #0a1a10 100%); display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
+        .login-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--r24); padding: 2.75rem; width: 100%; max-width: 380px; backdrop-filter: blur(20px); }
+        .login-logo { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 700; color: var(--white); margin-bottom: 0.25rem; }
+        .login-logo em { color: var(--amber2); font-style: normal; }
+        .login-subtitle { color: rgba(255,255,255,0.4); font-size: 0.82rem; margin-bottom: 2.25rem; }
+        .login-label { display: block; color: rgba(255,255,255,0.6); font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.4rem; }
+        .login-input { width: 100%; padding: 0.8rem 1rem; background: rgba(255,255,255,0.07); border: 1.5px solid rgba(255,255,255,0.12); border-radius: var(--r8); color: var(--white); font-family: 'Outfit', sans-serif; font-size: 0.9rem; outline: none; margin-bottom: 1rem; transition: border-color 0.2s; }
+        .login-input::placeholder { color: rgba(255,255,255,0.25); }
+        .login-input:focus { border-color: var(--amber2); }
+        .login-btn { width: 100%; padding: 0.9rem; border-radius: var(--r8); background: var(--sage); color: var(--white); font-family: 'Outfit', sans-serif; font-size: 0.95rem; font-weight: 700; border: none; cursor: pointer; transition: background 0.2s; }
+        .login-btn:hover { background: var(--sage2); }
+        .login-error { background: rgba(192,57,43,0.12); border: 1px solid rgba(192,57,43,0.3); color: #f5b7b1; padding: 0.65rem 0.9rem; border-radius: var(--r8); font-size: 0.85rem; margin-top: 0.75rem; display: none; }
 
-        /* ADMIN LAYOUT */
+        /* ── ADMIN LAYOUT ── */
         #adminApp { display: none; }
-        .admin-header {
-            background: var(--forest); color: var(--white);
-            padding: 0 2rem; height: 60px;
-            display: flex; align-items: center; justify-content: space-between;
-            position: sticky; top: 0; z-index: 50;
-        }
-        .admin-logo { font-family: 'Playfair Display', serif; font-size: 1.2rem; }
-        .admin-logo span { color: var(--gold-light); }
-        .logout-btn {
-            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
-            color: var(--white); padding: 0.4rem 1rem; border-radius: 50px;
-            font-size: 0.8rem; font-weight: 600; cursor: pointer;
-            display: flex; align-items: center; gap: 0.4rem; transition: background 0.2s;
-        }
-        .logout-btn:hover { background: rgba(255,255,255,0.2); }
+        .admin-header { background: var(--ink2); color: var(--white); padding: 0 2rem; height: 62px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+        .admin-logo { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 700; }
+        .admin-logo em { color: var(--amber2); font-style: normal; }
+        .admin-logo small { font-size: 0.65rem; font-family: 'Outfit', sans-serif; color: rgba(255,255,255,0.35); font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; margin-left: 0.5rem; }
+        .logout-btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: rgba(255,255,255,0.7); padding: 0.4rem 1rem; border-radius: var(--r999); font-size: 0.78rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.4rem; transition: background 0.2s; font-family: 'Outfit', sans-serif; }
+        .logout-btn:hover { background: rgba(255,255,255,0.15); }
         .admin-main { padding: 2rem; max-width: 1400px; margin: 0 auto; }
 
-        /* TABS */
-        .tabs { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 2rem; }
-        .tab-btn {
-            padding: 0.55rem 1.1rem; border-radius: 50px;
-            background: var(--white); border: 1.5px solid var(--border);
-            font-family: 'DM Sans', sans-serif; font-size: 0.875rem; font-weight: 600;
-            color: var(--mid); cursor: pointer; transition: all 0.2s;
-            display: flex; align-items: center; gap: 0.4rem;
-        }
-        .tab-btn.active { background: var(--forest); border-color: var(--forest); color: var(--white); }
-        .tab-btn:hover:not(.active) { border-color: var(--forest); color: var(--forest); }
-        .tab-badge {
-            background: var(--terracotta); color: var(--white);
-            font-size: 0.7rem; font-weight: 700; padding: 0.1rem 0.45rem;
-            border-radius: 50px; min-width: 18px; text-align: center;
-        }
-        .tab-badge.active-badge { background: rgba(255,255,255,0.3); }
+        /* ── STATS ROW ── */
+        .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .stat-card { background: var(--white); border: 1px solid var(--paper2); border-radius: var(--r12); padding: 1.1rem 1.4rem; }
+        .stat-card .label { font-size: 0.72rem; font-weight: 700; color: var(--mist); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 0.4rem; }
+        .stat-card .value { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 700; color: var(--ink); line-height: 1; }
+
+        /* ── TABS ── */
+        .tabs { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.75rem; }
+        .tab-btn { padding: 0.55rem 1.1rem; border-radius: var(--r999); background: var(--white); border: 1.5px solid var(--paper2); font-family: 'Outfit', sans-serif; font-size: 0.85rem; font-weight: 600; color: var(--mist); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 0.4rem; }
+        .tab-btn.active { background: var(--ink2); border-color: var(--ink2); color: var(--white); }
+        .tab-btn:hover:not(.active) { border-color: var(--sage); color: var(--sage); }
+        .tab-badge { background: var(--rust); color: var(--white); font-size: 0.68rem; font-weight: 700; padding: 0.1rem 0.45rem; border-radius: var(--r999); min-width: 18px; text-align: center; }
+        .tab-btn.active .tab-badge { background: rgba(255,255,255,0.25); }
         .tab-panel { display: none; }
         .tab-panel.active { display: block; }
 
-        /* CARDS */
-        .card { background: var(--white); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; margin-bottom: 1.5rem; }
-        .card-header { padding: 1.1rem 1.4rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-        .card-header h3 { font-family: 'Playfair Display', serif; font-size: 1.05rem; }
-        .card-body { padding: 1.4rem; }
+        /* ── CARD ── */
+        .card { background: var(--white); border: 1px solid var(--paper2); border-radius: var(--r16); overflow: hidden; margin-bottom: 1.5rem; }
+        .card-header { padding: 1.1rem 1.5rem; border-bottom: 1px solid var(--paper2); display: flex; align-items: center; justify-content: space-between; }
+        .card-header h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.15rem; font-weight: 700; }
+        .card-body { padding: 1.5rem; }
 
-        /* FORM */
+        /* ── FORM ── */
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
         .form-group { margin-bottom: 0.75rem; }
         .form-group.full { grid-column: 1 / -1; }
-        label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--charcoal); margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.04em; }
-        input, textarea, select {
-            width: 100%; padding: 0.65rem 0.9rem;
-            border: 1.5px solid var(--border); border-radius: 8px;
-            font-family: 'DM Sans', sans-serif; font-size: 0.875rem;
-            color: var(--charcoal); background: var(--cream); outline: none;
-            transition: border-color 0.2s;
-        }
-        input:focus, textarea:focus, select:focus { border-color: var(--forest); }
+        label { display: block; font-size: 0.7rem; font-weight: 700; color: var(--ink); margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.06em; }
+        input, textarea, select { width: 100%; padding: 0.65rem 0.9rem; border: 1.5px solid var(--paper2); border-radius: var(--r8); font-family: 'Outfit', sans-serif; font-size: 0.875rem; color: var(--ink); background: var(--paper); outline: none; transition: border-color 0.2s; }
+        input:focus, textarea:focus, select:focus { border-color: var(--sage); }
         textarea { min-height: 80px; resize: vertical; }
-        .btn { padding: 0.6rem 1.4rem; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.875rem; font-weight: 600; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; transition: 0.2s; }
-        .btn-primary { background: var(--forest); color: var(--white); }
-        .btn-primary:hover { background: var(--forest-light); }
-        .btn-danger { background: #fef0f0; color: var(--error); border: 1px solid #f5b7b1; }
-        .btn-danger:hover { background: var(--error); color: var(--white); }
-        .btn-ghost { background: var(--sand); color: var(--mid); }
-        .btn-ghost:hover { background: var(--border); }
+        .btn { padding: 0.6rem 1.3rem; border-radius: var(--r8); font-family: 'Outfit', sans-serif; font-size: 0.875rem; font-weight: 600; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; transition: 0.2s; }
+        .btn-primary { background: var(--sage); color: var(--white); }
+        .btn-primary:hover { background: var(--sage2); }
+        .btn-danger { background: #fff0f0; color: var(--error); border: 1px solid #f5b7b1; }
+        .btn-danger:hover { background: var(--error); color: var(--white); border-color: var(--error); }
 
-        /* TABLE */
+        /* ── TABLE ── */
         .table-wrap { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 600px; }
-        thead th { background: var(--forest); color: var(--white); padding: 0.7rem 0.9rem; text-align: left; font-weight: 600; white-space: nowrap; }
-        tbody td { padding: 0.7rem 0.9rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.84rem; min-width: 600px; }
+        thead th { background: var(--ink2); color: var(--white); padding: 0.75rem 1rem; text-align: left; font-weight: 600; white-space: nowrap; font-size: 0.78rem; letter-spacing: 0.03em; }
+        tbody td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--paper2); vertical-align: middle; }
         tbody tr:last-child td { border-bottom: none; }
-        tbody tr:hover { background: var(--cream); }
-        .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 50px; font-size: 0.75rem; font-weight: 700; }
-        .badge-paid { background: #f0faf4; color: var(--success); border: 1px solid #a8d8b9; }
-        .badge-pending { background: #fef0f0; color: var(--error); border: 1px solid #f5b7b1; }
-        .empty-state { padding: 3rem; text-align: center; color: var(--light); font-size: 0.9rem; }
-        .loading-dots { display: flex; gap: 0.4rem; justify-content: center; padding: 2rem; }
-        .loading-dots span { width: 8px; height: 8px; border-radius: 50%; background: var(--border); animation: bounce 1.2s infinite; }
-        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
-        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes bounce { 0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px);background:var(--terracotta)} }
+        tbody tr:hover { background: var(--paper); }
+        .badge { display: inline-block; padding: 0.2rem 0.65rem; border-radius: var(--r999); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; }
+        .badge-paid { background: #f0faf4; color: var(--success); border: 1px solid #9fd4b4; }
+        .badge-pending { background: #fff0f0; color: var(--error); border: 1px solid #f5b7b1; }
+        .empty-state { padding: 3rem; text-align: center; color: var(--mist); font-size: 0.9rem; }
 
-        /* PRODUCT LIST */
-        .product-row { display: flex; align-items: center; gap: 1rem; padding: 0.9rem 0; border-bottom: 1px solid var(--border); }
+        /* ── PRODUCT LIST ── */
+        .product-row { display: flex; align-items: center; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid var(--paper2); }
         .product-row:last-child { border-bottom: none; }
-        .product-thumb { width: 56px; height: 56px; border-radius: 8px; object-fit: cover; flex-shrink: 0; background: var(--sand); }
+        .product-thumb { width: 56px; height: 56px; border-radius: var(--r8); object-fit: cover; flex-shrink: 0; background: var(--paper2); }
         .product-meta { flex: 1; }
-        .product-meta strong { display: block; font-size: 0.9rem; }
-        .product-meta span { font-size: 0.8rem; color: var(--mid); }
-        .product-price-tag { font-size: 1rem; font-weight: 700; color: var(--forest); white-space: nowrap; }
+        .product-meta strong { display: block; font-size: 0.9rem; margin-bottom: 0.2rem; }
+        .product-meta span { font-size: 0.78rem; color: var(--mist); }
+        .product-price-tag { font-size: 1.05rem; font-weight: 700; color: var(--sage); font-family: 'Cormorant Garamond', serif; white-space: nowrap; }
         .product-actions { display: flex; gap: 0.4rem; }
 
-        /* STATS ROW */
-        .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
-        .stat-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem 1.4rem; }
-        .stat-card .label { font-size: 0.75rem; font-weight: 600; color: var(--light); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.35rem; }
-        .stat-card .value { font-size: 1.7rem; font-family: 'Playfair Display', serif; color: var(--charcoal); }
+        /* ── LOADING ── */
+        .loading-dots { display: flex; gap: 0.4rem; justify-content: center; padding: 2rem; }
+        .loading-dots span { width: 8px; height: 8px; border-radius: 50%; background: var(--stone); animation: ldots 1.2s infinite; }
+        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes ldots { 0%,80%,100%{transform:translateY(0);background:var(--stone)} 40%{transform:translateY(-6px);background:var(--rust)} }
 
-        /* TOAST */
+        /* ── TOAST ── */
         .toast-container { position: fixed; bottom: 2rem; right: 2rem; z-index: 999; display: flex; flex-direction: column; gap: 0.5rem; }
-        .toast { min-width: 260px; padding: 0.85rem 1.1rem; border-radius: 10px; font-size: 0.875rem; display: flex; gap: 0.6rem; animation: toastIn 0.3s ease; box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
-        .toast-success { background: #f0faf4; border: 1px solid #a8d8b9; color: var(--success); }
-        .toast-error { background: #fef0f0; border: 1px solid #f5b7b1; color: var(--error); }
+        .toast { min-width: 260px; padding: 0.9rem 1.1rem; border-radius: var(--r12); font-size: 0.875rem; display: flex; gap: 0.6rem; animation: toastIn 0.3s ease; box-shadow: 0 6px 24px rgba(13,17,23,0.15); }
+        .toast-success { background: #f0faf4; border: 1px solid #9fd4b4; color: var(--success); }
+        .toast-error { background: #fff0f0; border: 1px solid #f5b7b1; color: var(--error); }
         @keyframes toastIn { from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)} }
 
-        @media (max-width: 640px) {
-            .form-grid { grid-template-columns: 1fr; }
-            .admin-main { padding: 1rem; }
-        }
+        @media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } .admin-main { padding: 1rem; } }
     </style>
 </head>
 <body>
@@ -180,7 +122,7 @@
 <!-- LOGIN SCREEN -->
 <div id="loginScreen">
     <div class="login-card">
-        <div class="login-logo">Wander<span>lust</span></div>
+        <div class="login-logo">Wander<em>lust</em></div>
         <div class="login-subtitle">Admin Portal — Restricted Access</div>
         <label class="login-label" for="adminId">Admin ID</label>
         <input class="login-input" type="text" id="adminId" placeholder="Enter admin ID" autocomplete="off">
@@ -194,19 +136,19 @@
 <!-- ADMIN APP -->
 <div id="adminApp">
     <header class="admin-header">
-        <div class="admin-logo">Wander<span>lust</span> Admin</div>
+        <div class="admin-logo">Wander<em>lust</em><small>Admin</small></div>
         <button class="logout-btn" onclick="doLogout()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
             Logout
         </button>
     </header>
 
     <main class="admin-main">
-        <!-- Stats Row -->
+        <!-- Stats -->
         <div class="stats-row" id="statsRow">
             <div class="stat-card"><div class="label">Products</div><div class="value" id="statProducts">—</div></div>
             <div class="stat-card"><div class="label">Orders</div><div class="value" id="statOrders">—</div></div>
-            <div class="stat-card"><div class="label">Itinerary Requests</div><div class="value" id="statItinerary">—</div></div>
+            <div class="stat-card"><div class="label">Itinerary Req.</div><div class="value" id="statItinerary">—</div></div>
             <div class="stat-card"><div class="label">Reviews</div><div class="value" id="statReviews">—</div></div>
             <div class="stat-card"><div class="label">Contacts</div><div class="value" id="statContacts">—</div></div>
         </div>
@@ -214,29 +156,24 @@
         <!-- Tabs -->
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('products',this)">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2z"/></svg>
-                Products
-                <span class="tab-badge" id="badgeProducts">0</span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2z"/></svg>
+                Products <span class="tab-badge" id="badgeProducts">0</span>
             </button>
             <button class="tab-btn" onclick="switchTab('orders',this)">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-8.9-5h9.45c.75 0 1.41-.41 1.75-1.03L21 7H6L4.27 3H1v2h2l3.6 7.59L5.25 15c-.16.28-.25.61-.25.96C5 17.1 5.9 18 7 18h14v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12z"/></svg>
-                Orders
-                <span class="tab-badge" id="badgeOrders">0</span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-8.9-5h9.45c.75 0 1.41-.41 1.75-1.03L21 7H6L4.27 3H1v2h2l3.6 7.59L5.25 15c-.16.28-.25.61-.25.96C5 17.1 5.9 18 7 18h14v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12z"/></svg>
+                Orders <span class="tab-badge" id="badgeOrders">0</span>
             </button>
             <button class="tab-btn" onclick="switchTab('itinerary',this)">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>
-                Itinerary
-                <span class="tab-badge" id="badgeItinerary">0</span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>
+                Itinerary <span class="tab-badge" id="badgeItinerary">0</span>
             </button>
             <button class="tab-btn" onclick="switchTab('reviews',this)">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>
-                Reviews
-                <span class="tab-badge" id="badgeReviews">0</span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>
+                Reviews <span class="tab-badge" id="badgeReviews">0</span>
             </button>
             <button class="tab-btn" onclick="switchTab('contacts',this)">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
-                Contacts
-                <span class="tab-badge" id="badgeContacts">0</span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                Contacts <span class="tab-badge" id="badgeContacts">0</span>
             </button>
         </div>
 
@@ -246,24 +183,12 @@
                 <div class="card-header"><h3>Add New Product</h3></div>
                 <div class="card-body">
                     <div class="form-grid">
+                        <div class="form-group"><label>Title *</label><input type="text" id="prod_title" placeholder="Package title"></div>
+                        <div class="form-group"><label>Price (₹) *</label><input type="number" id="prod_price" step="0.01" placeholder="0.00"></div>
+                        <div class="form-group full"><label>Description</label><textarea id="prod_desc" placeholder="Package description"></textarea></div>
+                        <div class="form-group"><label>Product Image</label><input type="file" id="prod_img" accept="image/*"></div>
                         <div class="form-group">
-                            <label>Title *</label>
-                            <input type="text" id="prod_title" placeholder="Package title">
-                        </div>
-                        <div class="form-group">
-                            <label>Price (₹) *</label>
-                            <input type="number" id="prod_price" step="0.01" placeholder="0.00">
-                        </div>
-                        <div class="form-group full">
-                            <label>Description</label>
-                            <textarea id="prod_desc" placeholder="Package description"></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label>Product Image</label>
-                            <input type="file" id="prod_img" accept="image/*">
-                        </div>
-                        <div class="form-group">
-                            <label>PDF Document</label>
+                            <label>Itinerary PDF <span style="font-size:0.68rem;color:var(--mist);text-transform:none;letter-spacing:0">(downloaded to user after payment)</span></label>
                             <input type="file" id="prod_pdf" accept=".pdf">
                         </div>
                     </div>
@@ -274,10 +199,8 @@
                 </div>
             </div>
             <div class="card">
-                <div class="card-header"><h3>Products</h3></div>
-                <div class="card-body" id="productsList">
-                    <div class="loading-dots"><span></span><span></span><span></span></div>
-                </div>
+                <div class="card-header"><h3>All Products</h3></div>
+                <div class="card-body" id="productsList"><div class="loading-dots"><span></span><span></span><span></span></div></div>
             </div>
         </div>
 
@@ -285,9 +208,7 @@
         <div class="tab-panel" id="tab-orders">
             <div class="card">
                 <div class="card-header"><h3>Product Orders</h3></div>
-                <div class="table-wrap" id="ordersTable">
-                    <div class="loading-dots"><span></span><span></span><span></span></div>
-                </div>
+                <div class="table-wrap" id="ordersTable"><div class="loading-dots"><span></span><span></span><span></span></div></div>
             </div>
         </div>
 
@@ -295,9 +216,7 @@
         <div class="tab-panel" id="tab-itinerary">
             <div class="card">
                 <div class="card-header"><h3>Itinerary Requests</h3></div>
-                <div class="table-wrap" id="itineraryTable">
-                    <div class="loading-dots"><span></span><span></span><span></span></div>
-                </div>
+                <div class="table-wrap" id="itineraryTable"><div class="loading-dots"><span></span><span></span><span></span></div></div>
             </div>
         </div>
 
@@ -305,9 +224,7 @@
         <div class="tab-panel" id="tab-reviews">
             <div class="card">
                 <div class="card-header"><h3>Travel Reviews</h3></div>
-                <div class="table-wrap" id="reviewsTable">
-                    <div class="loading-dots"><span></span><span></span><span></span></div>
-                </div>
+                <div class="table-wrap" id="reviewsTable"><div class="loading-dots"><span></span><span></span><span></span></div></div>
             </div>
         </div>
 
@@ -315,9 +232,7 @@
         <div class="tab-panel" id="tab-contacts">
             <div class="card">
                 <div class="card-header"><h3>Contact Requests</h3></div>
-                <div class="table-wrap" id="contactsTable">
-                    <div class="loading-dots"><span></span><span></span><span></span></div>
-                </div>
+                <div class="table-wrap" id="contactsTable"><div class="loading-dots"><span></span><span></span><span></span></div></div>
             </div>
         </div>
     </main>
@@ -326,16 +241,8 @@
 <div class="toast-container" id="toastContainer"></div>
 
 <script>
-const sb = window.supabase.createClient(
-    "https://eyekpbzcdouhkquqjjae.supabase.co",
-    "sb_publishable_hONe7ntkTZaGeyFsLV0iMQ_9aTXtOBE"
-);
-
-// ── CREDENTIALS (change these) ────────────────────────────────────────────────
-const ADMIN_ID = "admin";
-const ADMIN_PASS = "wanderlust@2025";
-// ─────────────────────────────────────────────────────────────────────────────
-
+const sb = window.supabase.createClient("https://eyekpbzcdouhkquqjjae.supabase.co","sb_publishable_hONe7ntkTZaGeyFsLV0iMQ_9aTXtOBE");
+const ADMIN_ID = "admin", ADMIN_PASS = "wanderlust@2025";
 let sessionActive = false;
 
 function doLogin() {
@@ -343,8 +250,7 @@ function doLogin() {
     const pw = document.getElementById('adminPass').value;
     const err = document.getElementById('loginError');
     if (id === ADMIN_ID && pw === ADMIN_PASS) {
-        sessionStorage.setItem('wl_admin', 'true');
-        sessionActive = true;
+        sessionStorage.setItem('wl_admin','true'); sessionActive = true;
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('adminApp').style.display = 'block';
         loadAll();
@@ -357,8 +263,7 @@ function doLogin() {
 }
 
 function doLogout() {
-    sessionStorage.removeItem('wl_admin');
-    sessionActive = false;
+    sessionStorage.removeItem('wl_admin'); sessionActive = false;
     document.getElementById('adminApp').style.display = 'none';
     document.getElementById('loginScreen').style.display = 'flex';
     document.getElementById('adminId').value = '';
@@ -374,7 +279,6 @@ function checkSession() {
     }
 }
 
-// ── TABS ──────────────────────────────────────────────────────────────────────
 function switchTab(name, btn) {
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -382,46 +286,27 @@ function switchTab(name, btn) {
     btn.classList.add('active');
 }
 
-// ── TOAST ─────────────────────────────────────────────────────────────────────
 function toast(msg, type = 'success') {
     const c = document.getElementById('toastContainer');
     const t = document.createElement('div');
     t.className = `toast toast-${type}`;
-    t.innerHTML = `<span>${type === 'success' ? '✓' : '✕'}</span><span>${msg}</span>`;
-    c.appendChild(t);
-    setTimeout(() => t.remove(), 3500);
+    t.innerHTML = `<span>${type==='success'?'✓':'✕'}</span><span>${msg}</span>`;
+    c.appendChild(t); setTimeout(() => t.remove(), 3500);
 }
 
-function esc(t) {
-    if (!t) return '';
-    const d = document.createElement('div');
-    d.textContent = t;
-    return d.innerHTML;
-}
+function esc(t) { if (!t) return ''; const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
 
-// ── LOAD ALL ──────────────────────────────────────────────────────────────────
-function loadAll() {
-    loadProducts();
-    loadOrders();
-    loadItinerary();
-    loadReviews();
-    loadContacts();
-}
+function loadAll() { loadProducts(); loadOrders(); loadItinerary(); loadReviews(); loadContacts(); }
 
-// ── ADD PRODUCT ───────────────────────────────────────────────────────────────
 async function addProduct(btn) {
     const title = document.getElementById('prod_title').value.trim();
     const price = parseFloat(document.getElementById('prod_price').value);
     const desc = document.getElementById('prod_desc').value.trim();
     const imgFile = document.getElementById('prod_img').files[0];
     const pdfFile = document.getElementById('prod_pdf').files[0];
-
     if (!title || !price) { toast('Please fill title and price', 'error'); return; }
-
     btn.disabled = true; btn.textContent = 'Saving...';
-
     let imageUrl = null, pdfUrl = null;
-
     if (imgFile) {
         const ext = imgFile.name.split('.').pop();
         const path = `products/img_${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
@@ -429,48 +314,39 @@ async function addProduct(btn) {
         if (ie) { toast('Image upload failed: ' + ie.message, 'error'); btn.disabled = false; btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg> Add Product'; return; }
         imageUrl = sb.storage.from('images').getPublicUrl(path).data.publicUrl;
     }
-
     if (pdfFile) {
         const path = `products/pdf_${Date.now()}_${Math.random().toString(36).slice(2)}.pdf`;
         const { error: pe } = await sb.storage.from('pdfs').upload(path, pdfFile);
         if (pe) { toast('PDF upload failed: ' + pe.message, 'error'); btn.disabled = false; btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg> Add Product'; return; }
         pdfUrl = sb.storage.from('pdfs').getPublicUrl(path).data.publicUrl;
     }
-
     const { error } = await sb.from('products').insert([{ title, description: desc, price, image_url: imageUrl, pdf_url: pdfUrl }]);
     btn.disabled = false;
     btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg> Add Product';
-
     if (error) { toast('Error: ' + error.message, 'error'); return; }
     toast('Product added successfully!');
     ['prod_title','prod_price','prod_desc'].forEach(id => document.getElementById(id).value = '');
-    document.getElementById('prod_img').value = '';
-    document.getElementById('prod_pdf').value = '';
+    document.getElementById('prod_img').value = ''; document.getElementById('prod_pdf').value = '';
     loadProducts();
 }
 
-// ── LOAD PRODUCTS ─────────────────────────────────────────────────────────────
 async function loadProducts() {
     const { data, error } = await sb.from('products').select('*').order('created_at', { ascending: false });
     const div = document.getElementById('productsList');
     document.getElementById('badgeProducts').textContent = data?.length || 0;
     document.getElementById('statProducts').textContent = data?.length || 0;
-
-    if (error || !data || data.length === 0) {
-        div.innerHTML = '<div class="empty-state">No products yet.</div>';
-        return;
-    }
+    if (error || !data || data.length === 0) { div.innerHTML = '<div class="empty-state">No products yet.</div>'; return; }
     div.innerHTML = data.map(p => `
         <div class="product-row">
-            ${p.image_url ? `<img class="product-thumb" src="${p.image_url}" onerror="this.style.display='none'" alt="">` : '<div class="product-thumb" style="display:flex;align-items:center;justify-content:center;color:var(--light)"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2z"/></svg></div>'}
+            ${p.image_url ? `<img class="product-thumb" src="${p.image_url}" onerror="this.style.display='none'" alt="">` : '<div class="product-thumb" style="display:flex;align-items:center;justify-content:center;color:var(--stone)"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2z"/></svg></div>'}
             <div class="product-meta">
                 <strong>${esc(p.title)}</strong>
-                <span>${esc(p.description)?.substring(0,60) || 'No description'}${(p.description || '').length > 60 ? '…' : ''}</span>
-                ${p.pdf_url ? `<span style="display:block;margin-top:2px"><a href="${p.pdf_url}" target="_blank" style="color:var(--terracotta);font-size:0.75rem;text-decoration:none">View PDF</a></span>` : ''}
+                <span>${(esc(p.description)||'').substring(0,60) || 'No description'}${(p.description||'').length>60?'…':''}</span>
+                ${p.pdf_url ? `<span style="display:block;margin-top:3px"><a href="${p.pdf_url}" target="_blank" style="color:var(--rust);font-size:0.72rem;text-decoration:none;font-weight:600">📄 View Itinerary PDF</a></span>` : '<span style="font-size:0.72rem;color:var(--stone);margin-top:3px;display:block">No PDF uploaded</span>'}
             </div>
             <div class="product-price-tag">₹${parseFloat(p.price).toFixed(0)}</div>
             <div class="product-actions">
-                <button class="btn btn-danger" onclick="deleteProduct(${p.id})">
+                <button class="btn btn-danger" onclick="deleteProduct(${p.id})" style="padding:0.35rem 0.75rem;font-size:0.78rem">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
                     Delete
                 </button>
@@ -482,11 +358,9 @@ async function deleteProduct(id) {
     if (!confirm('Delete this product?')) return;
     const { error } = await sb.from('products').delete().eq('id', id);
     if (error) { toast('Error: ' + error.message, 'error'); return; }
-    toast('Product deleted.');
-    loadProducts();
+    toast('Product deleted.'); loadProducts();
 }
 
-// ── LOAD ORDERS ───────────────────────────────────────────────────────────────
 async function loadOrders() {
     const { data, error } = await sb.from('product_orders').select('*').order('created_at', { ascending: false });
     const div = document.getElementById('ordersTable');
@@ -495,23 +369,15 @@ async function loadOrders() {
     if (error || !data || data.length === 0) { div.innerHTML = '<div class="empty-state">No orders yet.</div>'; return; }
     div.innerHTML = `<table>
         <thead><tr><th>ID</th><th>Product</th><th>Price</th><th>Buyer</th><th>Email</th><th>Phone</th><th>Travelers</th><th>Payment ID</th><th>Status</th><th>Date</th></tr></thead>
-        <tbody>${data.map(o => `
-        <tr>
-            <td>${o.id}</td>
-            <td>${esc(o.product_name)}</td>
-            <td>₹${o.product_price}</td>
-            <td>${esc(o.buyer_name)}</td>
-            <td>${esc(o.buyer_email)}</td>
-            <td>${esc(o.buyer_phone)}</td>
-            <td>${o.travelers}</td>
-            <td style="font-family:monospace;font-size:0.75rem">${esc(o.payment_id)||'—'}</td>
+        <tbody>${data.map(o => `<tr>
+            <td>${o.id}</td><td>${esc(o.product_name)}</td><td>₹${o.product_price}</td>
+            <td>${esc(o.buyer_name)}</td><td>${esc(o.buyer_email)}</td><td>${esc(o.buyer_phone)}</td>
+            <td>${o.travelers}</td><td style="font-family:monospace;font-size:0.72rem">${esc(o.payment_id)||'—'}</td>
             <td><span class="badge ${o.payment_status==='Paid'?'badge-paid':'badge-pending'}">${o.payment_status||'Pending'}</span></td>
             <td>${new Date(o.created_at).toLocaleDateString('en-IN')}</td>
-        </tr>`).join('')}</tbody>
-    </table>`;
+        </tr>`).join('')}</tbody></table>`;
 }
 
-// ── LOAD ITINERARY ────────────────────────────────────────────────────────────
 async function loadItinerary() {
     const { data, error } = await sb.from('itinerary_requests').select('*').order('created_at', { ascending: false });
     const div = document.getElementById('itineraryTable');
@@ -520,25 +386,15 @@ async function loadItinerary() {
     if (error || !data || data.length === 0) { div.innerHTML = '<div class="empty-state">No itinerary requests yet.</div>'; return; }
     div.innerHTML = `<table>
         <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Trip</th><th>Destination</th><th>Days</th><th>People</th><th>Budget</th><th>Style</th><th>Payment</th><th>Date</th></tr></thead>
-        <tbody>${data.map(r => `
-        <tr>
-            <td>${r.id}</td>
-            <td>${esc(r.full_name)}</td>
-            <td>${esc(r.email)}</td>
-            <td>${esc(r.phone)}</td>
-            <td>${esc(r.trip_type)}</td>
-            <td>${esc(r.destination)}</td>
-            <td>${r.days}</td>
-            <td>${r.people}</td>
-            <td>${r.budget?'₹'+r.budget:'—'}</td>
-            <td>${esc(r.travel_style)||'—'}</td>
+        <tbody>${data.map(r => `<tr>
+            <td>${r.id}</td><td>${esc(r.full_name)}</td><td>${esc(r.email)}</td><td>${esc(r.phone)}</td>
+            <td>${esc(r.trip_type)}</td><td>${esc(r.destination)}</td><td>${r.days}</td><td>${r.people}</td>
+            <td>${r.budget?'₹'+r.budget:'—'}</td><td>${esc(r.travel_style)||'—'}</td>
             <td><span class="badge ${r.payment_status==='Paid'?'badge-paid':'badge-pending'}">${r.payment_status||'Pending'}</span></td>
             <td>${new Date(r.created_at).toLocaleDateString('en-IN')}</td>
-        </tr>`).join('')}</tbody>
-    </table>`;
+        </tr>`).join('')}</tbody></table>`;
 }
 
-// ── LOAD REVIEWS ──────────────────────────────────────────────────────────────
 async function loadReviews() {
     const { data, error } = await sb.from('reviews').select('*').order('created_at', { ascending: false });
     const div = document.getElementById('reviewsTable');
@@ -547,28 +403,22 @@ async function loadReviews() {
     if (error || !data || data.length === 0) { div.innerHTML = '<div class="empty-state">No reviews yet.</div>'; return; }
     div.innerHTML = `<table>
         <thead><tr><th>ID</th><th>Name</th><th>Place</th><th>Rating</th><th>Message</th><th>Date</th><th>Action</th></tr></thead>
-        <tbody>${data.map(r => `
-        <tr>
-            <td>${r.id}</td>
-            <td>${esc(r.name)}</td>
-            <td>${esc(r.travel_place)}</td>
-            <td>${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</td>
-            <td>${esc(r.message)||'—'}</td>
+        <tbody>${data.map(r => `<tr>
+            <td>${r.id}</td><td>${esc(r.name)}</td><td>${esc(r.travel_place)}</td>
+            <td style="color:var(--amber)">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</td>
+            <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.message)||'—'}</td>
             <td>${new Date(r.created_at).toLocaleDateString('en-IN')}</td>
-            <td><button class="btn btn-danger" style="padding:0.3rem 0.7rem;font-size:0.78rem" onclick="deleteReview(${r.id})">Delete</button></td>
-        </tr>`).join('')}</tbody>
-    </table>`;
+            <td><button class="btn btn-danger" style="padding:0.3rem 0.7rem;font-size:0.75rem" onclick="deleteReview(${r.id})">Delete</button></td>
+        </tr>`).join('')}</tbody></table>`;
 }
 
 async function deleteReview(id) {
     if (!confirm('Delete this review?')) return;
     const { error } = await sb.from('reviews').delete().eq('id', id);
     if (error) { toast('Error: ' + error.message, 'error'); return; }
-    toast('Review deleted.');
-    loadReviews();
+    toast('Review deleted.'); loadReviews();
 }
 
-// ── LOAD CONTACTS ─────────────────────────────────────────────────────────────
 async function loadContacts() {
     const { data, error } = await sb.from('contact_messages').select('*').order('created_at', { ascending: false });
     const div = document.getElementById('contactsTable');
@@ -577,19 +427,13 @@ async function loadContacts() {
     if (error || !data || data.length === 0) { div.innerHTML = '<div class="empty-state">No contact requests yet.</div>'; return; }
     div.innerHTML = `<table>
         <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Message</th><th>Date</th></tr></thead>
-        <tbody>${data.map(c => `
-        <tr>
-            <td>${c.id}</td>
-            <td>${esc(c.name)}</td>
-            <td>${esc(c.email)}</td>
-            <td>${esc(c.contact)}</td>
-            <td>${esc(c.message)||'—'}</td>
+        <tbody>${data.map(c => `<tr>
+            <td>${c.id}</td><td>${esc(c.name)}</td><td>${esc(c.email)}</td><td>${esc(c.contact)}</td>
+            <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.message)||'—'}</td>
             <td>${new Date(c.created_at).toLocaleDateString('en-IN')}</td>
-        </tr>`).join('')}</tbody>
-    </table>`;
+        </tr>`).join('')}</tbody></table>`;
 }
 
-// Check session on load
 checkSession();
 </script>
 </body>
