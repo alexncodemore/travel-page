@@ -13,21 +13,15 @@
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         :root {
-            --ink: #0d1117;
-            --ink2: #1c2333;
-            --sage: #2a4a3a;
-            --sage2: #3a6b54;
-            --amber: #d4a843;
-            --amber2: #f0c56a;
-            --rust: #c4502a;
-            --rust2: #e0673d;
-            --paper: #f8f5ef;
-            --paper2: #eee9df;
-            --stone: #c9c2b4;
-            --mist: #8a8275;
+            --ink: #0d1117; --ink2: #1c2333;
+            --sage: #2a4a3a; --sage2: #3a6b54;
+            --amber: #d4a843; --amber2: #f0c56a;
+            --rust: #c4502a; --rust2: #e0673d;
+            --paper: #f8f5ef; --paper2: #eee9df;
+            --stone: #c9c2b4; --mist: #8a8275;
             --white: #ffffff;
-            --success: #1e7a4a;
-            --error: #c0392b;
+            --success: #1e7a4a; --error: #c0392b;
+            --field-error: #fef0f0; --field-error-border: #e74c3c;
             --r8: 8px; --r12: 12px; --r16: 16px; --r24: 24px; --r999: 999px;
         }
         html { scroll-behavior: smooth; }
@@ -52,66 +46,21 @@
         .hamburger span { width: 24px; height: 2px; background: var(--ink); display: block; transition: 0.3s; }
 
         /* ── HERO ── */
-        .hero {
-            min-height: 92vh; position: relative; overflow: hidden;
-            display: flex; align-items: center;
-            background: var(--ink2);
-        }
-        .hero-bg {
-            position: absolute; inset: 0;
-            background: 
-                radial-gradient(ellipse 80% 60% at 70% 50%, rgba(42,74,58,0.6) 0%, transparent 70%),
-                radial-gradient(ellipse 40% 40% at 20% 80%, rgba(196,80,42,0.15) 0%, transparent 60%),
-                linear-gradient(160deg, #0d1117 0%, #1a2f22 50%, #0f1a14 100%);
-        }
-        .hero-grain {
-            position: absolute; inset: 0; opacity: 0.035;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-        }
+        .hero { min-height: 92vh; position: relative; overflow: hidden; display: flex; align-items: center; background: var(--ink2); }
+        .hero-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 80% 60% at 70% 50%, rgba(42,74,58,0.6) 0%, transparent 70%), radial-gradient(ellipse 40% 40% at 20% 80%, rgba(196,80,42,0.15) 0%, transparent 60%), linear-gradient(160deg, #0d1117 0%, #1a2f22 50%, #0f1a14 100%); }
+        .hero-grain { position: absolute; inset: 0; opacity: 0.035; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
         .hero-content { position: relative; z-index: 2; padding: 6rem 5% 4rem; max-width: 760px; }
-        .hero-chip {
-            display: inline-flex; align-items: center; gap: 0.5rem;
-            border: 1px solid rgba(212,168,67,0.35); color: var(--amber2);
-            background: rgba(212,168,67,0.08);
-            padding: 0.4rem 1rem; border-radius: var(--r999);
-            font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
-            margin-bottom: 1.75rem;
-        }
-        .hero h1 {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: clamp(3rem, 6vw, 5.5rem);
-            font-weight: 700; line-height: 1.05; color: var(--white);
-            margin-bottom: 1.5rem; letter-spacing: -0.02em;
-        }
+        .hero-chip { display: inline-flex; align-items: center; gap: 0.5rem; border: 1px solid rgba(212,168,67,0.35); color: var(--amber2); background: rgba(212,168,67,0.08); padding: 0.4rem 1rem; border-radius: var(--r999); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 1.75rem; }
+        .hero h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(3rem, 6vw, 5.5rem); font-weight: 700; line-height: 1.05; color: var(--white); margin-bottom: 1.5rem; letter-spacing: -0.02em; }
         .hero h1 em { color: var(--amber2); font-style: italic; }
         .hero p { color: rgba(255,255,255,0.6); font-size: 1.05rem; line-height: 1.75; max-width: 520px; margin-bottom: 2.5rem; }
         .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
-        .btn-hero-primary {
-            display: inline-flex; align-items: center; gap: 0.5rem;
-            background: var(--rust); color: var(--white);
-            padding: 0.9rem 2.25rem; border-radius: var(--r999);
-            font-weight: 600; font-size: 0.95rem; text-decoration: none;
-            border: none; cursor: pointer; transition: background 0.2s, transform 0.15s;
-        }
+        .btn-hero-primary { display: inline-flex; align-items: center; gap: 0.5rem; background: var(--rust); color: var(--white); padding: 0.9rem 2.25rem; border-radius: var(--r999); font-weight: 600; font-size: 0.95rem; text-decoration: none; border: none; cursor: pointer; transition: background 0.2s, transform 0.15s; }
         .btn-hero-primary:hover { background: var(--rust2); transform: translateY(-2px); }
-        .btn-hero-outline {
-            display: inline-flex; align-items: center; gap: 0.5rem;
-            border: 1.5px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.85);
-            padding: 0.9rem 2.25rem; border-radius: var(--r999);
-            font-weight: 600; font-size: 0.95rem; text-decoration: none;
-            background: rgba(255,255,255,0.04); transition: all 0.2s;
-        }
+        .btn-hero-outline { display: inline-flex; align-items: center; gap: 0.5rem; border: 1.5px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.85); padding: 0.9rem 2.25rem; border-radius: var(--r999); font-weight: 600; font-size: 0.95rem; text-decoration: none; background: rgba(255,255,255,0.04); transition: all 0.2s; }
         .btn-hero-outline:hover { border-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.08); }
-        .hero-stats {
-            display: flex; gap: 3rem; margin-top: 4rem;
-            padding-top: 2.5rem; border-top: 1px solid rgba(255,255,255,0.1);
-            flex-wrap: wrap;
-        }
-        .hero-stat strong {
-            display: block;
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 2.5rem; font-weight: 700; color: var(--amber2); line-height: 1;
-        }
+        .hero-stats { display: flex; gap: 3rem; margin-top: 4rem; padding-top: 2.5rem; border-top: 1px solid rgba(255,255,255,0.1); flex-wrap: wrap; }
+        .hero-stat strong { display: block; font-family: 'Cormorant Garamond', serif; font-size: 2.5rem; font-weight: 700; color: var(--amber2); line-height: 1; }
         .hero-stat span { font-size: 0.78rem; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.2rem; display: block; }
         #heroRating { display: none; }
 
@@ -129,23 +78,13 @@
 
         /* ── PRODUCTS ── */
         .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.75rem; }
-        .product-card {
-            background: var(--white); border: 1px solid var(--paper2);
-            border-radius: var(--r16); overflow: hidden;
-            transition: box-shadow 0.25s, transform 0.25s;
-        }
+        .product-card { background: var(--white); border: 1px solid var(--paper2); border-radius: var(--r16); overflow: hidden; transition: box-shadow 0.25s, transform 0.25s; }
         .product-card:hover { box-shadow: 0 16px 48px rgba(13,17,23,0.12); transform: translateY(-3px); }
         .product-img-wrap { position: relative; height: 200px; background: var(--paper2); overflow: hidden; }
         .product-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
         .product-card:hover .product-img-wrap img { transform: scale(1.04); }
         .product-img-placeholder { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--stone); }
-        .product-pdf-badge {
-            position: absolute; top: 12px; right: 12px;
-            background: rgba(13,17,23,0.75); color: var(--amber2);
-            font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em;
-            padding: 0.25rem 0.6rem; border-radius: var(--r999); backdrop-filter: blur(6px);
-            display: flex; align-items: center; gap: 0.3rem;
-        }
+        .product-pdf-badge { position: absolute; top: 12px; right: 12px; background: rgba(13,17,23,0.75); color: var(--amber2); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em; padding: 0.25rem 0.6rem; border-radius: var(--r999); backdrop-filter: blur(6px); display: flex; align-items: center; gap: 0.3rem; }
         .product-body { padding: 1.5rem; }
         .product-body h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.35rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.01em; }
         .product-body p { color: var(--mist); font-size: 0.875rem; line-height: 1.6; margin-bottom: 1.25rem; }
@@ -156,12 +95,7 @@
         .btn-buy:hover { background: var(--sage2); }
 
         /* ── RATING BANNER ── */
-        .rating-banner {
-            background: linear-gradient(135deg, var(--sage) 0%, var(--sage2) 100%);
-            border-radius: var(--r16); padding: 2.25rem 2.5rem;
-            display: flex; align-items: center; gap: 2.5rem; flex-wrap: wrap;
-            margin-bottom: 3.5rem;
-        }
+        .rating-banner { background: linear-gradient(135deg, var(--sage) 0%, var(--sage2) 100%); border-radius: var(--r16); padding: 2.25rem 2.5rem; display: flex; align-items: center; gap: 2.5rem; flex-wrap: wrap; margin-bottom: 3.5rem; }
         .rating-big { text-align: center; min-width: 100px; }
         .rating-big .num { font-family: 'Cormorant Garamond', serif; font-size: 4rem; font-weight: 700; color: var(--white); line-height: 1; }
         .rating-big .stars-row { color: var(--amber2); font-size: 1.1rem; margin: 0.3rem 0; letter-spacing: 0.05em; }
@@ -176,57 +110,47 @@
 
         /* ── REVIEW CARDS ── */
         .reviews-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 1.25rem; }
-        .review-card {
-            background: var(--white); border: 1px solid var(--paper2);
-            border-radius: var(--r12); padding: 1.5rem;
-            transition: box-shadow 0.2s;
-        }
+        .review-card { background: var(--white); border: 1px solid var(--paper2); border-radius: var(--r12); padding: 1.5rem; transition: box-shadow 0.2s; }
         .review-card:hover { box-shadow: 0 8px 28px rgba(13,17,23,0.08); }
         .review-top { display: flex; align-items: center; gap: 0.85rem; margin-bottom: 1rem; }
-        .review-avatar {
-            width: 42px; height: 42px; border-radius: 50%;
-            background: linear-gradient(135deg, var(--rust), var(--amber));
-            display: flex; align-items: center; justify-content: center;
-            color: white; font-weight: 700; font-size: 0.95rem; flex-shrink: 0;
-            font-family: 'Cormorant Garamond', serif;
-        }
+        .review-avatar { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, var(--rust), var(--amber)); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.95rem; flex-shrink: 0; font-family: 'Cormorant Garamond', serif; }
         .review-info strong { display: block; font-size: 0.9rem; font-weight: 600; }
         .review-info span { color: var(--mist); font-size: 0.78rem; }
         .review-stars { color: var(--amber); font-size: 0.88rem; margin-bottom: 0.6rem; letter-spacing: 0.05em; }
         .review-text { color: var(--mist); font-size: 0.875rem; line-height: 1.65; }
         .review-date { color: var(--stone); font-size: 0.73rem; margin-top: 0.85rem; }
 
-        /* ── FORMS ── */
+        /* ── FORMS + VALIDATION ── */
         .form-card { background: var(--white); border: 1px solid var(--paper2); border-radius: var(--r24); padding: 2.5rem; max-width: 700px; margin: 0 auto; }
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
         .form-group { margin-bottom: 1rem; }
         .form-group.full { grid-column: 1 / -1; }
         label { display: block; font-size: 0.72rem; font-weight: 600; color: var(--ink); margin-bottom: 0.4rem; letter-spacing: 0.06em; text-transform: uppercase; }
-        input, textarea, select {
-            width: 100%; padding: 0.75rem 1rem;
-            border: 1.5px solid var(--paper2); border-radius: var(--r8);
-            font-family: 'Outfit', sans-serif; font-size: 0.9rem; color: var(--ink);
-            background: var(--paper); outline: none; transition: border-color 0.2s, box-shadow 0.2s;
-        }
+        input, textarea, select { width: 100%; padding: 0.75rem 1rem; border: 1.5px solid var(--paper2); border-radius: var(--r8); font-family: 'Outfit', sans-serif; font-size: 0.9rem; color: var(--ink); background: var(--paper); outline: none; transition: border-color 0.2s, box-shadow 0.2s, background 0.2s; }
         input:focus, textarea:focus, select:focus { border-color: var(--sage); box-shadow: 0 0 0 3px rgba(42,74,58,0.1); }
         textarea { resize: vertical; min-height: 100px; }
-        .btn-submit {
-            width: 100%; padding: 0.95rem; border-radius: var(--r8);
-            background: var(--rust); color: var(--white);
-            font-size: 0.95rem; font-weight: 600; font-family: 'Outfit', sans-serif;
-            border: none; cursor: pointer; transition: background 0.2s;
-            display: flex; align-items: center; justify-content: center; gap: 0.5rem;
-        }
-        .btn-submit:hover { background: var(--rust2); }
-        .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
-        .btn-pay {
-            width: 100%; padding: 0.95rem; border-radius: var(--r8);
-            background: var(--sage); color: var(--white);
-            font-size: 0.95rem; font-weight: 600; font-family: 'Outfit', sans-serif;
-            border: none; cursor: pointer; transition: background 0.2s;
-            display: flex; align-items: center; justify-content: center; gap: 0.5rem;
-        }
-        .btn-pay:hover { background: var(--sage2); }
+
+        /* Field validation states */
+        .field-wrap { position: relative; }
+        .field-err-msg { display: none; font-size: 0.72rem; color: var(--error); margin-top: 0.3rem; font-weight: 500; }
+        .form-group.has-error input,
+        .form-group.has-error textarea,
+        .form-group.has-error select { border-color: var(--field-error-border); background: var(--field-error); box-shadow: 0 0 0 3px rgba(231,76,60,0.08); }
+        .form-group.has-error .field-err-msg { display: block; }
+        .form-group.is-valid input,
+        .form-group.is-valid textarea,
+        .form-group.is-valid select { border-color: #4caf7d; }
+
+        .btn-submit { width: 100%; padding: 0.95rem; border-radius: var(--r8); background: var(--rust); color: var(--white); font-size: 0.95rem; font-weight: 600; font-family: 'Outfit', sans-serif; border: none; cursor: pointer; transition: background 0.2s, opacity 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+        .btn-submit:hover:not(:disabled) { background: var(--rust2); }
+        .btn-submit:disabled { opacity: 0.55; cursor: not-allowed; }
+        .btn-pay { width: 100%; padding: 0.95rem; border-radius: var(--r8); background: var(--sage); color: var(--white); font-size: 0.95rem; font-weight: 600; font-family: 'Outfit', sans-serif; border: none; cursor: pointer; transition: background 0.2s, opacity 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.5rem; position: relative; }
+        .btn-pay:hover:not(:disabled) { background: var(--sage2); }
+        .btn-pay:disabled { opacity: 0.55; cursor: not-allowed; }
+
+        /* Pay button lock indicator */
+        .btn-pay-lock { display: flex; align-items: center; gap: 0.5rem; }
+        .lock-icon { opacity: 0.7; }
 
         /* ── ITINERARY SECTION ── */
         .section-dark .form-card { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.1); }
@@ -235,23 +159,33 @@
         .section-dark input::placeholder, .section-dark textarea::placeholder { color: rgba(255,255,255,0.3); }
         .section-dark select option { background: var(--ink2); color: var(--white); }
         .section-dark input:focus, .section-dark textarea:focus, .section-dark select:focus { border-color: var(--amber2); box-shadow: 0 0 0 3px rgba(212,168,67,0.15); }
-        .price-pill {
-            display: inline-flex; align-items: center; gap: 0.5rem;
-            background: rgba(212,168,67,0.12); border: 1px solid rgba(212,168,67,0.3);
-            color: var(--amber2); padding: 0.5rem 1.1rem; border-radius: var(--r999);
-            font-size: 0.82rem; font-weight: 600; margin-bottom: 1.75rem;
-        }
+        .section-dark .form-group.has-error input,
+        .section-dark .form-group.has-error textarea,
+        .section-dark .form-group.has-error select { border-color: #ff6b6b; background: rgba(255,107,107,0.08); }
+        .section-dark .field-err-msg { color: #ff8a80; }
+        .section-dark .form-group.is-valid input,
+        .section-dark .form-group.is-valid select { border-color: #4caf7d; }
+        .price-pill { display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(212,168,67,0.12); border: 1px solid rgba(212,168,67,0.3); color: var(--amber2); padding: 0.5rem 1.1rem; border-radius: var(--r999); font-size: 0.82rem; font-weight: 600; margin-bottom: 1.75rem; }
+
+        /* ── VALIDATION SUMMARY (shows above pay button) ── */
+        .validation-hint { display: none; background: rgba(231,76,60,0.08); border: 1px solid rgba(231,76,60,0.25); border-radius: var(--r8); padding: 0.75rem 1rem; margin-bottom: 1rem; color: var(--error); font-size: 0.82rem; }
+        .section-dark .validation-hint { background: rgba(255,107,107,0.08); border-color: rgba(255,107,107,0.25); color: #ff8a80; }
+        .validation-hint.visible { display: flex; align-items: center; gap: 0.5rem; }
+
+        /* ── DOWNLOAD PROGRESS ── */
+        .download-status { display: none; position: fixed; bottom: 6rem; right: 2rem; z-index: 998; background: var(--ink2); color: var(--white); border-radius: var(--r12); padding: 1rem 1.25rem; min-width: 280px; box-shadow: 0 8px 32px rgba(13,17,23,0.3); }
+        .download-status.active { display: block; animation: toastIn 0.3s ease; }
+        .dl-step { display: flex; align-items: center; gap: 0.6rem; font-size: 0.82rem; padding: 0.3rem 0; color: rgba(255,255,255,0.5); transition: color 0.3s; }
+        .dl-step.active { color: var(--amber2); }
+        .dl-step.done { color: #4caf7d; }
+        .dl-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+        .dl-step.active .dl-dot { animation: pulse 1s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.75)} }
 
         /* ── FAQ ── */
         .faq-list { max-width: 740px; margin: 0 auto; }
         .faq-item { background: var(--white); border: 1px solid var(--paper2); border-radius: var(--r12); margin-bottom: 0.75rem; overflow: hidden; }
-        .faq-question {
-            width: 100%; padding: 1.1rem 1.5rem;
-            display: flex; align-items: center; justify-content: space-between; gap: 1rem;
-            background: none; border: none; cursor: pointer; text-align: left;
-            font-family: 'Outfit', sans-serif; font-size: 0.95rem; font-weight: 500; color: var(--ink);
-            transition: background 0.15s;
-        }
+        .faq-question { width: 100%; padding: 1.1rem 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; background: none; border: none; cursor: pointer; text-align: left; font-family: 'Outfit', sans-serif; font-size: 0.95rem; font-weight: 500; color: var(--ink); transition: background 0.15s; }
         .faq-question:hover { background: var(--paper); }
         .faq-question svg { flex-shrink: 0; color: var(--rust); transition: transform 0.25s; }
         .faq-item.open .faq-question svg { transform: rotate(45deg); }
@@ -415,11 +349,19 @@
     </div>
     <div class="form-card">
         <div class="form-grid">
-            <div class="form-group"><label>Your Name</label><input type="text" id="rev_name" placeholder="Full name"></div>
-            <div class="form-group"><label>Place Visited</label><input type="text" id="rev_place" placeholder="e.g. Goa, Rajasthan"></div>
-            <div class="form-group full">
-                <label>Rating</label>
-                <select id="rev_rating">
+            <div class="form-group" id="fg_rev_name">
+                <label>Your Name *</label>
+                <input type="text" id="rev_name" placeholder="Full name" oninput="liveValidate('rev_name','fg_rev_name','name')">
+                <div class="field-err-msg">Please enter your name</div>
+            </div>
+            <div class="form-group" id="fg_rev_place">
+                <label>Place Visited *</label>
+                <input type="text" id="rev_place" placeholder="e.g. Goa, Rajasthan" oninput="liveValidate('rev_place','fg_rev_place','required')">
+                <div class="field-err-msg">Please enter the place you visited</div>
+            </div>
+            <div class="form-group full" id="fg_rev_rating">
+                <label>Rating *</label>
+                <select id="rev_rating" onchange="liveValidate('rev_rating','fg_rev_rating','required')">
                     <option value="">Select your rating</option>
                     <option value="5">★★★★★ — Exceptional</option>
                     <option value="4">★★★★☆ — Very Good</option>
@@ -427,8 +369,12 @@
                     <option value="2">★★☆☆☆ — Fair</option>
                     <option value="1">★☆☆☆☆ — Poor</option>
                 </select>
+                <div class="field-err-msg">Please select a rating</div>
             </div>
-            <div class="form-group full"><label>Your Review</label><textarea id="rev_message" placeholder="Share the highlights of your journey..."></textarea></div>
+            <div class="form-group full">
+                <label>Your Review</label>
+                <textarea id="rev_message" placeholder="Share the highlights of your journey..."></textarea>
+            </div>
         </div>
         <button class="btn-submit" onclick="submitReview(this)">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
@@ -450,22 +396,53 @@
             Only ₹1 to get started — Itinerary PDF delivered within 24 hours
         </div>
         <div class="form-grid">
-            <div class="form-group"><label>Full Name *</label><input type="text" id="itin_name" placeholder="Your full name"></div>
-            <div class="form-group"><label>Email *</label><input type="email" id="itin_email" placeholder="your@email.com"></div>
-            <div class="form-group"><label>Phone *</label><input type="tel" id="itin_phone" placeholder="+91 XXXXX XXXXX"></div>
-            <div class="form-group">
+            <div class="form-group" id="fg_itin_name">
+                <label>Full Name *</label>
+                <input type="text" id="itin_name" placeholder="Your full name" oninput="liveValidate('itin_name','fg_itin_name','name'); itinCheckReady()">
+                <div class="field-err-msg">Please enter your full name</div>
+            </div>
+            <div class="form-group" id="fg_itin_email">
+                <label>Email *</label>
+                <input type="email" id="itin_email" placeholder="your@email.com" oninput="liveValidate('itin_email','fg_itin_email','email'); itinCheckReady()">
+                <div class="field-err-msg">Please enter a valid email address</div>
+            </div>
+            <div class="form-group" id="fg_itin_phone">
+                <label>Phone *</label>
+                <input type="tel" id="itin_phone" placeholder="+91 XXXXX XXXXX" oninput="liveValidate('itin_phone','fg_itin_phone','phone'); itinCheckReady()">
+                <div class="field-err-msg">Please enter a valid 10-digit phone number</div>
+            </div>
+            <div class="form-group" id="fg_itin_trip">
                 <label>Trip Type *</label>
-                <select id="itin_trip">
+                <select id="itin_trip" onchange="liveValidate('itin_trip','fg_itin_trip','required'); itinCheckReady()">
                     <option value="">Select trip type</option>
                     <option>Adventure</option><option>Beach</option><option>Cultural</option>
                     <option>Wildlife</option><option>Pilgrimage</option><option>Honeymoon</option>
                 </select>
+                <div class="field-err-msg">Please select a trip type</div>
             </div>
-            <div class="form-group"><label>Destination *</label><input type="text" id="itin_dest" placeholder="State or city"></div>
-            <div class="form-group"><label>Travel Dates</label><input type="text" id="itin_dates" placeholder="dd-mm-yyyy"></div>
-            <div class="form-group"><label>No. of Days *</label><input type="number" id="itin_days" min="1" placeholder="7"></div>
-            <div class="form-group"><label>No. of People *</label><input type="number" id="itin_people" min="1" placeholder="2"></div>
-            <div class="form-group"><label>Budget (₹/person)</label><input type="number" id="itin_budget" placeholder="Optional"></div>
+            <div class="form-group" id="fg_itin_dest">
+                <label>Destination *</label>
+                <input type="text" id="itin_dest" placeholder="State or city" oninput="liveValidate('itin_dest','fg_itin_dest','required'); itinCheckReady()">
+                <div class="field-err-msg">Please enter a destination</div>
+            </div>
+            <div class="form-group">
+                <label>Travel Dates</label>
+                <input type="text" id="itin_dates" placeholder="dd-mm-yyyy">
+            </div>
+            <div class="form-group" id="fg_itin_days">
+                <label>No. of Days *</label>
+                <input type="number" id="itin_days" min="1" placeholder="7" oninput="liveValidate('itin_days','fg_itin_days','positive'); itinCheckReady()">
+                <div class="field-err-msg">Please enter number of days (min 1)</div>
+            </div>
+            <div class="form-group" id="fg_itin_people">
+                <label>No. of People *</label>
+                <input type="number" id="itin_people" min="1" placeholder="2" oninput="liveValidate('itin_people','fg_itin_people','positive'); itinCheckReady()">
+                <div class="field-err-msg">Please enter number of people (min 1)</div>
+            </div>
+            <div class="form-group">
+                <label>Budget (₹/person)</label>
+                <input type="number" id="itin_budget" placeholder="Optional">
+            </div>
             <div class="form-group">
                 <label>Travel Style</label>
                 <select id="itin_style"><option value="">Select style</option><option>Luxury</option><option>Comfort</option><option>Budget</option><option>Backpacker</option></select>
@@ -478,11 +455,22 @@
                 <label>Children Travelling</label>
                 <select id="itin_kids"><option>No children</option><option>1 child</option><option>2 children</option><option>3+ children</option></select>
             </div>
-            <div class="form-group full"><label>Special Requirements</label><textarea id="itin_special" placeholder="Accessibility needs, dietary restrictions, must-see places..."></textarea></div>
+            <div class="form-group full">
+                <label>Special Requirements</label>
+                <textarea id="itin_special" placeholder="Accessibility needs, dietary restrictions, must-see places..."></textarea>
+            </div>
         </div>
-        <button class="btn-pay" onclick="processItineraryPayment(this)">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
-            Pay ₹1 &amp; Submit Itinerary Request
+        <!-- Validation hint shown if user clicks pay without completing form -->
+        <div class="validation-hint" id="itinValidHint">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+            Please complete all required fields before paying.
+        </div>
+        <button class="btn-pay" id="itinPayBtn" onclick="processItineraryPayment(this)" disabled>
+            <span class="btn-pay-lock">
+                <svg class="lock-icon" width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+                Pay ₹1 &amp; Submit Itinerary Request
+            </span>
         </button>
     </div>
 </section>
@@ -522,9 +510,9 @@
         </div>
         <div class="form-card" style="margin:0">
             <div class="form-grid">
-                <div class="form-group"><label>Name *</label><input type="text" id="con_name" placeholder="Your name"></div>
-                <div class="form-group"><label>Email *</label><input type="email" id="con_email" placeholder="your@email.com"></div>
-                <div class="form-group full"><label>Phone *</label><input type="tel" id="con_phone" placeholder="+91 XXXXX XXXXX"></div>
+                <div class="form-group" id="fg_con_name"><label>Name *</label><input type="text" id="con_name" placeholder="Your name" oninput="liveValidate('con_name','fg_con_name','name')"><div class="field-err-msg">Please enter your name</div></div>
+                <div class="form-group" id="fg_con_email"><label>Email *</label><input type="email" id="con_email" placeholder="your@email.com" oninput="liveValidate('con_email','fg_con_email','email')"><div class="field-err-msg">Please enter a valid email</div></div>
+                <div class="form-group full" id="fg_con_phone"><label>Phone *</label><input type="tel" id="con_phone" placeholder="+91 XXXXX XXXXX" oninput="liveValidate('con_phone','fg_con_phone','phone')"><div class="field-err-msg">Please enter a valid phone number</div></div>
                 <div class="form-group full"><label>Message</label><textarea id="con_message" placeholder="How can we help you?"></textarea></div>
             </div>
             <button class="btn-submit" onclick="submitContact(this)">
@@ -552,26 +540,157 @@
             </button>
         </div>
         <div class="modal-product-info" id="modalProductInfo"></div>
-        <input type="hidden" id="sel_id"><input type="hidden" id="sel_pdf"><input type="hidden" id="sel_itin_pdf"><input type="hidden" id="sel_price">
-        <div class="form-group"><label>Full Name *</label><input type="text" id="buy_name" placeholder="Your full name"></div>
-        <div class="form-group"><label>Email *</label><input type="email" id="buy_email" placeholder="your@email.com"></div>
-        <div class="form-group"><label>Phone *</label><input type="tel" id="buy_phone" placeholder="+91 XXXXX XXXXX"></div>
-        <div class="form-group"><label>Number of Travelers *</label><input type="number" id="buy_travelers" min="1" value="1"></div>
-        <div class="form-group"><label>Message (Optional)</label><textarea id="buy_message" rows="2" placeholder="Any special requirements?"></textarea></div>
-        <button class="btn-pay" id="modalPayBtn" onclick="processProductPayment(this)">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
-            <span id="modalPayLabel">Proceed to Pay</span>
+        <input type="hidden" id="sel_id">
+        <input type="hidden" id="sel_pdf">
+        <input type="hidden" id="sel_price">
+
+        <div class="form-group" id="fg_buy_name">
+            <label>Full Name *</label>
+            <input type="text" id="buy_name" placeholder="Your full name" oninput="liveValidate('buy_name','fg_buy_name','name'); modalCheckReady()">
+            <div class="field-err-msg">Please enter your full name</div>
+        </div>
+        <div class="form-group" id="fg_buy_email">
+            <label>Email *</label>
+            <input type="email" id="buy_email" placeholder="your@email.com" oninput="liveValidate('buy_email','fg_buy_email','email'); modalCheckReady()">
+            <div class="field-err-msg">Please enter a valid email address</div>
+        </div>
+        <div class="form-group" id="fg_buy_phone">
+            <label>Phone *</label>
+            <input type="tel" id="buy_phone" placeholder="+91 XXXXX XXXXX" oninput="liveValidate('buy_phone','fg_buy_phone','phone'); modalCheckReady()">
+            <div class="field-err-msg">Please enter a valid 10-digit phone number</div>
+        </div>
+        <div class="form-group" id="fg_buy_travelers">
+            <label>Number of Travelers *</label>
+            <input type="number" id="buy_travelers" min="1" value="1" oninput="liveValidate('buy_travelers','fg_buy_travelers','positive'); modalCheckReady()">
+            <div class="field-err-msg">Please enter at least 1 traveler</div>
+        </div>
+        <div class="form-group">
+            <label>Message (Optional)</label>
+            <textarea id="buy_message" rows="2" placeholder="Any special requirements?"></textarea>
+        </div>
+
+        <div class="validation-hint" id="modalValidHint">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+            Please complete all required fields before paying.
+        </div>
+
+        <button class="btn-pay" id="modalPayBtn" onclick="processProductPayment(this)" disabled>
+            <span class="btn-pay-lock">
+                <svg class="lock-icon" width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+                <span id="modalPayLabel">Proceed to Pay</span>
+            </span>
         </button>
     </div>
+</div>
+
+<!-- DOWNLOAD PROGRESS INDICATOR -->
+<div class="download-status" id="dlStatus">
+    <div style="font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.6rem">Preparing Your Files</div>
+    <div class="dl-step" id="dlStep1"><div class="dl-dot"></div> Downloading Itinerary PDF…</div>
+    <div class="dl-step" id="dlStep2"><div class="dl-dot"></div> Generating Invoice PDF…</div>
+    <div class="dl-step" id="dlStep3"><div class="dl-dot"></div> Sending Confirmation Email…</div>
 </div>
 
 <div class="toast-container" id="toastContainer"></div>
 
 <script>
+// ── INIT ──
 emailjs.init("7rgj4t_06JrmsxgHC");
-const sb = window.supabase.createClient("https://eyekpbzcdouhkquqjjae.supabase.co","sb_publishable_hONe7ntkTZaGeyFsLV0iMQ_9aTXtOBE");
+const sb = window.supabase.createClient(
+    "https://eyekpbzcdouhkquqjjae.supabase.co",
+    "sb_publishable_hONe7ntkTZaGeyFsLV0iMQ_9aTXtOBE"
+);
 const RAZORPAY_KEY = "rzp_live_SV68ifsBjM5tPz";
-let currentProduct = null, pendingFormData = null;
+
+// Payment state machine — prevents double payments and race conditions
+const PayState = {
+    IDLE: 'idle',
+    PAYING: 'paying',
+    PROCESSING: 'processing',
+    DONE: 'done'
+};
+let payState = PayState.IDLE;
+let currentProduct = null;
+let pendingFormData = null;
+
+// ── VALIDATION RULES ──
+const VALIDATORS = {
+    required: (v) => v.trim().length > 0,
+    name: (v) => v.trim().length >= 2,
+    email: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()),
+    phone: (v) => /^[+]?[\d\s\-()]{8,15}$/.test(v.trim()),
+    positive: (v) => parseFloat(v) >= 1
+};
+
+// Live validation: marks field valid/invalid on user input
+function liveValidate(inputId, groupId, rule) {
+    const el = document.getElementById(inputId);
+    const grp = document.getElementById(groupId);
+    if (!el || !grp) return false;
+    const val = el.value;
+    const valid = VALIDATORS[rule] ? VALIDATORS[rule](val) : val.trim().length > 0;
+    grp.classList.toggle('has-error', val.length > 0 && !valid);
+    grp.classList.toggle('is-valid', valid);
+    return valid;
+}
+
+// Hard validate (on submit/pay click) — marks all fields and returns bool
+function hardValidate(fields) {
+    let allValid = true;
+    fields.forEach(({ inputId, groupId, rule }) => {
+        const el = document.getElementById(inputId);
+        const grp = document.getElementById(groupId);
+        if (!el || !grp) return;
+        const valid = VALIDATORS[rule] ? VALIDATORS[rule](el.value) : el.value.trim().length > 0;
+        if (!valid) {
+            grp.classList.add('has-error');
+            grp.classList.remove('is-valid');
+            allValid = false;
+        } else {
+            grp.classList.remove('has-error');
+            grp.classList.add('is-valid');
+        }
+    });
+    return allValid;
+}
+
+// ── MODAL FORM READINESS CHECK ──
+const MODAL_FIELDS = [
+    { inputId:'buy_name',     groupId:'fg_buy_name',     rule:'name'     },
+    { inputId:'buy_email',    groupId:'fg_buy_email',    rule:'email'    },
+    { inputId:'buy_phone',    groupId:'fg_buy_phone',    rule:'phone'    },
+    { inputId:'buy_travelers',groupId:'fg_buy_travelers',rule:'positive' }
+];
+function modalCheckReady() {
+    const allOk = MODAL_FIELDS.every(f => {
+        const el = document.getElementById(f.inputId);
+        return el && VALIDATORS[f.rule] && VALIDATORS[f.rule](el.value);
+    });
+    const btn = document.getElementById('modalPayBtn');
+    btn.disabled = !allOk;
+    document.getElementById('modalValidHint').classList.toggle('visible', false);
+}
+
+// ── ITINERARY FORM READINESS CHECK ──
+const ITIN_REQUIRED_FIELDS = [
+    { inputId:'itin_name',   groupId:'fg_itin_name',   rule:'name'     },
+    { inputId:'itin_email',  groupId:'fg_itin_email',  rule:'email'    },
+    { inputId:'itin_phone',  groupId:'fg_itin_phone',  rule:'phone'    },
+    { inputId:'itin_trip',   groupId:'fg_itin_trip',   rule:'required' },
+    { inputId:'itin_dest',   groupId:'fg_itin_dest',   rule:'required' },
+    { inputId:'itin_days',   groupId:'fg_itin_days',   rule:'positive' },
+    { inputId:'itin_people', groupId:'fg_itin_people', rule:'positive' }
+];
+function itinCheckReady() {
+    const allOk = ITIN_REQUIRED_FIELDS.every(f => {
+        const el = document.getElementById(f.inputId);
+        return el && VALIDATORS[f.rule] && VALIDATORS[f.rule](el.value);
+    });
+    const btn = document.getElementById('itinPayBtn');
+    btn.disabled = !allOk;
+    if (allOk) document.getElementById('itinValidHint').classList.remove('visible');
+}
 
 // ── TOAST ──
 function toast(title, msg, type = 'success') {
@@ -579,10 +698,34 @@ function toast(title, msg, type = 'success') {
     const t = document.createElement('div');
     t.className = `toast toast-${type}`;
     t.innerHTML = `<span style="font-size:1rem">${type==='success'?'✓':'✕'}</span><div><strong>${title}</strong>${msg?`<div style="font-size:0.82rem;margin-top:2px;opacity:0.8">${msg}</div>`:''}</div>`;
-    c.appendChild(t); setTimeout(() => t.remove(), 4500);
+    c.appendChild(t);
+    setTimeout(() => t.remove(), 5000);
 }
 
-// ── REVIEWS + HERO RATING ──
+// ── DOWNLOAD PROGRESS UI ──
+function showDownloadProgress() {
+    document.getElementById('dlStatus').classList.add('active');
+    ['dlStep1','dlStep2','dlStep3'].forEach(id => {
+        const el = document.getElementById(id);
+        el.classList.remove('active','done');
+    });
+}
+function setDlStep(step) {
+    // step 1, 2, 3
+    for (let i = 1; i <= 3; i++) {
+        const el = document.getElementById('dlStep' + i);
+        el.classList.remove('active','done');
+        if (i < step) el.classList.add('done');
+        if (i === step) el.classList.add('active');
+    }
+}
+function hideDownloadProgress() {
+    setTimeout(() => {
+        document.getElementById('dlStatus').classList.remove('active');
+    }, 2000);
+}
+
+// ── REVIEWS ──
 async function loadReviews() {
     try {
         const { data, error } = await sb.from('reviews').select('*').order('created_at', { ascending: false });
@@ -592,18 +735,13 @@ async function loadReviews() {
         if (!data || data.length === 0) {
             grid.innerHTML = '<p class="empty-msg">No reviews yet. Be the first!</p>'; return;
         }
-        // Compute avg
         const avg = data.reduce((s,r) => s + r.rating, 0) / data.length;
         const avgFixed = avg.toFixed(1);
         const stars = Math.round(avg);
-
-        // Update hero rating stat
         const heroRatingEl = document.getElementById('heroRating');
         heroRatingEl.style.display = 'block';
         document.getElementById('heroRatingNum').textContent = avgFixed + ' ★';
         document.getElementById('heroRatingLabel').textContent = `Avg Rating (${data.length} reviews)`;
-
-        // Rating banner
         banner.style.display = 'flex';
         document.getElementById('avgNum').textContent = avgFixed;
         document.getElementById('avgCount').textContent = `${data.length} review${data.length !== 1 ? 's' : ''}`;
@@ -615,7 +753,6 @@ async function loadReviews() {
                 <div class="rating-bar-track"><div class="rating-bar-fill" style="width:${data.length?(c/data.length*100):0}%"></div></div>
                 <span class="rating-bar-count">${c}</span>
             </div>`).join('');
-
         grid.innerHTML = data.map(r => `
             <div class="review-card">
                 <div class="review-top">
@@ -632,12 +769,17 @@ async function loadReviews() {
 }
 
 async function submitReview(btn) {
+    const fields = [
+        { inputId:'rev_name',   groupId:'fg_rev_name',   rule:'name'     },
+        { inputId:'rev_place',  groupId:'fg_rev_place',  rule:'required' },
+        { inputId:'rev_rating', groupId:'fg_rev_rating', rule:'required' }
+    ];
+    if (!hardValidate(fields)) { toast('Missing Fields','Please fill all required fields correctly.','error'); return; }
     const name = document.getElementById('rev_name').value.trim();
     const place = document.getElementById('rev_place').value.trim();
     const rating = parseInt(document.getElementById('rev_rating').value);
     const message = document.getElementById('rev_message').value.trim();
-    if (!name || !place || !rating) { toast('Missing Fields','Please fill all required fields.','error'); return; }
-    btn.disabled = true; btn.textContent = 'Submitting...';
+    btn.disabled = true; btn.textContent = 'Submitting…';
     const { error } = await sb.from('reviews').insert([{ name, travel_place: place, rating, message }]);
     btn.disabled = false;
     btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Submit Review`;
@@ -645,6 +787,10 @@ async function submitReview(btn) {
     toast('Review Submitted','Thank you for sharing your experience!');
     ['rev_name','rev_place','rev_message'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('rev_rating').value = '';
+    ['fg_rev_name','fg_rev_place','fg_rev_rating'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('is-valid','has-error');
+    });
     loadReviews();
 }
 
@@ -677,6 +823,7 @@ async function loadProducts() {
 
 // ── MODAL ──
 function openModal(id, title, price, pdfUrl, imgUrl) {
+    if (payState !== PayState.IDLE) return; // Guard: don't open during payment
     currentProduct = { id, title, price, pdfUrl, imgUrl };
     document.getElementById('sel_id').value = id;
     document.getElementById('sel_pdf').value = pdfUrl;
@@ -685,116 +832,278 @@ function openModal(id, title, price, pdfUrl, imgUrl) {
     document.getElementById('modalProductInfo').innerHTML = `
         ${imgUrl ? `<img src="${imgUrl}" onerror="this.style.display='none'" alt="">` : ''}
         <div><strong>${esc(title)}</strong><div class="mprice">₹${parseFloat(price).toFixed(0)}</div></div>`;
-    ['buy_name','buy_email','buy_phone','buy_message'].forEach(id => document.getElementById(id).value = '');
+    // Reset form state
+    ['buy_name','buy_email','buy_phone','buy_message'].forEach(fid => document.getElementById(fid).value = '');
     document.getElementById('buy_travelers').value = 1;
+    ['fg_buy_name','fg_buy_email','fg_buy_phone','fg_buy_travelers'].forEach(fid => {
+        const el = document.getElementById(fid);
+        if (el) el.classList.remove('is-valid','has-error');
+    });
+    document.getElementById('modalPayBtn').disabled = true;
+    document.getElementById('modalValidHint').classList.remove('visible');
     document.getElementById('purchaseModal').classList.add('active');
 }
-function closeModal() { document.getElementById('purchaseModal').classList.remove('active'); }
+
+function closeModal() {
+    if (payState === PayState.PAYING || payState === PayState.PROCESSING) return; // Block close during payment
+    document.getElementById('purchaseModal').classList.remove('active');
+    pendingFormData = null;
+}
 
 // ── PRODUCT PAYMENT ──
 function processProductPayment(btn) {
-    const name = document.getElementById('buy_name').value.trim();
-    const email = document.getElementById('buy_email').value.trim();
-    const phone = document.getElementById('buy_phone').value.trim();
-    const travelers = parseInt(document.getElementById('buy_travelers').value)||1;
-    const message = document.getElementById('buy_message').value.trim();
-    if (!name || !email || !phone) { toast('Missing Fields','Please fill all required fields.','error'); return; }
-    if (!validateEmail(email)) { toast('Invalid Email','Please enter a valid email address.','error'); return; }
+    // Hard validate all fields first
+    if (!hardValidate(MODAL_FIELDS)) {
+        document.getElementById('modalValidHint').classList.add('visible');
+        toast('Please fix form errors', 'All required fields must be filled correctly.', 'error');
+        return;
+    }
+    if (payState !== PayState.IDLE) return; // Prevent duplicate payment
+
+    const name     = document.getElementById('buy_name').value.trim();
+    const email    = document.getElementById('buy_email').value.trim();
+    const phone    = document.getElementById('buy_phone').value.trim();
+    const travelers = parseInt(document.getElementById('buy_travelers').value) || 1;
+    const message  = document.getElementById('buy_message').value.trim();
+
     pendingFormData = { buyer_name: name, buyer_email: email, buyer_phone: phone, travelers, message };
-    closeModal();
+    payState = PayState.PAYING;
+    btn.disabled = true;
+
     const rzp = new Razorpay({
-        key: RAZORPAY_KEY, amount: Math.round(currentProduct.price * 100), currency: "INR",
-        name: "Wanderlust Travel", description: currentProduct.title, image: currentProduct.imgUrl||'',
-        prefill: { name, email, contact: phone }, theme: { color: '#2a4a3a' },
-        handler: handleProductSuccess, modal: { ondismiss: () => { pendingFormData = null; } }
+        key: RAZORPAY_KEY,
+        amount: Math.round(currentProduct.price * 100),
+        currency: "INR",
+        name: "Wanderlust Travel",
+        description: currentProduct.title,
+        image: currentProduct.imgUrl || '',
+        prefill: { name, email, contact: phone },
+        theme: { color: '#2a4a3a' },
+        handler: handleProductSuccess,
+        modal: {
+            ondismiss: () => {
+                payState = PayState.IDLE;
+                btn.disabled = false;
+                pendingFormData = null;
+                toast('Payment Cancelled', 'Your payment was not completed.', 'error');
+            }
+        }
     });
+    closeModal();
     rzp.open();
 }
 
 async function handleProductSuccess(response) {
+    if (payState !== PayState.PAYING) return; // Guard against duplicate handler
+    payState = PayState.PROCESSING;
     const paymentId = response.razorpay_payment_id;
-    if (!pendingFormData) return;
-    const { error } = await sb.from('product_orders').insert([{
-        product_id: currentProduct.id, product_name: currentProduct.title,
-        product_price: currentProduct.price, buyer_name: pendingFormData.buyer_name,
-        buyer_email: pendingFormData.buyer_email, buyer_phone: pendingFormData.buyer_phone,
-        travelers: pendingFormData.travelers, message: pendingFormData.message,
-        payment_status: 'Paid', payment_id: paymentId,
-        payment_amount: currentProduct.price, payment_date: new Date().toISOString()
-    }]);
-    if (error) { toast('DB Error', error.message, 'error'); return; }
-    toast('Payment Successful!', `Payment ID: ${paymentId}`);
+    if (!pendingFormData || !currentProduct) return;
 
-    // 1) Always generate invoice PDF
-    generateInvoicePDF(pendingFormData.buyer_name, currentProduct.title, currentProduct.price, paymentId, pendingFormData.travelers);
+    showDownloadProgress();
 
-    // 2) Also download product PDF (itinerary) if admin uploaded one
-    if (currentProduct.pdfUrl && currentProduct.pdfUrl !== '' && currentProduct.pdfUrl !== 'null') {
-        setTimeout(() => downloadFile(currentProduct.pdfUrl, currentProduct.title + '_Itinerary'), 800);
+    // Step 1: Download admin-uploaded itinerary PDF FIRST (if exists)
+    setDlStep(1);
+    const hasPdf = currentProduct.pdfUrl && currentProduct.pdfUrl !== '' && currentProduct.pdfUrl !== 'null';
+    if (hasPdf) {
+        await downloadFileAsync(currentProduct.pdfUrl, currentProduct.title + '_Itinerary');
+        await sleep(600); // Small gap between downloads
+    } else {
+        await sleep(400); // Simulate step even if no PDF
     }
 
-    await sendEmailNotification(pendingFormData.buyer_email, pendingFormData.buyer_name, currentProduct.title, currentProduct.price, paymentId, currentProduct.pdfUrl);
+    // Step 2: Generate + download invoice PDF AFTER itinerary
+    setDlStep(2);
+    await sleep(300);
+    generateInvoicePDF(
+        pendingFormData.buyer_name,
+        currentProduct.title,
+        currentProduct.price,
+        paymentId,
+        pendingFormData.travelers
+    );
+    await sleep(400);
+
+    // Step 3: Save to DB + send email
+    setDlStep(3);
+    const { error } = await sb.from('product_orders').insert([{
+        product_id: currentProduct.id,
+        product_name: currentProduct.title,
+        product_price: currentProduct.price,
+        buyer_name: pendingFormData.buyer_name,
+        buyer_email: pendingFormData.buyer_email,
+        buyer_phone: pendingFormData.buyer_phone,
+        travelers: pendingFormData.travelers,
+        message: pendingFormData.message,
+        payment_status: 'Paid',
+        payment_id: paymentId,
+        payment_amount: currentProduct.price,
+        payment_date: new Date().toISOString()
+    }]);
+    if (error) {
+        toast('Order Save Failed', 'Payment was successful but order could not be saved. Please contact support with ID: ' + paymentId, 'error');
+    }
+
+    await sendEmailNotification(
+        pendingFormData.buyer_email,
+        pendingFormData.buyer_name,
+        currentProduct.title,
+        currentProduct.price,
+        paymentId,
+        currentProduct.pdfUrl
+    );
+
+    hideDownloadProgress();
+    toast('Payment Successful!', `Booking confirmed. Payment ID: ${paymentId}`);
+
+    payState = PayState.IDLE;
     pendingFormData = null;
 }
 
 // ── ITINERARY PAYMENT ──
 function processItineraryPayment(btn) {
-    const name = document.getElementById('itin_name').value.trim();
-    const email = document.getElementById('itin_email').value.trim();
-    const phone = document.getElementById('itin_phone').value.trim();
-    const trip = document.getElementById('itin_trip').value;
-    const dest = document.getElementById('itin_dest').value.trim();
-    const days = document.getElementById('itin_days').value;
-    const people = document.getElementById('itin_people').value;
-    const budget = document.getElementById('itin_budget').value;
-    const dates = document.getElementById('itin_dates').value.trim();
-    const style = document.getElementById('itin_style').value;
-    const food = document.getElementById('itin_food').value;
-    const kids = document.getElementById('itin_kids').value;
+    // Hard validate required fields
+    if (!hardValidate(ITIN_REQUIRED_FIELDS)) {
+        document.getElementById('itinValidHint').classList.add('visible');
+        toast('Please fix form errors', 'All required fields must be filled correctly.', 'error');
+        // Scroll to first error
+        const firstErr = document.querySelector('#itinerary .has-error input, #itinerary .has-error select');
+        if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+    }
+    if (payState !== PayState.IDLE) return;
+
+    const name    = document.getElementById('itin_name').value.trim();
+    const email   = document.getElementById('itin_email').value.trim();
+    const phone   = document.getElementById('itin_phone').value.trim();
+    const trip    = document.getElementById('itin_trip').value;
+    const dest    = document.getElementById('itin_dest').value.trim();
+    const days    = document.getElementById('itin_days').value;
+    const people  = document.getElementById('itin_people').value;
+    const budget  = document.getElementById('itin_budget').value;
+    const dates   = document.getElementById('itin_dates').value.trim();
+    const style   = document.getElementById('itin_style').value;
+    const food    = document.getElementById('itin_food').value;
+    const kids    = document.getElementById('itin_kids').value;
     const special = document.getElementById('itin_special').value.trim();
-    if (!name || !email || !phone || !trip || !dest || !days || !people) { toast('Missing Fields','Please fill all required fields.','error'); return; }
-    if (!validateEmail(email)) { toast('Invalid Email','Please enter a valid email.','error'); return; }
-    pendingFormData = { full_name: name, email, phone, trip_type: trip, destination: dest, days: parseInt(days), people: parseInt(people), budget: budget ? parseFloat(budget) : null, travel_dates: dates, travel_style: style, food_preference: food, kids_travelling: kids, special_requirements: special };
+
+    pendingFormData = {
+        full_name: name, email, phone, trip_type: trip, destination: dest,
+        days: parseInt(days), people: parseInt(people),
+        budget: budget ? parseFloat(budget) : null,
+        travel_dates: dates, travel_style: style, food_preference: food,
+        kids_travelling: kids, special_requirements: special
+    };
+
+    payState = PayState.PAYING;
+    btn.disabled = true;
+
     const rzp = new Razorpay({
-        key: RAZORPAY_KEY, amount: 100, currency: "INR",
-        name: "Wanderlust Travel", description: "Custom Itinerary Request",
-        prefill: { name, email, contact: phone }, theme: { color: '#2a4a3a' },
-        handler: handleItinerarySuccess, modal: { ondismiss: () => { pendingFormData = null; } }
+        key: RAZORPAY_KEY,
+        amount: 100, // ₹1 in paise
+        currency: "INR",
+        name: "Wanderlust Travel",
+        description: "Custom Itinerary Request",
+        prefill: { name, email, contact: phone },
+        theme: { color: '#2a4a3a' },
+        handler: handleItinerarySuccess,
+        modal: {
+            ondismiss: () => {
+                payState = PayState.IDLE;
+                btn.disabled = false;
+                pendingFormData = null;
+                toast('Payment Cancelled', 'Your request was not submitted.', 'error');
+            }
+        }
     });
     rzp.open();
 }
 
 async function handleItinerarySuccess(response) {
+    if (payState !== PayState.PAYING) return;
+    payState = PayState.PROCESSING;
     const paymentId = response.razorpay_payment_id;
     if (!pendingFormData) return;
 
-    // Look up if admin has uploaded an itinerary PDF for this destination/request
-    const { data: iData } = await sb.from('itinerary_requests').select('pdf_url').eq('full_name', pendingFormData.full_name).order('created_at', {ascending: false}).limit(1);
+    showDownloadProgress();
 
-    const { error } = await sb.from('itinerary_requests').insert([{ ...pendingFormData, payment_status: 'Paid', payment_id: paymentId, payment_amount: 1, payment_date: new Date().toISOString() }]);
-    if (error) { toast('Error', error.message, 'error'); return; }
-    toast('Itinerary Requested!','Our team will contact you within 24 hours!');
+    // Step 1: Check if admin has pre-uploaded an itinerary PDF for this request,
+    // download it FIRST before anything else
+    setDlStep(1);
+    const { data: iData } = await sb
+        .from('itinerary_requests')
+        .select('pdf_url')
+        .eq('full_name', pendingFormData.full_name)
+        .order('created_at', { ascending: false })
+        .limit(1);
 
-    // 1) Generate invoice PDF for itinerary payment
+    const prePdf = iData && iData[0] && iData[0].pdf_url;
+    if (prePdf) {
+        await downloadFileAsync(prePdf, 'Itinerary_' + pendingFormData.destination);
+        await sleep(600);
+    } else {
+        await sleep(400); // Still show step as "checked"
+    }
+    document.getElementById('dlStep1').querySelector('.dl-dot').style.background = '#4caf7d';
+
+    // Step 2: Generate invoice PDF AFTER itinerary
+    setDlStep(2);
+    await sleep(300);
     generateItineraryInvoicePDF(pendingFormData, paymentId);
+    await sleep(400);
 
-    // 2) If admin had pre-uploaded an itinerary PDF, download it too
-    if (iData && iData[0] && iData[0].pdf_url) {
-        setTimeout(() => downloadFile(iData[0].pdf_url, 'Itinerary_' + pendingFormData.destination), 800);
+    // Step 3: Save to DB + send email
+    setDlStep(3);
+    const { error } = await sb.from('itinerary_requests').insert([{
+        ...pendingFormData,
+        payment_status: 'Paid',
+        payment_id: paymentId,
+        payment_amount: 1,
+        payment_date: new Date().toISOString()
+    }]);
+    if (error) {
+        toast('Save Failed', 'Payment confirmed but data could not be saved. Please contact us with ID: ' + paymentId, 'error');
     }
 
     await sendItineraryEmail(pendingFormData.email, pendingFormData.full_name, paymentId, pendingFormData);
+
+    hideDownloadProgress();
+    toast('Itinerary Requested!', 'Our team will contact you within 24 hours!');
+
+    // Reset form
     clearItineraryForm();
+    payState = PayState.IDLE;
     pendingFormData = null;
+
+    // Re-enable pay button after form cleared (it will be disabled by default)
+    const btn = document.getElementById('itinPayBtn');
+    if (btn) { btn.disabled = true; }
 }
 
-// ── PDF: INVOICE (for product purchase) ──
+// ── FILE DOWNLOAD (async version that resolves after triggering) ──
+function downloadFileAsync(url, title) {
+    return new Promise((resolve) => {
+        try {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${(title||'document').replace(/[^a-z0-9]/gi,'_')}.pdf`;
+            a.target = '_blank';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        } catch(e) {
+            console.error('Download failed:', e);
+        }
+        resolve(); // Resolve immediately after triggering browser download
+    });
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ── PDF: INVOICE ──
 function generateInvoicePDF(name, product, amount, paymentId, travelers) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     const now = new Date();
-
-    // Header
     doc.setFillColor(42, 74, 58);
     doc.rect(0, 0, 210, 48, 'F');
     doc.setTextColor(255,255,255);
@@ -803,17 +1112,13 @@ function generateInvoicePDF(name, product, amount, paymentId, travelers) {
     doc.setFontSize(10); doc.setFont('helvetica','normal');
     doc.text('INVOICE', 20, 32);
     doc.text(`Date: ${now.toLocaleDateString('en-IN')}  |  Time: ${now.toLocaleTimeString('en-IN')}`, 20, 40);
-    // Invoice No right side
     doc.setFontSize(9);
     doc.text(`Invoice #WL-${Date.now().toString().slice(-8)}`, 150, 32);
-
     doc.setTextColor(28,28,28);
     doc.setFontSize(13); doc.setFont('helvetica','bold');
     doc.text(`Dear ${name},`, 20, 62);
     doc.setFontSize(10); doc.setFont('helvetica','normal');
     doc.text('Thank you for your purchase with Wanderlust Travel. Your payment has been confirmed.', 20, 71);
-
-    // Bill to box
     doc.setFillColor(248,245,239);
     doc.roundedRect(20, 80, 80, 30, 3, 3, 'F');
     doc.setFontSize(8); doc.setFont('helvetica','bold');
@@ -821,8 +1126,6 @@ function generateInvoicePDF(name, product, amount, paymentId, travelers) {
     doc.setFont('helvetica','normal');
     doc.text(name, 25, 97);
     doc.text(`Travelers: ${travelers || 1}`, 25, 104);
-
-    // Payment info box
     doc.setFillColor(248,245,239);
     doc.roundedRect(110, 80, 80, 30, 3, 3, 'F');
     doc.setFontSize(8); doc.setFont('helvetica','bold');
@@ -831,15 +1134,12 @@ function generateInvoicePDF(name, product, amount, paymentId, travelers) {
     doc.setFontSize(7);
     doc.text(`ID: ${paymentId}`, 115, 97);
     doc.text('Gateway: Razorpay', 115, 104);
-
-    // Line items table
     doc.setFillColor(42,74,58);
     doc.rect(20, 122, 170, 10, 'F');
     doc.setTextColor(255,255,255); doc.setFontSize(9); doc.setFont('helvetica','bold');
     doc.text('DESCRIPTION', 25, 129);
     doc.text('QTY', 130, 129);
     doc.text('AMOUNT', 165, 129);
-
     doc.setTextColor(28,28,28); doc.setFont('helvetica','normal'); doc.setFontSize(9);
     doc.setFillColor(255,255,255);
     doc.rect(20, 132, 170, 14, 'F');
@@ -848,37 +1148,29 @@ function generateInvoicePDF(name, product, amount, paymentId, travelers) {
     doc.text(product.substring(0,50), 25, 141);
     doc.text(String(travelers||1), 133, 141);
     doc.text(`INR ${parseFloat(amount).toFixed(2)}`, 160, 141);
-
-    // Total
     doc.setFillColor(42,74,58);
     doc.rect(120, 150, 70, 14, 'F');
     doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(11);
     doc.text('TOTAL', 128, 159);
     doc.text(`INR ${parseFloat(amount).toFixed(2)}`, 160, 159);
-
     doc.setTextColor(45,122,79); doc.setFontSize(10); doc.setFont('helvetica','bold');
     doc.text('✓  PAYMENT STATUS: CONFIRMED', 20, 178);
-
     doc.setTextColor(90,90,90); doc.setFontSize(9); doc.setFont('helvetica','normal');
-    doc.text('A PDF itinerary guide has also been downloaded to your device.', 20, 192);
+    doc.text('Your itinerary PDF guide has been downloaded to your device separately.', 20, 192);
     doc.text('For support: hello@wanderlust.in  |  +91 98765 43210', 20, 201);
-
-    // Footer
     doc.setFillColor(238,233,223);
     doc.rect(0, 275, 210, 22, 'F');
     doc.setFontSize(8); doc.setTextColor(120,115,108);
     doc.text('Wanderlust Travel  ·  Mumbai, Maharashtra, India  ·  hello@wanderlust.in  ·  wanderlust.in', 105, 284, { align: 'center' });
     doc.text('This is a computer-generated invoice and does not require a signature.', 105, 291, { align: 'center' });
-
     doc.save(`Invoice_${name.replace(/\s/g,'_')}_${paymentId}.pdf`);
 }
 
-// ── PDF: ITINERARY INVOICE (for ₹1 itinerary request) ──
+// ── PDF: ITINERARY INVOICE ──
 function generateItineraryInvoicePDF(data, paymentId) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     const now = new Date();
-
     doc.setFillColor(42,74,58);
     doc.rect(0, 0, 210, 48, 'F');
     doc.setTextColor(255,255,255);
@@ -889,15 +1181,12 @@ function generateItineraryInvoicePDF(data, paymentId) {
     doc.text(`Date: ${now.toLocaleDateString('en-IN')}  |  Time: ${now.toLocaleTimeString('en-IN')}`, 20, 40);
     doc.setFontSize(9);
     doc.text(`Ref #WL-IT-${Date.now().toString().slice(-8)}`, 150, 32);
-
     doc.setTextColor(28,28,28);
     doc.setFontSize(13); doc.setFont('helvetica','bold');
     doc.text(`Dear ${data.full_name},`, 20, 62);
     doc.setFontSize(10); doc.setFont('helvetica','normal');
     doc.text('Your custom itinerary request is confirmed! Payment received.', 20, 71);
     doc.text('Our travel experts will prepare your personalised plan within 24 hours.', 20, 79);
-
-    // Payment confirmed tag
     doc.setFillColor(240,250,244);
     doc.roundedRect(20, 86, 80, 14, 3, 3, 'F');
     doc.setDrawColor(159,212,180);
@@ -906,13 +1195,10 @@ function generateItineraryInvoicePDF(data, paymentId) {
     doc.text(`✓ PAID — INR 1.00`, 25, 95);
     doc.setTextColor(90,90,90); doc.setFontSize(8); doc.setFont('helvetica','normal');
     doc.text(`Payment ID: ${paymentId}`, 115, 95);
-
-    // Itinerary details table
     doc.setFillColor(42,74,58);
     doc.rect(20, 108, 170, 10, 'F');
     doc.setTextColor(255,255,255); doc.setFontSize(9); doc.setFont('helvetica','bold');
     doc.text('ITINERARY DETAILS', 25, 115);
-
     const fields = [
         ['Destination', data.destination],['Trip Type', data.trip_type],
         ['Duration', `${data.days} Days`],['No. of Travelers', `${data.people} People`],
@@ -928,7 +1214,6 @@ function generateItineraryInvoicePDF(data, paymentId) {
         doc.setTextColor(28,28,28); doc.setFont('helvetica','normal');
         doc.text(String(v||'—'), 90, y + 1);
     });
-
     if (data.special_requirements) {
         const y = 126 + fields.length * 11 + 4;
         doc.setFillColor(255,248,230);
@@ -941,20 +1226,12 @@ function generateItineraryInvoicePDF(data, paymentId) {
         const wrapped = doc.splitTextToSize(data.special_requirements, 155);
         doc.text(wrapped[0]||'', 25, y + 15);
     }
-
     doc.setFillColor(238,233,223);
     doc.rect(0, 275, 210, 22, 'F');
     doc.setFontSize(8); doc.setTextColor(120,115,108);
     doc.text('Wanderlust Travel  ·  Mumbai, Maharashtra, India  ·  hello@wanderlust.in', 105, 284, { align: 'center' });
     doc.text('Our team will email your full itinerary within 24 hours of this confirmation.', 105, 291, { align: 'center' });
-
     doc.save(`ItineraryRequest_${data.full_name.replace(/\s/g,'_')}_${paymentId}.pdf`);
-}
-
-function downloadFile(url, title) {
-    const a = document.createElement('a');
-    a.href = url; a.download = `${(title||'document').replace(/[^a-z0-9]/gi,'_')}.pdf`;
-    a.target = '_blank'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
 
 // ── EMAIL ──
@@ -970,25 +1247,33 @@ async function sendItineraryEmail(email, name, paymentId, data) {
 
 // ── CONTACT ──
 async function submitContact(btn) {
-    const name = document.getElementById('con_name').value.trim();
-    const email = document.getElementById('con_email').value.trim();
-    const phone = document.getElementById('con_phone').value.trim();
+    const fields = [
+        { inputId:'con_name',  groupId:'fg_con_name',  rule:'name'  },
+        { inputId:'con_email', groupId:'fg_con_email', rule:'email' },
+        { inputId:'con_phone', groupId:'fg_con_phone', rule:'phone' }
+    ];
+    if (!hardValidate(fields)) { toast('Missing Fields','Please fill all required fields correctly.','error'); return; }
+    const name    = document.getElementById('con_name').value.trim();
+    const email   = document.getElementById('con_email').value.trim();
+    const phone   = document.getElementById('con_phone').value.trim();
     const message = document.getElementById('con_message').value.trim();
-    if (!name || !email || !phone) { toast('Missing Fields','Please fill all required fields.','error'); return; }
-    if (!validateEmail(email)) { toast('Invalid Email','Please enter a valid email address.','error'); return; }
-    btn.disabled = true; btn.textContent = 'Sending...';
+    btn.disabled = true; btn.textContent = 'Sending…';
     const { error } = await sb.from('contact_messages').insert([{ name, email, contact: phone, message }]);
     btn.disabled = false;
     btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg> Send Message`;
     if (error) { toast('Error', error.message, 'error'); return; }
     toast('Message Sent',"We'll get back to you shortly!");
     ['con_name','con_email','con_phone','con_message'].forEach(id => document.getElementById(id).value = '');
+    fields.forEach(f => {
+        const el = document.getElementById(f.groupId);
+        if (el) el.classList.remove('is-valid','has-error');
+    });
 }
 
 // ── FAQ ──
 const faqs = [
     { q:"How does the custom itinerary service work?", a:"Fill out the itinerary request form with your travel preferences. After a small ₹1 booking fee, our team will prepare a fully personalized travel plan and send it to your email within 24 hours." },
-    { q:"What happens after I pay for a travel package?", a:"You receive an instant Invoice PDF downloaded automatically. If the admin has uploaded an itinerary PDF for that package, it also downloads immediately. A confirmation email is also sent." },
+    { q:"What happens after I pay for a travel package?", a:"First, the admin-uploaded itinerary PDF downloads to your device. Then your invoice PDF is generated and downloaded. Finally, a confirmation email is sent to your inbox." },
     { q:"Is my payment information secure?", a:"Yes. All payments are processed by Razorpay, a PCI-DSS compliant payment gateway used by thousands of Indian businesses. We never store your card or bank details." },
     { q:"Can I get a refund if I'm not satisfied?", a:"We offer a full refund within 7 days of purchase if the product does not match its description. Contact us at hello@wanderlust.in with your payment ID." },
     { q:"How long does it take to receive a custom itinerary?", a:"Our travel experts typically deliver your personalised itinerary within 24 hours of receiving your request. For complex or group itineraries, it may take up to 48 hours." },
@@ -1016,16 +1301,25 @@ function toggleFAQ(i) {
 
 // ── UTILS ──
 function esc(t) { if (!t) return ''; const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
-function validateEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+
 function clearItineraryForm() {
     ['itin_name','itin_email','itin_phone','itin_dest','itin_days','itin_people','itin_budget','itin_dates','itin_special'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     ['itin_trip','itin_style'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     document.getElementById('itin_food').value = 'No Preference';
     document.getElementById('itin_kids').value = 'No children';
+    ITIN_REQUIRED_FIELDS.forEach(f => {
+        const el = document.getElementById(f.groupId);
+        if (el) el.classList.remove('is-valid','has-error');
+    });
+    document.getElementById('itinValidHint').classList.remove('visible');
 }
+
 function toggleMenu() { document.getElementById('mobileNav').classList.toggle('active'); }
 
-document.getElementById('purchaseModal').addEventListener('click', e => { if (e.target === document.getElementById('purchaseModal')) closeModal(); });
+// Close modal only when clicking the dark overlay (not the box)
+document.getElementById('purchaseModal').addEventListener('click', e => {
+    if (e.target === document.getElementById('purchaseModal')) closeModal();
+});
 
 // ── INIT ──
 loadProducts();
