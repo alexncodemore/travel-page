@@ -3,152 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Travel Reviews — Wanderlust</title>
+    <title>Traveler Reviews — Wanderlust</title>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         :root {
-            --cream: #faf7f2; --sand: #f0ebe0; --terracotta: #c4622d; --terracotta-dark: #a04e22;
-            --forest: #2d4a3e; --forest-light: #3d6b5c; --gold: #c9952a; --gold-light: #e8b84b;
-            --charcoal: #1c1c1e; --mid: #5a5a5a; --light: #9a9a9a; --border: #e0d9ce;
-            --white: #fff; --success: #2d7a4f;
+            --ink: #0d1117; --ink2: #1c2333; --sage: #2a4a3a; --sage2: #3a6b54;
+            --amber: #d4a843; --amber2: #f0c56a; --rust: #c4502a; --rust2: #e0673d;
+            --paper: #f8f5ef; --paper2: #eee9df; --stone: #c9c2b4; --mist: #8a8275;
+            --white: #fff; --success: #1e7a4a; --error: #c0392b;
+            --r8: 8px; --r12: 12px; --r16: 16px; --r24: 24px; --r999: 999px;
         }
-        body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--charcoal); min-height: 100vh; }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Outfit', sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; }
         a { color: inherit; text-decoration: none; }
 
+        /* ── HEADER ── */
         header {
-            background: var(--forest); color: var(--white);
-            padding: 0 5%; height: 60px;
+            background: var(--ink2); color: var(--white);
+            padding: 0 5%; height: 68px;
             display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 50;
         }
-        .logo { font-family: 'Playfair Display', serif; font-size: 1.3rem; }
-        .logo span { color: var(--gold-light); }
-        header a { color: rgba(255,255,255,0.7); font-size: 0.85rem; transition: color 0.2s; }
-        header a:hover { color: var(--white); }
-
-        .page-wrap { max-width: 960px; margin: 0 auto; padding: 3rem 5%; }
-
-        .page-title {
-            font-family: 'Playfair Display', serif;
-            font-size: clamp(1.8rem, 3vw, 2.4rem);
-            margin-bottom: 0.4rem;
+        .logo { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-weight: 700; }
+        .logo em { color: var(--rust2); font-style: normal; }
+        .back-link {
+            display: flex; align-items: center; gap: 0.5rem;
+            color: rgba(255,255,255,0.55); font-size: 0.875rem; font-weight: 500;
+            transition: color 0.2s;
         }
-        .page-sub { color: var(--mid); margin-bottom: 2.5rem; font-size: 0.95rem; }
+        .back-link:hover { color: var(--white); }
 
-        /* RATING BANNER */
+        /* ── HERO STRIP ── */
+        .page-hero {
+            background: linear-gradient(160deg, var(--sage) 0%, #1a2f22 100%);
+            padding: 3.5rem 5%;
+            position: relative; overflow: hidden;
+        }
+        .page-hero::before {
+            content: ''; position: absolute; inset: 0; opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        }
+        .page-hero-content { position: relative; z-index: 1; max-width: 640px; }
+        .hero-chip { display: inline-flex; align-items: center; gap: 0.5rem; border: 1px solid rgba(212,168,67,0.35); color: var(--amber2); background: rgba(212,168,67,0.08); padding: 0.35rem 0.9rem; border-radius: var(--r999); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 1rem; }
+        .page-hero h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.2rem, 5vw, 3.5rem); font-weight: 700; color: var(--white); line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 0.75rem; }
+        .page-hero p { color: rgba(255,255,255,0.55); font-size: 0.95rem; line-height: 1.7; }
+
+        /* ── RATING BANNER ── */
         .rating-banner {
-            background: linear-gradient(135deg, var(--forest), var(--forest-light));
-            border-radius: 16px; padding: 1.75rem;
-            display: flex; align-items: center; gap: 2rem; flex-wrap: wrap;
-            margin-bottom: 2.5rem;
+            background: var(--white); border: 1px solid var(--paper2);
+            border-radius: var(--r16); padding: 2rem 2.5rem;
+            display: flex; align-items: center; gap: 2.5rem; flex-wrap: wrap;
+            margin-bottom: 3rem; box-shadow: 0 4px 24px rgba(13,17,23,0.06);
         }
-        .rating-big { text-align: center; }
-        .rating-big .num { font-family: 'Playfair Display', serif; font-size: 3.5rem; font-weight: 700; color: var(--white); line-height: 1; }
-        .rating-big .stars { color: var(--gold-light); font-size: 1.1rem; margin: 0.3rem 0; }
-        .rating-big .count { color: rgba(255,255,255,0.55); font-size: 0.82rem; }
-        .rating-divider { width: 1px; height: 60px; background: rgba(255,255,255,0.15); }
-        .rating-bars { flex: 1; min-width: 160px; }
-        .bar-row { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.35rem; }
-        .bar-label { color: rgba(255,255,255,0.6); font-size: 0.78rem; width: 26px; text-align: right; }
-        .bar-track { flex: 1; height: 5px; background: rgba(255,255,255,0.12); border-radius: 3px; overflow: hidden; }
-        .bar-fill { height: 100%; background: var(--gold-light); border-radius: 3px; }
-        .bar-count { color: rgba(255,255,255,0.45); font-size: 0.73rem; width: 20px; }
+        .rating-big { text-align: center; min-width: 90px; }
+        .rating-big .num { font-family: 'Cormorant Garamond', serif; font-size: 4rem; font-weight: 700; color: var(--sage); line-height: 1; }
+        .rating-big .stars { color: var(--amber); font-size: 1.1rem; margin: 0.25rem 0; letter-spacing: 0.05em; }
+        .rating-big .count { color: var(--mist); font-size: 0.8rem; }
+        .rating-divider { width: 1px; height: 70px; background: var(--paper2); }
+        .rating-bars { flex: 1; min-width: 200px; }
+        .bar-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.55rem; }
+        .bar-label { color: var(--mist); font-size: 0.78rem; font-weight: 600; width: 26px; text-align: right; }
+        .bar-track { flex: 1; height: 7px; background: var(--paper2); border-radius: 4px; overflow: hidden; }
+        .bar-fill { height: 100%; background: linear-gradient(90deg, var(--amber), var(--amber2)); border-radius: 4px; transition: width 0.9s cubic-bezier(0.4,0,0.2,1); }
+        .bar-count { color: var(--stone); font-size: 0.72rem; width: 22px; text-align: right; }
 
-        /* FORM CARD */
-        .form-section { margin-bottom: 3rem; }
-        .form-section h2 { font-family: 'Playfair Display', serif; font-size: 1.3rem; margin-bottom: 1.25rem; }
-        .form-card {
-            background: var(--white); border: 1px solid var(--border);
-            border-radius: 16px; padding: 1.75rem;
-        }
+        /* ── MAIN LAYOUT ── */
+        .page-wrap { max-width: 1000px; margin: 0 auto; padding: 3.5rem 5%; }
+
+        /* ── WRITE REVIEW ── */
+        .section-label { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-weight: 700; color: var(--ink); margin-bottom: 1.25rem; }
+        .form-card { background: var(--white); border: 1px solid var(--paper2); border-radius: var(--r16); padding: 2rem; margin-bottom: 3.5rem; }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
         .form-group { margin-bottom: 1rem; }
-        label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--charcoal); margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.04em; }
-        input, select, textarea {
-            width: 100%; padding: 0.7rem 0.9rem;
-            border: 1.5px solid var(--border); border-radius: 8px;
-            font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
-            color: var(--charcoal); background: var(--cream); outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        input:focus, select:focus, textarea:focus {
-            border-color: var(--forest); box-shadow: 0 0 0 3px rgba(45,74,62,0.1);
-        }
+        label { display: block; font-size: 0.72rem; font-weight: 600; color: var(--ink); margin-bottom: 0.4rem; letter-spacing: 0.06em; text-transform: uppercase; }
+        input, select, textarea { width: 100%; padding: 0.75rem 1rem; border: 1.5px solid var(--paper2); border-radius: var(--r8); font-family: 'Outfit', sans-serif; font-size: 0.9rem; color: var(--ink); background: var(--paper); outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+        input:focus, select:focus, textarea:focus { border-color: var(--sage); box-shadow: 0 0 0 3px rgba(42,74,58,0.1); }
         textarea { min-height: 90px; resize: vertical; }
-        .btn-submit {
-            width: 100%; padding: 0.85rem; border-radius: 8px;
-            background: var(--terracotta); color: var(--white);
-            font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 700;
-            border: none; cursor: pointer; transition: background 0.2s;
-            display: flex; align-items: center; justify-content: center; gap: 0.5rem;
-        }
-        .btn-submit:hover { background: var(--terracotta-dark); }
+        .btn-submit { width: 100%; padding: 0.9rem; border-radius: var(--r8); background: var(--rust); color: var(--white); font-family: 'Outfit', sans-serif; font-size: 0.95rem; font-weight: 600; border: none; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+        .btn-submit:hover { background: var(--rust2); }
         .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
 
-        /* REVIEWS */
-        .reviews-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.5rem; }
-        .reviews-header h2 { font-family: 'Playfair Display', serif; font-size: 1.3rem; }
-        .btn-reload {
-            background: var(--sand); border: 1px solid var(--border);
-            color: var(--mid); padding: 0.45rem 1rem; border-radius: 50px;
-            font-size: 0.82rem; font-weight: 600; cursor: pointer;
-            display: flex; align-items: center; gap: 0.4rem;
-            transition: background 0.15s;
-        }
-        .btn-reload:hover { background: var(--border); }
-        .reviews-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
-        .review-card {
-            background: var(--white); border: 1px solid var(--border);
-            border-radius: 12px; padding: 1.2rem;
-            transition: box-shadow 0.2s;
-        }
-        .review-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.07); }
-        .review-top { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 0.7rem; }
-        .avatar {
-            width: 38px; height: 38px; border-radius: 50%;
-            background: linear-gradient(135deg, var(--terracotta), var(--gold));
-            display: flex; align-items: center; justify-content: center;
-            color: var(--white); font-weight: 700; font-size: 0.85rem; flex-shrink: 0;
-        }
-        .rev-name { font-size: 0.9rem; font-weight: 600; }
-        .rev-place { font-size: 0.78rem; color: var(--mid); }
-        .rev-stars { color: var(--gold); font-size: 0.9rem; margin-bottom: 0.5rem; }
-        .rev-text { color: var(--mid); font-size: 0.875rem; line-height: 1.6; }
-        .rev-date { color: var(--light); font-size: 0.75rem; margin-top: 0.7rem; }
+        /* ── REVIEWS HEADER ── */
+        .reviews-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem; }
+        .reviews-header h2 { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-weight: 700; }
+        .reviews-count { background: var(--paper2); color: var(--mist); font-size: 0.8rem; font-weight: 600; padding: 0.3rem 0.75rem; border-radius: var(--r999); }
+        .btn-reload { background: var(--paper2); border: 1px solid var(--stone); color: var(--mist); padding: 0.45rem 1rem; border-radius: var(--r999); font-size: 0.82rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.4rem; transition: background 0.15s; font-family: 'Outfit', sans-serif; }
+        .btn-reload:hover { background: var(--stone); }
 
-        .loading-dots { display: flex; gap: 0.4rem; justify-content: center; padding: 2rem; }
-        .loading-dots span { width: 8px; height: 8px; border-radius: 50%; background: var(--border); animation: bounce 1.2s infinite; }
+        /* ── REVIEWS GRID ── */
+        .reviews-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem; }
+        .review-card { background: var(--white); border: 1px solid var(--paper2); border-radius: var(--r12); padding: 1.5rem; transition: box-shadow 0.2s; }
+        .review-card:hover { box-shadow: 0 8px 28px rgba(13,17,23,0.08); }
+        .review-top { display: flex; align-items: center; gap: 0.85rem; margin-bottom: 1rem; }
+        .avatar { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, var(--rust), var(--amber)); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.95rem; flex-shrink: 0; font-family: 'Cormorant Garamond', serif; }
+        .rev-name { font-size: 0.9rem; font-weight: 600; }
+        .rev-place { font-size: 0.78rem; color: var(--mist); }
+        .rev-stars { color: var(--amber); font-size: 0.88rem; margin-bottom: 0.6rem; letter-spacing: 0.05em; }
+        .rev-text { color: var(--mist); font-size: 0.875rem; line-height: 1.65; }
+        .rev-date { color: var(--stone); font-size: 0.73rem; margin-top: 0.85rem; }
+
+        /* ── LOADING/EMPTY ── */
+        .loading-dots { display: flex; gap: 0.4rem; justify-content: center; padding: 2.5rem; }
+        .loading-dots span { width: 8px; height: 8px; border-radius: 50%; background: var(--stone); animation: ldots 1.2s infinite; }
         .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
         .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes bounce { 0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px);background:var(--terracotta)} }
+        @keyframes ldots { 0%,80%,100%{transform:translateY(0);background:var(--stone)} 40%{transform:translateY(-7px);background:var(--rust)} }
+        .empty-msg { color: var(--mist); text-align: center; padding: 3rem; font-size: 0.9rem; grid-column: 1/-1; }
 
+        /* ── TOAST ── */
         .toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 99; display: flex; flex-direction: column; gap: 0.5rem; }
-        .toast { min-width: 240px; padding: 0.8rem 1rem; border-radius: 10px; font-size: 0.875rem; display: flex; gap: 0.6rem; animation: fadeIn 0.3s ease; box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
-        .toast-success { background: #f0faf4; border: 1px solid #a8d8b9; color: var(--success); }
-        .toast-error { background: #fef0f0; border: 1px solid #f5b7b1; color: #c0392b; }
-        @keyframes fadeIn { from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)} }
+        .toast { min-width: 260px; padding: 0.9rem 1.1rem; border-radius: var(--r12); font-size: 0.875rem; display: flex; gap: 0.6rem; animation: toastIn 0.3s ease; box-shadow: 0 6px 24px rgba(13,17,23,0.15); }
+        .toast-success { background: #f0faf4; border: 1px solid #9fd4b4; color: var(--success); }
+        .toast-error { background: #fff0f0; border: 1px solid #f5b7b1; color: var(--error); }
+        @keyframes toastIn { from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)} }
 
         @media (max-width: 600px) {
             .form-row { grid-template-columns: 1fr; }
             .rating-divider { display: none; }
+            .page-hero { padding: 2.5rem 5%; }
         }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="logo">Wander<span>lust</span></div>
-    <a href="index.html">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:4px"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    <div class="logo">Wander<em>lust</em></div>
+    <a href="index.html" class="back-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
         Back to Home
     </a>
 </header>
 
+<div class="page-hero">
+    <div class="page-hero-content">
+        <div class="hero-chip">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>
+            Community Reviews
+        </div>
+        <h1>Traveler Stories</h1>
+        <p>Genuine experiences shared by our community of explorers from across India and beyond.</p>
+    </div>
+</div>
+
 <div class="page-wrap">
-    <h1 class="page-title">Traveler Reviews</h1>
-    <p class="page-sub">Genuine experiences from our community of explorers.</p>
 
     <!-- Rating Banner -->
     <div class="rating-banner" id="ratingBanner" style="display:none">
@@ -162,79 +162,58 @@
     </div>
 
     <!-- Write Review -->
-    <div class="form-section">
-        <h2>Share Your Experience</h2>
-        <div class="form-card">
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Your Name</label>
-                    <input type="text" id="rev_name" placeholder="Full name">
-                </div>
-                <div class="form-group">
-                    <label>Place Visited</label>
-                    <input type="text" id="rev_place" placeholder="e.g. Goa, Rajasthan">
-                </div>
-            </div>
-            <div class="form-group">
-                <label>Rating</label>
-                <select id="rev_rating">
-                    <option value="">Select your rating</option>
-                    <option value="5">5 Stars — Exceptional</option>
-                    <option value="4">4 Stars — Very Good</option>
-                    <option value="3">3 Stars — Good</option>
-                    <option value="2">2 Stars — Fair</option>
-                    <option value="1">1 Star — Poor</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Your Review</label>
-                <textarea id="rev_message" placeholder="Share the highlights of your journey..."></textarea>
-            </div>
-            <button class="btn-submit" onclick="submitReview(this)">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-                Submit Review
-            </button>
+    <div class="section-label">Share Your Experience</div>
+    <div class="form-card">
+        <div class="form-row">
+            <div class="form-group"><label>Your Name</label><input type="text" id="rev_name" placeholder="Full name"></div>
+            <div class="form-group"><label>Place Visited</label><input type="text" id="rev_place" placeholder="e.g. Goa, Rajasthan"></div>
         </div>
+        <div class="form-group">
+            <label>Rating</label>
+            <select id="rev_rating">
+                <option value="">Select your rating</option>
+                <option value="5">★★★★★ — Exceptional</option>
+                <option value="4">★★★★☆ — Very Good</option>
+                <option value="3">★★★☆☆ — Good</option>
+                <option value="2">★★☆☆☆ — Fair</option>
+                <option value="1">★☆☆☆☆ — Poor</option>
+            </select>
+        </div>
+        <div class="form-group"><label>Your Review</label><textarea id="rev_message" placeholder="Share the highlights of your journey..."></textarea></div>
+        <button class="btn-submit" onclick="submitReview(this)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            Submit Review
+        </button>
     </div>
 
     <!-- All Reviews -->
-    <div>
-        <div class="reviews-header">
-            <h2>All Reviews</h2>
-            <button class="btn-reload" onclick="loadReviews()">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
-                Refresh
-            </button>
-        </div>
-        <div class="reviews-grid" id="reviewsGrid">
-            <div class="loading-dots"><span></span><span></span><span></span></div>
-        </div>
+    <div class="reviews-header">
+        <h2>All Reviews <span class="reviews-count" id="reviewsCount"></span></h2>
+        <button class="btn-reload" onclick="loadReviews()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+            Refresh
+        </button>
     </div>
+    <div class="reviews-grid" id="reviewsGrid">
+        <div class="loading-dots"><span></span><span></span><span></span></div>
+    </div>
+
 </div>
 
 <div class="toast-container" id="toastContainer"></div>
 
 <script>
-const sb = window.supabase.createClient(
-    "https://eyekpbzcdouhkquqjjae.supabase.co",
-    "sb_publishable_hONe7ntkTZaGeyFsLV0iMQ_9aTXtOBE"
-);
+const sb = window.supabase.createClient("https://eyekpbzcdouhkquqjjae.supabase.co","sb_publishable_hONe7ntkTZaGeyFsLV0iMQ_9aTXtOBE");
 
 function toast(msg, type = 'success') {
     const c = document.getElementById('toastContainer');
     const t = document.createElement('div');
     t.className = `toast toast-${type}`;
-    t.innerHTML = `<span>${type === 'success' ? '✓' : '✕'}</span><span>${msg}</span>`;
-    c.appendChild(t);
-    setTimeout(() => t.remove(), 3500);
+    t.innerHTML = `<span>${type==='success'?'✓':'✕'}</span><span>${msg}</span>`;
+    c.appendChild(t); setTimeout(() => t.remove(), 3500);
 }
 
-function esc(t) {
-    if (!t) return '';
-    const d = document.createElement('div');
-    d.textContent = t;
-    return d.innerHTML;
-}
+function esc(t) { if (!t) return ''; const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
 
 async function loadReviews() {
     const grid = document.getElementById('reviewsGrid');
@@ -242,23 +221,25 @@ async function loadReviews() {
     grid.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div>';
 
     const { data, error } = await sb.from('reviews').select('*').order('created_at', { ascending: false });
-
     if (error || !data || data.length === 0) {
-        grid.innerHTML = '<p style="color:var(--light);padding:2rem;grid-column:1/-1;text-align:center">No reviews yet. Be the first to share!</p>';
+        banner.style.display = 'none';
+        grid.innerHTML = '<p class="empty-msg">No reviews yet. Be the first to share your experience!</p>';
         return;
     }
 
+    // Stats
+    const avg = data.reduce((s,r) => s + r.rating, 0) / data.length;
     banner.style.display = 'flex';
-    const avg = data.reduce((s, r) => s + r.rating, 0) / data.length;
     document.getElementById('avgNum').textContent = avg.toFixed(1);
-    document.getElementById('avgCount').textContent = `${data.length} review${data.length !== 1 ? 's' : ''}`;
-    document.getElementById('avgStars').textContent = '★'.repeat(Math.round(avg)) + '☆'.repeat(5 - Math.round(avg));
+    document.getElementById('avgCount').textContent = `${data.length} review${data.length!==1?'s':''}`;
+    document.getElementById('reviewsCount').textContent = data.length;
+    document.getElementById('avgStars').textContent = '★'.repeat(Math.round(avg)) + '☆'.repeat(5-Math.round(avg));
 
-    const counts = [5,4,3,2,1].map(n => ({ n, c: data.filter(r => r.rating === n).length }));
-    document.getElementById('ratingBars').innerHTML = counts.map(({ n, c }) => `
+    const counts = [5,4,3,2,1].map(n => ({ n, c: data.filter(r => r.rating===n).length }));
+    document.getElementById('ratingBars').innerHTML = counts.map(({n,c}) => `
         <div class="bar-row">
             <span class="bar-label">${n}</span>
-            <div class="bar-track"><div class="bar-fill" style="width:${data.length ? (c/data.length*100) : 0}%"></div></div>
+            <div class="bar-track"><div class="bar-fill" style="width:${data.length?(c/data.length*100):0}%"></div></div>
             <span class="bar-count">${c}</span>
         </div>`).join('');
 
@@ -272,7 +253,7 @@ async function loadReviews() {
                 </div>
             </div>
             <div class="rev-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
-            <div class="rev-text">${esc(r.message) || 'No written review.'}</div>
+            <div class="rev-text">${esc(r.message)||'No written review.'}</div>
             <div class="rev-date">${new Date(r.created_at).toLocaleDateString('en-IN',{year:'numeric',month:'long',day:'numeric'})}</div>
         </div>`).join('');
 }
@@ -282,20 +263,14 @@ async function submitReview(btn) {
     const place = document.getElementById('rev_place').value.trim();
     const rating = parseInt(document.getElementById('rev_rating').value);
     const message = document.getElementById('rev_message').value.trim();
-
-    if (!name || !place || !rating) { toast('Please fill all required fields.', 'error'); return; }
-
+    if (!name || !place || !rating) { toast('Please fill all required fields.','error'); return; }
     btn.disabled = true; btn.textContent = 'Submitting...';
     const { error } = await sb.from('reviews').insert([{ name, travel_place: place, rating, message }]);
     btn.disabled = false;
     btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Submit Review';
-
     if (error) { toast('Error: ' + error.message, 'error'); return; }
     toast('Review submitted! Thank you.');
-    document.getElementById('rev_name').value = '';
-    document.getElementById('rev_place').value = '';
-    document.getElementById('rev_rating').value = '';
-    document.getElementById('rev_message').value = '';
+    ['rev_name','rev_place','rev_rating','rev_message'].forEach(id => document.getElementById(id).value = '');
     loadReviews();
 }
 
