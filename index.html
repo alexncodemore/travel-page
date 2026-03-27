@@ -1,311 +1,1528 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Itinerary & Product Management</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wanderers Itinerary — DIY Travel Planning</title>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --ink:        #0f0d0a;
+            --ink-2:      #2a241c;
+            --ink-3:      #5a5048;
+            --sand:       #f5efe6;
+            --sand-2:     #ece4d8;
+            --sand-3:     #d8ccbb;
+            --ochre:      #c8891a;
+            --ochre-deep: #a36a08;
+            --ochre-pale: #fdf5e8;
+            --rust:       #b84b2f;
+            --rust-deep:  #8f3520;
+            --white:      #fefcf9;
+            --line:       rgba(200,137,26,0.18);
+            --shadow-sm:  0 2px 12px rgba(15,13,10,0.07);
+            --shadow-md:  0 8px 40px rgba(15,13,10,0.12);
+            --shadow-lg:  0 20px 80px rgba(15,13,10,0.18);
+            --radius:     4px;
+            --radius-lg:  10px;
+            --ease:       cubic-bezier(.4,0,.2,1);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; font-size: 16px; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--white);
+            color: var(--ink);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: var(--sand); }
+        ::-webkit-scrollbar-thumb { background: var(--ochre); border-radius: 2px; }
+
+        /* ── NAVBAR ── */
+        .navbar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 999;
+            background: rgba(15,13,10,0.96);
+            backdrop-filter: blur(16px);
+            height: 64px;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 5%;
+            border-bottom: 1px solid rgba(200,137,26,0.25);
+        }
+
+        .nav-logo {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--white);
+            letter-spacing: 0.03em;
+            text-decoration: none;
+        }
+        .nav-logo em {
+            font-style: italic;
+            color: var(--ochre);
+        }
+
+        .nav-links {
+            display: flex; gap: 2.4rem; list-style: none; align-items: center;
+        }
+        .nav-links a {
+            color: rgba(254,252,249,0.65);
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            transition: color 0.25s var(--ease);
+        }
+        .nav-links a:hover { color: var(--ochre); }
+
+        .nav-cta {
+            background: var(--ochre);
+            color: var(--ink);
+            padding: 9px 22px;
+            border-radius: var(--radius);
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: background 0.2s var(--ease), transform 0.2s var(--ease);
+            white-space: nowrap;
+        }
+        .nav-cta:hover { background: var(--ochre-deep); transform: translateY(-1px); }
+
+        .hamburger {
+            display: none;
+            flex-direction: column; gap: 5px;
+            background: none; border: none; cursor: pointer; padding: 4px;
+        }
+        .hamburger span {
+            display: block; width: 24px; height: 2px;
+            background: var(--white); border-radius: 2px;
+            transition: all 0.3s var(--ease);
+        }
+        .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+        .hamburger.open span:nth-child(2) { opacity: 0; }
+        .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+        /* Mobile nav */
+        .mobile-nav {
+            display: none;
+            position: fixed; top: 64px; left: 0; right: 0; z-index: 998;
+            background: rgba(15,13,10,0.98);
+            padding: 24px 5%;
+            border-bottom: 1px solid rgba(200,137,26,0.2);
+            flex-direction: column; gap: 0;
+        }
+        .mobile-nav.open { display: flex; }
+        .mobile-nav a {
+            color: rgba(254,252,249,0.75);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(200,137,26,0.1);
+            transition: color 0.2s;
+        }
+        .mobile-nav a:last-child { border-bottom: none; }
+        .mobile-nav a:hover { color: var(--ochre); }
+
+        /* ── HERO ── */
+        .hero {
+            min-height: 100vh;
+            position: relative;
+            display: flex; align-items: center;
+            overflow: hidden;
+        }
+
+        .hero-carousel {
+            position: absolute; inset: 0;
+        }
+        .carousel-track {
+            display: flex; height: 100%;
+            transition: transform 1s cubic-bezier(.77,0,.18,1);
+        }
+        .carousel-slide {
+            min-width: 100%; height: 100%;
+            background-size: cover; background-position: center;
+        }
+        .carousel-slide:nth-child(1) { background-image: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1800&auto=format&fit=crop'); }
+        .carousel-slide:nth-child(2) { background-image: url('https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=1800&auto=format&fit=crop'); }
+        .carousel-slide:nth-child(3) { background-image: url('https://images.unsplash.com/photo-1587474260584-136574528ed5?w=1800&auto=format&fit=crop'); }
+        .carousel-slide:nth-child(4) { background-image: url('https://images.unsplash.com/photo-1477587458883-47145ed4973f?w=1800&auto=format&fit=crop'); }
+
+        .hero-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(
+                105deg,
+                rgba(15,13,10,0.88) 0%,
+                rgba(15,13,10,0.65) 50%,
+                rgba(15,13,10,0.4) 100%
+            );
+        }
+
+        .carousel-btn {
+            position: absolute; top: 50%; transform: translateY(-50%); z-index: 3;
+            background: rgba(200,137,26,0.12);
+            border: 1px solid rgba(200,137,26,0.4);
+            color: var(--ochre); width: 44px; height: 44px;
+            border-radius: 50%; font-size: 1rem; cursor: pointer;
+            transition: all 0.2s var(--ease);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .carousel-btn:hover { background: var(--ochre); color: var(--ink); }
+        .carousel-btn.prev { left: 24px; }
+        .carousel-btn.next { right: 24px; }
+
+        .carousel-dots {
+            position: absolute; bottom: 28px; left: 5%; z-index: 3;
+            display: flex; gap: 8px;
+        }
+        .dot {
+            width: 24px; height: 3px; border-radius: 2px;
+            background: rgba(200,137,26,0.3); cursor: pointer;
+            border: none; transition: all 0.3s var(--ease);
+        }
+        .dot.active { background: var(--ochre); width: 40px; }
+
+        .hero-content {
+            position: relative; z-index: 2;
+            padding: 120px 5% 80px;
+            max-width: 760px;
+            animation: fadeUp 1s var(--ease) both;
+        }
+
+        @keyframes fadeUp {
+            from { opacity:0; transform: translateY(32px); }
+            to   { opacity:1; transform: translateY(0); }
+        }
+
+        .hero-eyebrow {
+            display: inline-block;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--ochre);
+            margin-bottom: 1.4rem;
+            border-bottom: 1px solid rgba(200,137,26,0.4);
+            padding-bottom: 8px;
+            animation: fadeUp 1s 0.1s var(--ease) both;
+        }
+
+        .hero h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(3rem, 6.5vw, 5.5rem);
+            font-weight: 700;
+            color: var(--white);
+            line-height: 1.06;
+            margin-bottom: 1.4rem;
+            animation: fadeUp 1s 0.2s var(--ease) both;
+        }
+        .hero h1 em {
+            font-style: italic;
+            color: var(--ochre);
+        }
+
+        .hero-sub {
+            color: rgba(254,252,249,0.72);
+            font-size: 1.05rem;
+            line-height: 1.75;
+            max-width: 500px;
+            margin-bottom: 2.4rem;
+            font-weight: 300;
+            animation: fadeUp 1s 0.3s var(--ease) both;
+        }
+
+        .hero-pills {
+            display: flex; gap: 12px; flex-wrap: wrap;
+            margin-bottom: 2.4rem;
+            animation: fadeUp 1s 0.35s var(--ease) both;
+        }
+        .hero-pill {
+            background: rgba(200,137,26,0.12);
+            border: 1px solid rgba(200,137,26,0.3);
+            color: rgba(254,252,249,0.8);
+            font-size: 0.78rem;
+            padding: 6px 14px;
+            border-radius: 40px;
+            letter-spacing: 0.04em;
+        }
+
+        .hero-rating {
+            display: inline-flex; align-items: center; gap: 14px;
+            background: rgba(254,252,249,0.06);
+            border: 1px solid rgba(200,137,26,0.2);
+            backdrop-filter: blur(8px);
+            padding: 14px 22px; border-radius: var(--radius-lg);
+            margin-bottom: 2rem;
+            animation: fadeUp 1s 0.4s var(--ease) both;
+        }
+        .rating-num {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.4rem;
+            font-weight: 700;
+            color: var(--ochre);
+            line-height: 1;
+        }
+        .rating-right { display: flex; flex-direction: column; gap: 2px; }
+        .rating-stars { color: var(--ochre); font-size: 0.95rem; letter-spacing: 3px; }
+        .rating-count { color: rgba(254,252,249,0.45); font-size: 0.75rem; }
+
+        .hero-actions {
+            display: flex; gap: 14px; flex-wrap: wrap;
+            animation: fadeUp 1s 0.5s var(--ease) both;
+        }
+
+        /* ── BUTTONS ── */
+        .btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 13px 28px;
+            border-radius: var(--radius);
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600; font-size: 0.84rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            cursor: pointer; text-decoration: none;
+            border: none;
+            transition: all 0.22s var(--ease);
+            position: relative;
+            white-space: nowrap;
+        }
+        .btn-primary {
+            background: var(--ochre);
+            color: var(--ink);
+        }
+        .btn-primary:hover { background: var(--ochre-deep); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(200,137,26,0.35); }
+
+        .btn-ghost {
+            background: transparent;
+            color: rgba(254,252,249,0.85);
+            border: 1px solid rgba(254,252,249,0.25);
+        }
+        .btn-ghost:hover { border-color: var(--ochre); color: var(--ochre); transform: translateY(-2px); }
+
+        .btn-dark {
+            background: var(--ink);
+            color: var(--white);
+        }
+        .btn-dark:hover { background: var(--ink-2); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+
+        .btn-rust {
+            background: var(--rust);
+            color: var(--white);
+        }
+        .btn-rust:hover { background: var(--rust-deep); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(184,75,47,0.35); }
+
+        .btn-sm { padding: 9px 20px; font-size: 0.76rem; }
+        .btn-full { width: 100%; justify-content: center; }
+
+        /* ── SECTION SHARED ── */
+        section { padding: 96px 5%; }
+        .container { max-width: 1160px; margin: 0 auto; }
+
+        .section-label {
+            display: inline-block;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--ochre);
+            margin-bottom: 1rem;
+            position: relative;
+            padding-left: 20px;
+        }
+        .section-label::before {
+            content: '';
+            position: absolute; left: 0; top: 50%;
+            transform: translateY(-50%);
+            width: 12px; height: 1px;
+            background: var(--ochre);
+        }
+
+        .section-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(1.9rem, 3.5vw, 2.9rem);
+            font-weight: 700;
+            color: var(--ink);
+            line-height: 1.15;
+        }
+        .section-title em { font-style: italic; color: var(--rust); }
+
+        .section-desc {
+            color: var(--ink-3);
+            font-size: 0.96rem;
+            line-height: 1.75;
+            max-width: 540px;
+            font-weight: 300;
+        }
+
+        .section-header {
+            margin-bottom: 60px;
+        }
+        .section-header.centered { text-align: center; }
+        .section-header.centered .section-label::before { display: none; }
+        .section-header.centered .section-label { padding-left: 0; }
+        .section-header.centered .section-desc { margin: 0.8rem auto 0; }
+
+        /* ── RULE ── */
+        .rule { height: 1px; background: var(--sand-2); }
+        .rule-gradient { height: 2px; background: linear-gradient(90deg, transparent, var(--ochre), transparent); }
+
+        /* ── ABOUT ── */
+        .about-section { background: var(--white); }
+        .about-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 80px; align-items: center;
+        }
+
+        .about-image-wrap {
+            position: relative;
+        }
+        .about-image-wrap img {
+            width: 100%; border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            display: block;
+        }
+        .about-image-frame {
+            position: absolute; top: -14px; left: -14px;
+            right: 14px; bottom: 14px;
+            border: 1.5px solid var(--ochre);
+            border-radius: var(--radius-lg);
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .about-text h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem; font-weight: 700;
+            color: var(--ink); margin-bottom: 1.4rem; line-height: 1.2;
+        }
+        .about-text h2 em { font-style: italic; color: var(--rust); }
+        .about-text p { color: var(--ink-3); line-height: 1.8; margin-bottom: 1rem; font-size: 0.95rem; font-weight: 300; }
+
+        .stats-row {
+            display: flex; gap: 40px; margin-top: 2.4rem; flex-wrap: wrap;
+            padding-top: 2rem;
+            border-top: 1px solid var(--sand-2);
+        }
+        .stat-box {}
+        .stat-num {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.2rem; font-weight: 700; color: var(--ochre);
+            line-height: 1;
+        }
+        .stat-label { font-size: 0.72rem; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 4px; }
+
+        /* ── COST BUBBLE ── */
+        .cost-bubble {
+            background: var(--ochre-pale);
+            border: 1px solid rgba(200,137,26,0.25);
+            border-radius: var(--radius-lg);
+            padding: 20px 24px;
+            margin-top: 1.8rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .cost-bubble::before {
+            content: '';
+            position: absolute; top: 0; left: 0;
+            width: 4px; height: 100%;
+            background: var(--ochre);
+        }
+        .cost-bubble p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--ink-2);
+            font-style: italic;
+            font-weight: 400;
+        }
+        .cost-bubble strong { color: var(--ochre); font-style: normal; font-weight: 700; }
+
+        /* ── WHY DIY ── */
+        .why-section { background: var(--sand); }
+        .why-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 60px; align-items: start;
+        }
+        .why-left h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.2rem; font-weight: 700;
+            line-height: 1.15; margin-bottom: 1.2rem;
+        }
+        .why-left h2 em { font-style: italic; color: var(--rust); }
+        .why-left > p { color: var(--ink-3); line-height: 1.8; font-size: 0.95rem; font-weight: 300; margin-bottom: 1.6rem; }
+
+        .why-list {
+            list-style: none;
+            display: flex; flex-direction: column; gap: 14px;
+        }
+        .why-list li {
+            display: flex; align-items: flex-start; gap: 14px;
+            padding: 16px 18px;
+            background: var(--white);
+            border-radius: var(--radius);
+            border-left: 3px solid var(--ochre);
+            box-shadow: var(--shadow-sm);
+        }
+        .why-check {
+            width: 20px; height: 20px;
+            background: var(--ochre);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .why-check::after {
+            content: '';
+            width: 6px; height: 4px;
+            border-left: 2px solid var(--ink);
+            border-bottom: 2px solid var(--ink);
+            transform: rotate(-45deg) translate(1px, -1px);
+            display: block;
+        }
+        .why-list li span { font-size: 0.9rem; color: var(--ink-2); line-height: 1.5; font-weight: 400; }
+
+        .why-right {}
+        .why-box {
+            background: var(--ink);
+            border-radius: var(--radius-lg);
+            padding: 36px;
+            color: var(--white);
+        }
+        .why-box h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem; font-weight: 600;
+            color: var(--ochre); margin-bottom: 20px;
+            line-height: 1.2;
+        }
+        .inclusions-list {
+            list-style: none; display: flex; flex-direction: column; gap: 12px;
+        }
+        .inclusions-list li {
+            display: flex; align-items: flex-start; gap: 12px;
+            font-size: 0.86rem; color: rgba(254,252,249,0.75);
+            line-height: 1.5; font-weight: 300;
+        }
+        .incl-dot {
+            width: 6px; height: 6px;
+            background: var(--ochre);
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-top: 6px;
+        }
+
+        /* ── PRODUCTS ── */
+        .products-section { background: var(--white); }
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 28px;
+        }
+        .product-card {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--sand-2);
+            overflow: hidden;
+            transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+        }
+        .product-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
+        .product-img {
+            height: 200px; overflow: hidden;
+            background: var(--sand);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .product-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s var(--ease); }
+        .product-card:hover .product-img img { transform: scale(1.04); }
+        .product-body { padding: 22px 24px; }
+        .product-title { font-family: 'Cormorant Garamond', serif; font-size: 1.25rem; font-weight: 700; color: var(--ink); margin-bottom: 8px; line-height: 1.2; }
+        .product-desc { font-size: 0.85rem; color: var(--ink-3); line-height: 1.6; margin-bottom: 0; font-weight: 300; }
+        .product-footer {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 24px;
+            border-top: 1px solid var(--sand-2);
+            background: var(--ochre-pale);
+        }
+        .product-price { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 700; color: var(--rust); }
+        .product-price small { display: block; font-family: 'Outfit', sans-serif; font-size: 0.72rem; color: var(--ink-3); font-weight: 400; margin-top: 1px; }
+        .product-date { font-size: 0.7rem; color: var(--sand-3); }
+
+        /* ── PROCESS ── */
+        .process-section { background: var(--sand); }
+        .process-steps {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 0; position: relative;
+        }
+        .process-step {
+            padding: 32px 24px;
+            position: relative;
+        }
+        .process-step:not(:last-child)::after {
+            content: '';
+            position: absolute; top: 44px; right: 0;
+            width: 1px; height: 40px;
+            background: var(--ochre);
+            opacity: 0.3;
+        }
+        .step-num {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 3rem; font-weight: 700;
+            color: rgba(200,137,26,0.15);
+            line-height: 1;
+            margin-bottom: 12px;
+        }
+        .step-title {
+            font-weight: 600; font-size: 0.88rem;
+            color: var(--ink); margin-bottom: 8px;
+            text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        .step-desc { font-size: 0.83rem; color: var(--ink-3); line-height: 1.6; font-weight: 300; }
+
+        /* ── ITINERARY / GOOGLE FORM ── */
+        .form-section {
+            background: var(--ink);
+        }
+        .form-section .section-label { color: var(--ochre); }
+        .form-section .section-title { color: var(--white); }
+        .form-section .section-title em { color: var(--ochre); }
+        .form-section .section-desc { color: rgba(254,252,249,0.55); }
+
+        .form-layout {
+            display: grid; grid-template-columns: 1fr 1.8fr;
+            gap: 60px; align-items: start;
+        }
+        .form-info {}
+        .form-info-list {
+            list-style: none; display: flex; flex-direction: column; gap: 18px;
+            margin-top: 2rem;
+        }
+        .form-info-list li {
+            display: flex; gap: 14px; align-items: flex-start;
+        }
+        .form-info-icon {
+            width: 28px; height: 28px;
+            background: rgba(200,137,26,0.15);
+            border: 1px solid rgba(200,137,26,0.3);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            color: var(--ochre);
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+        .form-info-text strong { display: block; font-size: 0.82rem; color: var(--white); margin-bottom: 2px; }
+        .form-info-text span { font-size: 0.78rem; color: rgba(254,252,249,0.45); font-weight: 300; }
+
+        .process-mini {
+            margin-top: 2.4rem;
+            padding: 24px;
+            background: rgba(200,137,26,0.07);
+            border: 1px solid rgba(200,137,26,0.15);
+            border-radius: var(--radius-lg);
+        }
+        .process-mini h4 {
+            font-size: 0.72rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase;
+            color: var(--ochre); margin-bottom: 16px;
+        }
+        .process-mini-steps {
+            list-style: none; display: flex; flex-direction: column; gap: 10px;
+        }
+        .process-mini-steps li {
+            display: flex; gap: 10px; align-items: flex-start;
+            font-size: 0.8rem; color: rgba(254,252,249,0.6);
+        }
+        .step-dot {
+            width: 18px; height: 18px; background: rgba(200,137,26,0.2);
+            border-radius: 50%; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.65rem; font-weight: 700; color: var(--ochre);
+        }
+
+        .google-form-wrapper {
+            background: rgba(254,252,249,0.04);
+            border: 1px solid rgba(200,137,26,0.2);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+        .google-form-header {
+            padding: 18px 24px;
+            background: rgba(200,137,26,0.1);
+            border-bottom: 1px solid rgba(200,137,26,0.15);
+            display: flex; align-items: center; gap: 10px;
+        }
+        .google-form-header span {
+            font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em;
+            text-transform: uppercase; color: var(--ochre);
+        }
+        .gform-dots { display: flex; gap: 6px; }
+        .gform-dots b {
+            width: 10px; height: 10px; border-radius: 50%;
+            display: block;
+        }
+        .google-form-wrapper iframe {
+            width: 100%; height: 680px;
+            border: none;
+            display: block;
+        }
+
+        /* ── REVIEWS ── */
+        .reviews-section { background: var(--sand); }
+        .reviews-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+        }
+        .review-card {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            border: 1px solid var(--sand-2);
+            transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+        }
+        .review-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+        .review-quote-mark {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 4rem; color: var(--ochre); opacity: 0.2;
+            line-height: 0.8; margin-bottom: -4px;
+        }
+        .review-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+        .review-name { font-weight: 600; font-size: 0.92rem; color: var(--ink); }
+        .review-place { font-size: 0.78rem; color: var(--ink-3); margin-top: 2px; }
+        .review-stars { color: var(--ochre); font-size: 0.9rem; letter-spacing: 2px; flex-shrink: 0; }
+        .review-text { font-size: 0.87rem; color: var(--ink-3); line-height: 1.65; font-weight: 300; }
+        .review-date { font-size: 0.72rem; color: var(--sand-3); margin-top: 14px; }
+
+        /* ── FAQ ── */
+        .faq-section { background: var(--white); }
+        .faq-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 0 60px; align-items: start;
+        }
+        .faq-item {
+            border-bottom: 1px solid var(--sand-2);
+            padding: 20px 0;
+            cursor: pointer;
+        }
+        .faq-question {
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
+            font-weight: 600; font-size: 0.9rem; color: var(--ink);
+            user-select: none;
+        }
+        .faq-toggle {
+            width: 24px; height: 24px;
+            background: var(--sand);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            font-size: 1rem; color: var(--ochre);
+            transition: transform 0.25s var(--ease), background 0.2s;
+        }
+        .faq-item.open .faq-toggle { transform: rotate(45deg); background: var(--ochre); color: var(--ink); }
+        .faq-answer {
+            font-size: 0.86rem; color: var(--ink-3); line-height: 1.7;
+            padding-top: 12px; font-weight: 300;
+            display: none;
+        }
+        .faq-item.open .faq-answer { display: block; }
+
+        /* ── CONTACT ── */
+        .contact-section { background: var(--ochre-pale); }
+        .contact-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 60px; align-items: center;
+        }
+        .contact-left h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.1rem; font-weight: 700; line-height: 1.15;
+            color: var(--ink); margin-bottom: 1.2rem;
+        }
+        .contact-left h2 em { font-style: italic; color: var(--rust); }
+        .contact-left p { color: var(--ink-3); line-height: 1.8; font-size: 0.95rem; font-weight: 300; margin-bottom: 1.6rem; }
+        .contact-details { display: flex; flex-direction: column; gap: 10px; }
+        .contact-detail {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 0.88rem; color: var(--ink-2);
+        }
+        .contact-detail-icon { color: var(--ochre); font-size: 0.85rem; width: 20px; text-align: center; }
+
+        .contact-form-card {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 36px;
+            box-shadow: var(--shadow-lg);
+            display: flex; flex-direction: column; gap: 14px;
+        }
+        .contact-form-card input,
+        .contact-form-card textarea {
+            width: 100%;
+            background: var(--sand);
+            border: 1.5px solid transparent;
+            border-radius: var(--radius);
+            padding: 12px 16px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.88rem;
+            color: var(--ink);
+            outline: none;
+            transition: border-color 0.2s var(--ease), background 0.2s;
+        }
+        .contact-form-card input:focus,
+        .contact-form-card textarea:focus { border-color: var(--ochre); background: var(--white); }
+        .contact-form-card textarea { resize: vertical; min-height: 100px; }
+        .contact-form-card input::placeholder,
+        .contact-form-card textarea::placeholder { color: var(--sand-3); }
+
+        /* ── FOOTER ── */
+        footer {
+            background: var(--ink);
+            color: rgba(254,252,249,0.45);
+            padding: 48px 5%;
+            border-top: 1px solid rgba(200,137,26,0.2);
+        }
+        .footer-inner {
+            max-width: 1160px; margin: 0 auto;
+            display: grid; grid-template-columns: 2fr 1fr 1fr;
+            gap: 48px;
+        }
+        .footer-brand .nav-logo { display: block; margin-bottom: 14px; }
+        .footer-brand p { font-size: 0.84rem; line-height: 1.7; font-weight: 300; max-width: 280px; }
+        .footer-col h4 { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--white); margin-bottom: 16px; }
+        .footer-links { list-style: none; display: flex; flex-direction: column; gap: 9px; }
+        .footer-links a { color: rgba(254,252,249,0.45); text-decoration: none; font-size: 0.84rem; transition: color 0.2s; }
+        .footer-links a:hover { color: var(--ochre); }
+        .footer-bottom {
+            max-width: 1160px; margin: 36px auto 0;
+            padding-top: 24px;
+            border-top: 1px solid rgba(254,252,249,0.06);
+            display: flex; align-items: center; justify-content: space-between;
+            font-size: 0.78rem;
+            flex-wrap: wrap; gap: 8px;
+        }
+
+        /* ── MODALS ── */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0; z-index: 2000;
+            background: rgba(15,13,10,0.7); backdrop-filter: blur(8px);
+            align-items: center; justify-content: center; padding: 20px;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal-box {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 40px;
+            width: 100%; max-width: 480px;
+            box-shadow: 0 32px 100px rgba(0,0,0,0.4);
+            position: relative;
+            animation: modalIn 0.3s var(--ease) both;
+            max-height: 90vh; overflow-y: auto;
+        }
+        @keyframes modalIn {
+            from { opacity:0; transform: scale(0.93) translateY(20px); }
+            to   { opacity:1; transform: scale(1) translateY(0); }
+        }
+        .modal-close {
+            position: absolute; top: 16px; right: 18px;
+            background: var(--sand); border: none;
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; cursor: pointer;
+            color: var(--ink-3);
+            transition: background 0.2s, color 0.2s;
+        }
+        .modal-close:hover { background: var(--rust); color: var(--white); }
+        .modal-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem; color: var(--ink); font-weight: 700;
+            margin-bottom: 22px; padding-right: 28px; line-height: 1.2;
+        }
+        .modal-title span { color: var(--ink-3); display: block; font-size: 0.84rem; font-family: 'Outfit', sans-serif; font-weight: 400; margin-top: 4px; }
+
+        .modal-form { display: flex; flex-direction: column; gap: 12px; }
+        .modal-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 4px; display: block; }
+        .modal-form input,
+        .modal-form textarea {
+            width: 100%;
+            background: var(--sand);
+            border: 1.5px solid transparent;
+            border-radius: var(--radius);
+            padding: 11px 14px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.88rem;
+            color: var(--ink); outline: none;
+            transition: border-color 0.2s;
+        }
+        .modal-form input:focus,
+        .modal-form textarea:focus { border-color: var(--ochre); background: var(--white); }
+
+        /* PDF viewer */
+        .pdf-overlay {
+            display: none; position: fixed; inset: 0; z-index: 3000;
+            background: rgba(0,0,0,0.95); align-items: center; justify-content: center; padding: 20px;
+        }
+        .pdf-overlay.open { display: flex; }
+        .pdf-inner {
+            width: 92%; height: 90vh;
+            position: relative; background: var(--white); border-radius: 10px; overflow: hidden;
+        }
+        .pdf-close {
+            position: absolute; top: -42px; right: 0;
+            background: none; border: none; color: var(--white);
+            font-size: 1.8rem; cursor: pointer;
+        }
+
+        /* ── EMPTY STATE ── */
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center; padding: 60px 20px;
+            color: var(--ink-3);
+        }
+        .empty-state p { font-size: 0.92rem; }
+
+        /* ── HALFWAY BANNER ── */
+        .halfway-banner {
+            background: var(--ink-2);
+            padding: 32px 5%;
+        }
+        .halfway-inner {
+            max-width: 900px; margin: 0 auto;
+            display: flex; align-items: center; gap: 32px;
+            flex-wrap: wrap;
+        }
+        .halfway-text { flex: 1; min-width: 260px; }
+        .halfway-text h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.4rem; color: var(--white); font-weight: 600;
+            line-height: 1.3; margin-bottom: 6px;
+        }
+        .halfway-text h3 em { font-style: italic; color: var(--ochre); }
+        .halfway-text p { font-size: 0.84rem; color: rgba(254,252,249,0.5); font-weight: 300; line-height: 1.6; }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 960px) {
+            .about-grid, .why-grid, .form-layout, .contact-grid { grid-template-columns: 1fr; gap: 40px; }
+            .faq-grid { grid-template-columns: 1fr; }
+            .footer-inner { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 720px) {
+            .nav-links, .nav-cta { display: none; }
+            .hamburger { display: flex; }
+            section { padding: 64px 5%; }
+            .hero-content { padding: 100px 5% 60px; }
+            .footer-inner { grid-template-columns: 1fr; gap: 32px; }
+            .footer-bottom { flex-direction: column; text-align: center; }
+            .process-steps { grid-template-columns: 1fr 1fr; }
+            .carousel-btn { display: none; }
+            .google-form-wrapper iframe { height: 560px; }
+        }
+        @media (max-width: 480px) {
+            .hero h1 { font-size: 2.4rem; }
+            .stats-row { gap: 24px; }
+            .process-steps { grid-template-columns: 1fr; }
+            .products-grid { grid-template-columns: 1fr; }
+            .modal-box { padding: 28px 20px; }
+        }
+    </style>
 </head>
 <body>
 
-<h2>Travel Reviews Rating</h2>
-<div id="averageRating">0.0</div>
-<div id="starDisplay"></div>
-<div id="totalReviews">0 reviews</div>
+<!-- NAVBAR -->
+<nav class="navbar">
+    <a href="#" class="nav-logo">Wanderers <em>Itinerary</em></a>
+    <ul class="nav-links">
+        <li><a href="#about">About</a></li>
+        <li><a href="#why-diy">Why DIY</a></li>
+        <li><a href="#products">Packages</a></li>
+        <li><a href="#itinerary">Custom Plan</a></li>
+        <li><a href="#reviews">Reviews</a></li>
+        <li><a href="#contact">Contact</a></li>
+    </ul>
+    <a href="#itinerary" class="nav-cta">Plan My Trip</a>
+    <button class="hamburger" id="hamburger" onclick="toggleMobileNav()">
+        <span></span><span></span><span></span>
+    </button>
+</nav>
+<div class="mobile-nav" id="mobileNav">
+    <a href="#about" onclick="closeMobileNav()">About</a>
+    <a href="#why-diy" onclick="closeMobileNav()">Why DIY</a>
+    <a href="#products" onclick="closeMobileNav()">Packages</a>
+    <a href="#itinerary" onclick="closeMobileNav()">Custom Plan</a>
+    <a href="#reviews" onclick="closeMobileNav()">Reviews</a>
+    <a href="#contact" onclick="closeMobileNav()">Contact</a>
+    <a href="#itinerary" onclick="closeMobileNav()" style="color:var(--ochre); margin-top:4px;">Plan My Trip</a>
+</div>
 
-<hr>
+<!-- HERO -->
+<header>
+    <div class="hero">
+        <div class="hero-carousel">
+            <div class="carousel-track" id="carouselTrack">
+                <div class="carousel-slide"></div>
+                <div class="carousel-slide"></div>
+                <div class="carousel-slide"></div>
+                <div class="carousel-slide"></div>
+            </div>
+            <div class="hero-overlay"></div>
+            <button class="carousel-btn prev" onclick="carouselMove(-1)">&#8592;</button>
+            <button class="carousel-btn next" onclick="carouselMove(1)">&#8594;</button>
+            <div class="carousel-dots" id="carouselDots"></div>
+        </div>
 
-<h2>Contact Form</h2>
-<input id="name" placeholder="Name"><br><br>
-<input id="email" placeholder="Email"><br><br>
-<input id="contact" placeholder="Contact"><br><br>
-<textarea id="message" placeholder="Message"></textarea><br><br>
-<button onclick="submitContact()">Submit</button>
+        <div class="hero-content">
+            <div class="hero-eyebrow">DIY Travel Planning — Done Right</div>
+            <h1>Your Journey,<br><em>Your Rules.</em></h1>
+            <p class="hero-sub">Well-researched, day-by-day travel itineraries designed for independent explorers who want freedom without the stress of planning from scratch.</p>
 
-<hr>
+            <div class="hero-pills">
+                <span class="hero-pill">Day-wise travel plans</span>
+                <span class="hero-pill">Exact transport routes</span>
+                <span class="hero-pill">Budget breakdowns</span>
+                <span class="hero-pill">Hotel & restaurant picks</span>
+            </div>
 
-<h2>Travel Reviews</h2>
-<div id="reviews"></div>
+            <div class="hero-rating">
+                <div class="rating-num" id="averageRating">—</div>
+                <div class="rating-right">
+                    <div class="rating-stars" id="starDisplay">— — — — —</div>
+                    <div class="rating-count" id="totalReviews">Loading reviews</div>
+                </div>
+            </div>
 
+            <div class="hero-actions">
+                <a href="#products" class="btn btn-primary">View Itineraries</a>
+                <a href="#itinerary" class="btn btn-ghost">Request Custom Plan</a>
+            </div>
+        </div>
+    </div>
+</header>
 
-<hr>
+<div class="rule-gradient"></div>
 
-<h2>Products List</h2>
-<div id="productsList"></div>
+<!-- ABOUT -->
+<section class="about-section" id="about">
+    <div class="container">
+        <div class="about-grid">
+            <div class="about-image-wrap">
+                <div class="about-image-frame"></div>
+                <img src="https://images.unsplash.com/photo-1539635278303-d4002c07eae3?w=700&auto=format&fit=crop" alt="Travel planning">
+            </div>
+            <div class="about-text">
+                <div class="section-label">Our Story</div>
+                <h2>Born from Research,<br>Driven by <em>Wanderlust</em></h2>
+                <p>Wanderers Itinerary was born from two things — a love for travel and a mind trained for research. With an academic background in Biotechnology and experience in the research field, detailed analysis, planning, and problem-solving have always been second nature.</p>
+                <p>Over time, these skills naturally found their way into travel planning — researching destinations deeply, studying routes, logistics, and timing, and creating clear, practical day-by-day itineraries.</p>
+                <p>What started as planning personal trips soon turned into helping others who wanted to travel independently but didn't have the time to research everything themselves.</p>
 
-<hr>
+                <div class="cost-bubble">
+                    <p>Our itineraries cost <strong>less than 1% of your total trip cost</strong> — but save you hours of research and planning. That's the most efficient travel investment you'll make.</p>
+                </div>
 
-<h2>Request Custom Itinerary (₹1 Only)</h2>
-<input id="full_name" placeholder="Full Name *"><br><br>
-<input id="itinerary_email" placeholder="Email *"><br><br>
-<input id="phone" placeholder="Phone *"><br><br>
+                <div class="stats-row">
+                    <div class="stat-box">
+                        <div class="stat-num">500+</div>
+                        <div class="stat-label">Happy Travellers</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-num">50+</div>
+                        <div class="stat-label">Destinations</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-num">8+</div>
+                        <div class="stat-label">Years Experience</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
-<select id="trip_type">
-    <option value="">Select Trip Type *</option>
-    <option value="Adventure">Adventure</option>
-    <option value="Beach">Beach</option>
-    <option value="Cultural">Cultural</option>
-    <option value="Wildlife">Wildlife</option>
-    <option value="Pilgrimage">Pilgrimage</option>
-    <option value="Honeymoon">Honeymoon</option>
-</select><br><br>
+<div class="rule"></div>
 
-<input id="destination" placeholder="Destination / State *"><br><br>
-<input id="days" placeholder="No. of Days *" type="number"><br><br>
-<input id="people" placeholder="No. of People *" type="number"><br><br>
-<input id="budget" placeholder="Budget (₹ / person)" type="number"><br><br>
-<input id="travel_dates" placeholder="Travel Dates (dd-mm-yyyy)"><br><br>
+<!-- WHY DIY -->
+<section class="why-section" id="why-diy">
+    <div class="container">
+        <div class="why-grid">
+            <div class="why-left">
+                <div class="section-label">The Case for Independence</div>
+                <h2>Why <em>DIY Travel</em><br>Works Better</h2>
+                <p>One belief drives this platform: travel doesn't have to be expensive. When planned well and in advance, international travel can be surprisingly affordable. DIY travel also gives you something traditional tours rarely do — true freedom.</p>
+                <p>Except for senior citizens who may prefer structured tours for comfort, most travellers can easily navigate countries independently with the right guidance. That's exactly where we come in.</p>
 
-<select id="travel_style">
-    <option value="">Select Travel Style</option>
-    <option value="Luxury">Luxury</option>
-    <option value="Comfort">Comfort</option>
-    <option value="Budget">Budget</option>
-    <option value="Backpacker">Backpacker</option>
-</select><br><br>
+                <ul class="why-list">
+                    <li><div class="why-check"></div><span>Travel at your own pace — no fixed schedules, no rushing</span></li>
+                    <li><div class="why-check"></div><span>Skip places you are not interested in, spend more time where you are</span></li>
+                    <li><div class="why-check"></div><span>Add experiences you truly enjoy — local markets, hidden cafes, offbeat trails</span></li>
+                    <li><div class="why-check"></div><span>Save significantly compared to fixed tour packages</span></li>
+                    <li><div class="why-check"></div><span>Experience destinations authentically, not just as a tourist</span></li>
+                </ul>
+            </div>
 
-<select id="food_preference">
-    <option value="No Preference">No Preference</option>
-    <option value="Vegetarian">Vegetarian</option>
-    <option value="Vegan">Vegan</option>
-    <option value="Non-Vegetarian">Non-Vegetarian</option>
-    <option value="Halal">Halal</option>
-    <option value="Kosher">Kosher</option>
-</select><br><br>
+            <div class="why-right">
+                <div class="why-box">
+                    <h3>What's Inside<br>Each Itinerary</h3>
+                    <ul class="inclusions-list">
+                        <li><div class="incl-dot"></div><span>Day-wise travel plan with clear daily schedules</span></li>
+                        <li><div class="incl-dot"></div><span>Exact transport routes — train, metro, bus, ferry — with Google Maps links</span></li>
+                        <li><div class="incl-dot"></div><span>Attraction planning for each day to cover places efficiently</span></li>
+                        <li><div class="incl-dot"></div><span>Approximate travel costs to help you budget your trip</span></li>
+                        <li><div class="incl-dot"></div><span>Budget-friendly hotel recommendations in prime locations with booking links</span></li>
+                        <li><div class="incl-dot"></div><span>Veg, Jain, and Vegan-friendly restaurant suggestions with direct links</span></li>
+                        <li><div class="incl-dot"></div><span>Local travel tips to help you navigate the destination easily</span></li>
+                        <li><div class="incl-dot"></div><span>Time-efficient route planning — more exploring, less figuring out</span></li>
+                        <li><div class="incl-dot"></div><span>Estimated total trip cost for complete financial planning</span></li>
+                        <li><div class="incl-dot"></div><span>Essential apps to download before the trip for smoother travel</span></li>
+                        <li><div class="incl-dot"></div><span>Optional activities and alternatives for flexible customisation</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
-<select id="kids_travelling">
-    <option value="No children">No children</option>
-    <option value="1 child">1 child</option>
-    <option value="2 children">2 children</option>
-    <option value="3+ children">3+ children</option>
-</select><br><br>
-
-<textarea id="special_requirements" placeholder="Special Requirements"></textarea><br><br>
-
-<!-- Hidden field to store selected itinerary PDF URL -->
-<input type="hidden" id="selected_itinerary_pdf_url" value="">
-
-<button onclick="processItineraryPayment()">Pay ₹1 & Submit Itinerary</button>
-
-<!-- Modal for product purchase form -->
-<div id="purchaseModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000;">
-    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:20px; width:400px;">
-        <span onclick="closeModal()" style="float:right; cursor:pointer;">&times;</span>
-        <h3 id="modalProductTitle">Complete Purchase Details</h3>
-        <input type="hidden" id="selectedProductId">
-        <input type="hidden" id="selectedProductPdf">
-        <input type="hidden" id="selectedProductPrice">
-        
-        <label>Name *</label>
-        <input type="text" id="buyer_name" placeholder="Full Name"><br><br>
-        
-        <label>Email *</label>
-        <input type="email" id="buyer_email" placeholder="Email"><br><br>
-        
-        <label>Contact *</label>
-        <input type="text" id="buyer_phone" placeholder="Phone Number"><br><br>
-        
-        <label>Number of People Travelling *</label>
-        <input type="number" id="travelers" min="1" value="1"><br><br>
-        
-        <label>Message</label>
-        <textarea id="buyer_message" rows="3" placeholder="Any special requirements or message"></textarea><br><br>
-        
-        <button onclick="processProductPaymentFromModal()">Proceed to Pay ₹<span id="displayPrice">0</span></button>
+<!-- HALFWAY BANNER -->
+<div class="halfway-banner">
+    <div class="halfway-inner">
+        <div class="halfway-text">
+            <h3>Halfway through planning your trip? You're at the <em>perfect stage.</em></h3>
+            <p>A structured itinerary can help fine-tune your plan, optimise travel routes, and ensure you don't miss important details. Adapt a ready itinerary or choose a customised plan built around what you've already drafted.</p>
+        </div>
+        <a href="#products" class="btn btn-primary" style="flex-shrink:0;">Explore Itineraries</a>
     </div>
 </div>
 
-<!-- PDF Viewer Modal -->
-<div id="pdfViewer" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:2000;">
-    <div style="position:relative; width:90%; height:90%; margin:2% auto; background:white;">
-        <button onclick="closePDFViewer()" style="position:absolute; top:-40px; right:0; background:none; border:none; color:white; font-size:30px; cursor:pointer;">&times;</button>
+<div class="rule"></div>
+
+<!-- PRODUCTS -->
+<section class="products-section" id="products">
+    <div class="container">
+        <div class="section-header centered">
+            <div class="section-label">Ready-Made Plans</div>
+            <h2 class="section-title">Curated <em>Travel Itineraries</em></h2>
+            <p class="section-desc">Carefully researched, ready-to-use itinerary packages for every kind of explorer. Buy, download, and travel.</p>
+        </div>
+        <div class="products-grid" id="productsList">
+            <div class="empty-state"><p>Loading packages...</p></div>
+        </div>
+    </div>
+</section>
+
+<div class="rule"></div>
+
+<!-- PROCESS -->
+<section class="process-section" id="process">
+    <div class="container">
+        <div class="section-header centered">
+            <div class="section-label">How It Works</div>
+            <h2 class="section-title">The Customised<br><em>Itinerary Process</em></h2>
+            <p class="section-desc">Simple steps designed to take your travel idea from rough plan to detailed, research-backed itinerary.</p>
+        </div>
+        <div class="process-steps">
+            <div class="process-step">
+                <div class="step-num">01</div>
+                <div class="step-title">Fill the Enquiry Form</div>
+                <div class="step-desc">Share your destination, travel dates, number of days, travellers, and preferences.</div>
+            </div>
+            <div class="process-step">
+                <div class="step-num">02</div>
+                <div class="step-title">Make Prepayment</div>
+                <div class="step-desc">A prepayment is required to begin the research and planning process.</div>
+            </div>
+            <div class="process-step">
+                <div class="step-num">03</div>
+                <div class="step-title">Receive Travel Sketch</div>
+                <div class="step-desc">You'll first receive a rough travel plan outlining the structure of your trip within 3 days.</div>
+            </div>
+            <div class="process-step">
+                <div class="step-num">04</div>
+                <div class="step-title">Review & Finalise</div>
+                <div class="step-desc">Review the plan, request any adjustments, and confirm the final itinerary structure.</div>
+            </div>
+            <div class="process-step">
+                <div class="step-num">05</div>
+                <div class="step-title">Balance Payment</div>
+                <div class="step-desc">Once the structure is confirmed, complete the remaining balance payment.</div>
+            </div>
+            <div class="process-step">
+                <div class="step-num">06</div>
+                <div class="step-title">Receive Your Itinerary</div>
+                <div class="step-desc">Get your complete PDF itinerary with routes, recommendations, and booking links within 4–5 days.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="rule-gradient"></div>
+
+<!-- CUSTOM ITINERARY FORM -->
+<section class="form-section" id="itinerary">
+    <div class="container">
+        <div class="form-layout">
+            <div class="form-info">
+                <div class="section-label">Custom Itinerary</div>
+                <h2 class="section-title" style="color:var(--white);">Request a Plan<br><em>Built for You</em></h2>
+                <p class="section-desc" style="color:rgba(254,252,249,0.5); margin-top:1rem;">Tell us your dream trip. We research, plan, and deliver a detailed DIY itinerary tailored to your travel style.</p>
+
+                <ul class="form-info-list">
+                    <li>
+                        <div class="form-info-icon">1</div>
+                        <div class="form-info-text">
+                            <strong>Fill the form</strong>
+                            <span>Share your destination, dates, and travel preferences</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="form-info-icon">2</div>
+                        <div class="form-info-text">
+                            <strong>Receive a travel sketch</strong>
+                            <span>Initial rough plan shared within 3 days of prepayment</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="form-info-icon">3</div>
+                        <div class="form-info-text">
+                            <strong>Approve & finalise</strong>
+                            <span>Request adjustments, then confirm the final structure</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="form-info-icon">4</div>
+                        <div class="form-info-text">
+                            <strong>Receive complete itinerary</strong>
+                            <span>Detailed PDF delivered within 4–5 days after final payment</span>
+                        </div>
+                    </li>
+                </ul>
+
+                <div class="process-mini">
+                    <h4>Note on Delivery</h4>
+                    <p style="font-size:0.82rem; color:rgba(254,252,249,0.5); line-height:1.6; font-weight:300;">We do not book hotels, flights, or activities on your behalf. Itineraries include researched recommendations with direct booking links — you maintain full control and flexibility. Start planning ideally 3–6 months in advance for best prices.</p>
+                </div>
+            </div>
+
+            <div>
+                <div class="google-form-wrapper">
+                    <div class="google-form-header">
+                        <div class="gform-dots">
+                            <b style="background:#ff5f57;"></b>
+                            <b style="background:#febc2e;"></b>
+                            <b style="background:#28c840;"></b>
+                        </div>
+                        <span>Custom Itinerary Request Form</span>
+                    </div>
+                    <iframe
+                        src="https://docs.google.com/forms/d/e/1FAIpQLSf_7XT-IkLhKWfSm44rVSqeGAcSQXaKzEVeIvS9LmEaHBZVxw/viewform?embedded=true"
+                        title="Custom Itinerary Request"
+                        frameborder="0"
+                        marginheight="0"
+                        marginwidth="0"
+                        loading="lazy">
+                        Loading form...
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="rule"></div>
+
+<!-- REVIEWS -->
+<section class="reviews-section" id="reviews">
+    <div class="container">
+        <div class="section-header centered">
+            <div class="section-label">Testimonials</div>
+            <h2 class="section-title">What Travellers <em>Say</em></h2>
+            <p class="section-desc">Real experiences from people who explored independently with our itineraries.</p>
+        </div>
+        <div class="reviews-grid" id="reviewsList">
+            <div class="empty-state"><p>Loading reviews...</p></div>
+        </div>
+    </div>
+</section>
+
+<div class="rule"></div>
+
+<!-- FAQ -->
+<section class="faq-section" id="faq">
+    <div class="container">
+        <div class="section-header centered" style="margin-bottom:48px;">
+            <div class="section-label">Common Questions</div>
+            <h2 class="section-title">Frequently Asked <em>Questions</em></h2>
+        </div>
+        <div class="faq-grid" id="faqGrid">
+            <!-- Populated by JS -->
+        </div>
+    </div>
+</section>
+
+<div class="rule"></div>
+
+<!-- CONTACT -->
+<section class="contact-section" id="contact">
+    <div class="container">
+        <div class="contact-grid">
+            <div class="contact-left">
+                <div class="section-label">Get in Touch</div>
+                <h2>Let's Plan Your<br><em>Next Adventure</em></h2>
+                <p>Have a question or want to discuss a custom trip? Drop us a message and our travel experts will get back to you within 24 hours.</p>
+                <div class="contact-details">
+                    <div class="contact-detail"><div class="contact-detail-icon">Loc</div> Mumbai, Maharashtra, India</div>
+                    <div class="contact-detail"><div class="contact-detail-icon">Ph</div> +91 98765 43210</div>
+                    <div class="contact-detail"><div class="contact-detail-icon">Em</div> hello@wanderersitinerary.in</div>
+                </div>
+            </div>
+            <div class="contact-form-card">
+                <input id="c_name" placeholder="Your Name">
+                <input id="c_email" type="email" placeholder="Email Address">
+                <input id="c_contact" placeholder="Phone Number">
+                <textarea id="c_message" placeholder="Your message — feel free to ask anything about DIY travel, our itineraries, or how to get started."></textarea>
+                <button class="btn btn-rust btn-full" onclick="submitContact()">Send Message</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <div class="footer-inner">
+        <div class="footer-brand">
+            <a href="#" class="nav-logo">Wanderers <em>Itinerary</em></a>
+            <p>Well-researched travel itineraries for independent explorers. Helping you travel smarter, not harder.</p>
+        </div>
+        <div class="footer-col">
+            <h4>Explore</h4>
+            <ul class="footer-links">
+                <li><a href="#about">Our Story</a></li>
+                <li><a href="#why-diy">Why DIY Travel</a></li>
+                <li><a href="#products">Ready Itineraries</a></li>
+                <li><a href="#itinerary">Custom Plan</a></li>
+                <li><a href="#faq">FAQ</a></li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <h4>Connect</h4>
+            <ul class="footer-links">
+                <li><a href="#contact">Contact Us</a></li>
+                <li><a href="#reviews">Reviews</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <span>© 2025 Wanderers Itinerary. All rights reserved.</span>
+        <span>Crafted with care — powered by research and a love for travel.</span>
+    </div>
+</footer>
+
+<!-- PURCHASE MODAL -->
+<div class="modal-overlay" id="purchaseModal">
+    <div class="modal-box">
+        <button class="modal-close" onclick="closeModal()">×</button>
+        <div class="modal-title" id="modalProductTitle">
+            Complete Purchase
+            <span>Fill in your details to proceed with payment</span>
+        </div>
+        <input type="hidden" id="selectedProductId">
+        <input type="hidden" id="selectedProductPdf">
+        <input type="hidden" id="selectedProductPrice">
+        <div class="modal-form">
+            <div><label class="modal-label">Name</label><input type="text" id="buyer_name" placeholder="Full Name"></div>
+            <div><label class="modal-label">Email</label><input type="email" id="buyer_email" placeholder="Email Address"></div>
+            <div><label class="modal-label">Phone</label><input type="text" id="buyer_phone" placeholder="Phone Number"></div>
+            <div><label class="modal-label">Number of Travellers</label><input type="number" id="travelers" min="1" value="1"></div>
+            <div><label class="modal-label">Message</label><textarea id="buyer_message" rows="3" placeholder="Any special requirements..."></textarea></div>
+            <button class="btn btn-rust btn-full" style="margin-top:6px;" onclick="processProductPaymentFromModal()">
+                Proceed to Pay — Rs.<span id="displayPrice">0</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- PDF VIEWER -->
+<div class="pdf-overlay" id="pdfViewer">
+    <div class="pdf-inner">
+        <button class="pdf-close" onclick="closePDFViewer()">×</button>
         <iframe id="pdfFrame" style="width:100%; height:100%; border:none;"></iframe>
     </div>
 </div>
 
 <script>
-// Initialize EmailJS
+/* ── Init ── */
 emailjs.init("7rgj4t_06JrmsxgHC");
-
 const supabaseClient = window.supabase.createClient(
     "https://eyekpbzcdouhkquqjjae.supabase.co",
     "sb_publishable_hONe7ntkTZaGeyFsLV0iMQ_9aTXtOBE"
 );
-
 const RAZORPAY_KEY = "rzp_live_SV68ifsBjM5tPz";
 let currentProduct = null;
 let pendingFormData = null;
-
-// In-memory cache of loaded itineraries (populated during loadItineraries)
 let allItineraries = [];
 
-// ─── Contact form ───────────────────────────────────────────────────────────
-async function submitContact() {
-    const name    = document.getElementById("name").value;
-    const email   = document.getElementById("email").value;
-    const contact = document.getElementById("contact").value;
-    const message = document.getElementById("message").value;
-
-    if (!name || !email || !contact) { alert("Please fill all required fields"); return; }
-
-    const { error } = await supabaseClient
-        .from('contact_messages')
-        .insert([{ name, email, contact, message }]);
-
-    if (error) { alert("Error: " + error.message); return; }
-
-    alert("Contact form submitted successfully!");
-    ["name","email","contact","message"].forEach(id => document.getElementById(id).value = "");
+/* ── Mobile Nav ── */
+function toggleMobileNav() {
+    const nav = document.getElementById('mobileNav');
+    const btn = document.getElementById('hamburger');
+    const isOpen = nav.classList.toggle('open');
+    btn.classList.toggle('open', isOpen);
+}
+function closeMobileNav() {
+    document.getElementById('mobileNav').classList.remove('open');
+    document.getElementById('hamburger').classList.remove('open');
 }
 
-// ─── Reviews ────────────────────────────────────────────────────────────────
+/* ── Carousel ── */
+let carIdx = 0;
+const carTotal = 4;
+let carTimer;
+function carouselMove(dir) { carIdx = (carIdx + dir + carTotal) % carTotal; updateCarousel(); }
+function updateCarousel() {
+    document.getElementById('carouselTrack').style.transform = `translateX(-${carIdx * 100}%)`;
+    document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === carIdx));
+}
+function initCarousel() {
+    const dotsEl = document.getElementById('carouselDots');
+    for (let i = 0; i < carTotal; i++) {
+        const d = document.createElement('button');
+        d.className = 'dot' + (i === 0 ? ' active' : '');
+        d.setAttribute('aria-label', `Slide ${i + 1}`);
+        d.onclick = () => { carIdx = i; updateCarousel(); resetCarTimer(); };
+        dotsEl.appendChild(d);
+    }
+    carTimer = setInterval(() => carouselMove(1), 5500);
+}
+function resetCarTimer() { clearInterval(carTimer); carTimer = setInterval(() => carouselMove(1), 5500); }
+
+/* ── FAQ ── */
+const faqs = [
+    { q: "Is DIY travel difficult?", a: "Not at all — it only feels difficult when you have to plan everything from scratch. With a structured itinerary, clear routes, and planning already done, DIY travel becomes simple and enjoyable. You get the freedom of independent travel without the stress." },
+    { q: "What if I get lost while following the itinerary?", a: "The itineraries include Google Maps links, transport routes, and practical travel tips to help you navigate easily. Modern travel apps make it very easy to move around a new country. Thousands of travelers explore destinations independently every day." },
+    { q: "Why buy an itinerary instead of planning myself?", a: "You absolutely can — but it often requires many hours of research across multiple sources. Wanderers Itinerary simplifies weeks of research into one structured, practical plan, saving you time and helping you travel more efficiently." },
+    { q: "Are these suitable for first-time international travelers?", a: "Yes. The itineraries are designed to be easy to follow even for first-time DIY travelers, with clear transport routes, Google Maps links, and practical travel guidance at every step." },
+    { q: "How far in advance should I start planning?", a: "Ideally 3–6 months in advance, especially for destinations where accommodation and transport prices increase closer to travel dates. Early planning helps you get better prices and a smoother experience." },
+    { q: "How will I receive the itinerary after purchase?", a: "You will receive the itinerary as a digital PDF document, which can be easily accessed on your phone during travel — no printing required." },
+    { q: "Do you book hotels, flights, or activities for us?", a: "No. We provide carefully researched recommendations with direct booking links — you simply click and book. Direct booking means better prices, better choices, and complete flexibility for your trip." },
+    { q: "How long does a custom itinerary take?", a: "The initial travel sketch is usually shared within 3 days after prepayment and form submission. Once finalised and balance payment is completed, the detailed DIY itinerary is delivered within 4–5 days." },
+    { q: "Can I make changes after receiving the itinerary?", a: "Minor adjustments can be accommodated during the planning stage before the itinerary is finalised, ensuring the plan suits your travel style and preferences." },
+    { q: "Why not just use free online resources?", a: "Planning a trip requires hours of research across multiple sources, blogs, forums, and travel sites. Wanderers Itinerary simplifies weeks of research into one structured, practical plan so you spend less time planning and more time experiencing." },
+];
+
+function buildFAQ() {
+    const grid = document.getElementById('faqGrid');
+    grid.innerHTML = faqs.map((f, i) => `
+        <div class="faq-item" id="faq-${i}" onclick="toggleFAQ(${i})">
+            <div class="faq-question">
+                ${escapeHtml(f.q)}
+                <div class="faq-toggle">+</div>
+            </div>
+            <div class="faq-answer">${escapeHtml(f.a)}</div>
+        </div>
+    `).join('');
+}
+function toggleFAQ(i) {
+    const item = document.getElementById(`faq-${i}`);
+    const wasOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(el => el.classList.remove('open'));
+    if (!wasOpen) item.classList.add('open');
+}
+
+/* ── Contact ── */
+async function submitContact() {
+    const name = document.getElementById("c_name").value;
+    const email = document.getElementById("c_email").value;
+    const contact = document.getElementById("c_contact").value;
+    const message = document.getElementById("c_message").value;
+    if (!name || !email || !contact) { alert("Please fill all required fields"); return; }
+    const { error } = await supabaseClient.from('contact_messages').insert([{ name, email, contact, message }]);
+    if (error) { alert("Error: " + error.message); return; }
+    alert("Message sent. We'll reply within 24 hours.");
+    ["c_name","c_email","c_contact","c_message"].forEach(id => document.getElementById(id).value = "");
+}
+
+/* ── Reviews ── */
 async function loadReviews() {
     try {
-        const { data, error } = await supabaseClient
-            .from('reviews')
-            .select('*')
-            .order('created_at', { ascending: false });
-
-        if (error) { document.getElementById("reviews").innerHTML = "Error loading reviews"; return; }
-
-        const reviewsDiv = document.getElementById("reviews");
-
-        if (!data || data.length === 0) {
-            reviewsDiv.innerHTML = "No reviews yet";
-            document.getElementById("averageRating").innerHTML = "0.0";
-            document.getElementById("starDisplay").innerHTML = "☆☆☆☆☆";
-            document.getElementById("totalReviews").innerHTML = "0 reviews";
+        const { data, error } = await supabaseClient.from('reviews').select('*').order('created_at', { ascending: false });
+        const el = document.getElementById("reviewsList");
+        if (error || !data || data.length === 0) {
+            el.innerHTML = '<div class="empty-state"><p>No reviews yet. Be the first to share your experience.</p></div>';
+            document.getElementById("averageRating").textContent = "—";
+            document.getElementById("starDisplay").textContent = "— — — — —";
+            document.getElementById("totalReviews").textContent = "No reviews yet";
             return;
         }
-
         const avg = (data.reduce((s, r) => s + r.rating, 0) / data.length).toFixed(1);
-        const full  = Math.floor(avg);
-        const half  = (avg % 1) >= 0.5 ? 1 : 0;
-        const empty = 5 - full - half;
-
-        document.getElementById("averageRating").innerHTML = avg;
-        document.getElementById("starDisplay").innerHTML   = "★".repeat(full) + (half ? "½" : "") + "☆".repeat(empty);
-        document.getElementById("totalReviews").innerHTML  = `${data.length} review${data.length !== 1 ? 's' : ''}`;
-
-        reviewsDiv.innerHTML = data.map(r => `
-            <div style="border:1px solid #ccc; margin:10px 0; padding:10px;">
-                <strong>${escapeHtml(r.name)}</strong> visited <strong>${escapeHtml(r.travel_place)}</strong><br>
-                Rating: ${"★".repeat(r.rating)}${"☆".repeat(5 - r.rating)} (${r.rating}/5)<br>
-                Message: ${escapeHtml(r.message) || "No message"}<br>
-                <small>${new Date(r.created_at).toLocaleString()}</small>
+        const full = Math.floor(avg), half = (avg % 1) >= 0.5 ? 1 : 0, empty = 5 - full - half;
+        document.getElementById("averageRating").textContent = avg;
+        document.getElementById("starDisplay").textContent = "★".repeat(full) + (half ? "½" : "") + "☆".repeat(empty);
+        document.getElementById("totalReviews").textContent = `${data.length} verified review${data.length !== 1 ? 's' : ''}`;
+        el.innerHTML = data.map(r => `
+            <div class="review-card">
+                <div class="review-quote-mark">"</div>
+                <div class="review-header">
+                    <div>
+                        <div class="review-name">${escapeHtml(r.name)}</div>
+                        <div class="review-place">${escapeHtml(r.travel_place)}</div>
+                    </div>
+                    <div class="review-stars">${"★".repeat(r.rating)}${"☆".repeat(5 - r.rating)}</div>
+                </div>
+                <div class="review-text">${escapeHtml(r.message) || "No message provided."}</div>
+                <div class="review-date">${new Date(r.created_at).toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' })}</div>
             </div>
-        `).join("");
-    } catch (err) { console.error("Error in loadReviews:", err); }
+        `).join('');
+    } catch (err) { console.error("loadReviews:", err); }
 }
 
-// ─── Products ────────────────────────────────────────────────────────────────
+/* ── Products ── */
 async function loadProducts() {
     try {
-        const { data, error } = await supabaseClient
-            .from('products')
-            .select('*')
-            .order('created_at', { ascending: false });
-
-        if (error) { document.getElementById("productsList").innerHTML = "Error loading products"; return; }
-
-        const productsDiv = document.getElementById("productsList");
-        if (!data || data.length === 0) { productsDiv.innerHTML = "No products found"; return; }
-
-        productsDiv.innerHTML = data.map(p => `
-            <div style="border:1px solid #ccc; margin:10px 0; padding:10px; display:inline-block; width:300px; vertical-align:top;">
-                <h3>${escapeHtml(p.title)}</h3>
-                <p>Price: ₹${parseFloat(p.price).toFixed(2)}</p>
-                <p>Description: ${escapeHtml(p.description) || "No description"}</p>
-                ${p.image_url ? `<img src="${p.image_url}" style="max-width:100%; height:150px;"><br>` : ''}
-                 <small>Added: ${new Date(p.created_at).toLocaleString()}</small><br><br>
-                <button onclick="openProductPurchaseModal(${p.id}, '${escapeHtml(p.title)}', ${p.price}, '${p.pdf_url || ''}')">Buy Now - Pay ₹${p.price}</button>
+        const { data, error } = await supabaseClient.from('products').select('*').order('created_at', { ascending: false });
+        const div = document.getElementById("productsList");
+        if (error || !data || data.length === 0) {
+            div.innerHTML = '<div class="empty-state"><p>No packages available yet. Check back soon.</p></div>'; return;
+        }
+        div.innerHTML = data.map(p => `
+            <div class="product-card">
+                <div class="product-img">
+                    ${p.image_url ? `<img src="${p.image_url}" alt="${escapeHtml(p.title)}" loading="lazy">` : '<span style="font-size:2.5rem; color:var(--sand-3)">Map</span>'}
+                </div>
+                <div class="product-body">
+                    <div class="product-title">${escapeHtml(p.title)}</div>
+                    <div class="product-desc">${escapeHtml(p.description) || "A carefully researched itinerary for independent travellers."}</div>
+                </div>
+                <div class="product-footer">
+                    <div class="product-price">
+                        Rs.${parseFloat(p.price).toFixed(2)}
+                        <small>per itinerary</small>
+                    </div>
+                    <button class="btn btn-rust btn-sm" onclick="openProductPurchaseModal(${p.id}, '${escapeHtml(p.title)}', ${p.price}, '${p.pdf_url || ''}')">
+                        Buy Now
+                    </button>
+                </div>
             </div>
-        `).join("");
-    } catch (err) { console.error("Error in loadProducts:", err); }
+        `).join('');
+    } catch (err) { console.error("loadProducts:", err); }
 }
 
-// ─── Itinerary Library ───────────────────────────────────────────────────────
+/* ── Itineraries ── */
 async function loadItineraries() {
     try {
-        const { data, error } = await supabaseClient
-            .from('itineraries')
-            .select('*')
-            .order('category', { ascending: true });
-
-        if (error) { document.getElementById("itineraryLibrary").innerHTML = "Error loading itineraries"; return; }
-
-        const container = document.getElementById("itineraryLibrary");
-
-        if (!data || data.length === 0) {
-            container.innerHTML = "No itineraries available yet. Check back soon!";
-            return;
-        }
-
-        // Cache for use during payment
-        allItineraries = data;
-
-        // Group by category
-        const grouped = {};
-        for (const item of data) {
-            if (!grouped[item.category]) grouped[item.category] = [];
-            grouped[item.category].push(item);
-        }
-
-        let html = "";
-        for (const category in grouped) {
-            html += `<h3>📌 ${category}</h3><div>`;
-            for (const itinerary of grouped[category]) {
-                const safePdfUrl  = (itinerary.pdf_url  || '').replace(/'/g, "\\'");
-                const safeTitle   = escapeHtml(itinerary.title);
-                html += `
-                    <div style="border:1px solid #ccc; margin:10px; padding:10px; display:inline-block; width:300px; vertical-align:top;">
-                        ${itinerary.thumbnail_url ? `<img src="${itinerary.thumbnail_url}" style="max-width:100%; height:150px;"><br>` : ''}
-                        <h4>${safeTitle}</h4>
-                        <p><strong>Duration:</strong> ${itinerary.duration || 'N/A'}</p>
-                        <p><strong>Difficulty:</strong> ${itinerary.difficulty || 'N/A'}</p>
-                        <p>${escapeHtml(itinerary.description) || ''}</p>
-                        ${itinerary.pdf_url ? `
-                            <button onclick="viewPDF('${safePdfUrl}')">👁️ View PDF</button>
-                            <button onclick="downloadPDF('${safePdfUrl}', '${safeTitle}')">📥 Download PDF</button>
-                            <br><br>
-                            <button onclick="selectItineraryForRequest('${safePdfUrl}', '${safeTitle}')">📋 Request This Itinerary</button>
-                        ` : ''}
-                    </div>
-                `;
-            }
-            html += `</div>`;
-        }
-        container.innerHTML = html;
-    } catch (err) { console.error("Error in loadItineraries:", err); }
+        const { data, error } = await supabaseClient.from('itineraries').select('*').order('category', { ascending: true });
+        if (!error && data) allItineraries = data;
+    } catch (err) { console.error("loadItineraries:", err); }
 }
 
-/**
- * Called when user clicks "Request This Itinerary" on a library card.
- * Stores the PDF URL so it gets downloaded after payment.
- */
-function selectItineraryForRequest(pdfUrl, title) {
-    document.getElementById("selected_itinerary_pdf_url").value = pdfUrl;
-
-    // Scroll to the request form and auto-fill destination hint
-    document.getElementById("full_name").scrollIntoView({ behavior: 'smooth' });
-    alert(`✅ "${title}" selected! Please fill in the form below and pay ₹1 to receive this itinerary.`);
-}
-
-// ─── PDF helpers ─────────────────────────────────────────────────────────────
-function viewPDF(pdfUrl) {
-    document.getElementById("pdfFrame").src = pdfUrl;
-    document.getElementById("pdfViewer").style.display = "block";
-}
-
-function closePDFViewer() {
-    document.getElementById("pdfFrame").src = "";
-    document.getElementById("pdfViewer").style.display = "none";
-}
-
-/**
- * Download a PDF from a Supabase storage public URL.
- * Uses fetch + blob so the browser saves it as a file instead of navigating.
- */
+/* ── PDF helpers ── */
+function viewPDF(pdfUrl) { document.getElementById("pdfFrame").src = pdfUrl; document.getElementById("pdfViewer").classList.add("open"); }
+function closePDFViewer() { document.getElementById("pdfFrame").src = ""; document.getElementById("pdfViewer").classList.remove("open"); }
 async function downloadPDF(pdfUrl, title) {
     if (!pdfUrl) { alert("No PDF available."); return; }
     try {
@@ -314,51 +1531,36 @@ async function downloadPDF(pdfUrl, title) {
         const blob = await response.blob();
         const blobUrl = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = blobUrl;
-        a.download = `${title.replace(/[^a-z0-9]/gi, '_')}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        a.href = blobUrl; a.download = `${title.replace(/[^a-z0-9]/gi, '_')}.pdf`;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
         URL.revokeObjectURL(blobUrl);
-    } catch (err) {
-        console.error("Download error:", err);
-        // Fallback: open in new tab
-        window.open(pdfUrl, '_blank');
-    }
+    } catch (err) { window.open(pdfUrl, '_blank'); }
 }
 
-// ─── Product purchase modal ───────────────────────────────────────────────────
+/* ── Product modal ── */
 function openProductPurchaseModal(id, title, price, pdfUrl) {
     currentProduct = { id, title, price, pdfUrl };
-
-    document.getElementById("modalProductTitle").innerHTML = `Complete Purchase: ${title}`;
-    document.getElementById("selectedProductId").value    = id;
-    document.getElementById("selectedProductPdf").value   = pdfUrl;
+    document.getElementById("modalProductTitle").innerHTML = `Complete Purchase<span>${title}</span>`;
+    document.getElementById("selectedProductId").value = id;
+    document.getElementById("selectedProductPdf").value = pdfUrl;
     document.getElementById("selectedProductPrice").value = price;
-    document.getElementById("displayPrice").innerHTML     = price;
-    ["buyer_name","buyer_email","buyer_phone","buyer_message"].forEach(id => document.getElementById(id).value = "");
+    document.getElementById("displayPrice").textContent = price;
+    ["buyer_name","buyer_email","buyer_phone","buyer_message"].forEach(i => document.getElementById(i).value = "");
     document.getElementById("travelers").value = "1";
-
-    document.getElementById("purchaseModal").style.display = "block";
+    document.getElementById("purchaseModal").classList.add("open");
 }
-
-function closeModal() { document.getElementById("purchaseModal").style.display = "none"; }
+function closeModal() { document.getElementById("purchaseModal").classList.remove("open"); }
 
 function processProductPaymentFromModal() {
-    const buyer_name  = document.getElementById("buyer_name").value;
+    const buyer_name = document.getElementById("buyer_name").value;
     const buyer_email = document.getElementById("buyer_email").value;
     const buyer_phone = document.getElementById("buyer_phone").value;
-    const travelers   = parseInt(document.getElementById("travelers").value);
-    const message     = document.getElementById("buyer_message").value;
-
-    if (!buyer_name || !buyer_email || !buyer_phone || !travelers) {
-        alert("Please fill all required fields"); return;
-    }
-
+    const travelers = parseInt(document.getElementById("travelers").value);
+    const message = document.getElementById("buyer_message").value;
+    if (!buyer_name || !buyer_email || !buyer_phone || !travelers) { alert("Please fill all required fields"); return; }
     pendingFormData = { buyer_name, buyer_email, buyer_phone, travelers, message };
     closeModal();
-
-    const options = {
+    new Razorpay({
         key: RAZORPAY_KEY,
         amount: Math.round(currentProduct.price * 100),
         currency: "INR",
@@ -367,287 +1569,55 @@ function processProductPaymentFromModal() {
         prefill: { name: buyer_name, email: buyer_email, contact: buyer_phone },
         handler: handleProductPaymentSuccess,
         modal: { ondismiss: () => { pendingFormData = null; alert("Payment cancelled"); } }
-    };
-    new Razorpay(options).open();
+    }).open();
 }
 
 async function handleProductPaymentSuccess(response) {
-    const paymentId     = response.razorpay_payment_id;
-    const paymentAmount = currentProduct.price;
-
-    if (!pendingFormData) { alert("Error: No form data found"); return; }
-
+    const paymentId = response.razorpay_payment_id;
+    if (!pendingFormData) return;
     const { error } = await supabaseClient.from('product_orders').insert([{
-        product_id:     currentProduct.id,
-        product_name:   currentProduct.title,
-        product_price:  currentProduct.price,
-        buyer_name:     pendingFormData.buyer_name,
-        buyer_email:    pendingFormData.buyer_email,
-        buyer_phone:    pendingFormData.buyer_phone,
-        travelers:      pendingFormData.travelers,
-        message:        pendingFormData.message,
-        payment_status: 'Paid',
-        payment_id:     paymentId,
-        payment_amount: paymentAmount,
-        payment_date:   new Date().toISOString()
+        product_id: currentProduct.id, product_name: currentProduct.title, product_price: currentProduct.price,
+        buyer_name: pendingFormData.buyer_name, buyer_email: pendingFormData.buyer_email, buyer_phone: pendingFormData.buyer_phone,
+        travelers: pendingFormData.travelers, message: pendingFormData.message,
+        payment_status: 'Paid', payment_id: paymentId,
+        payment_amount: currentProduct.price, payment_date: new Date().toISOString()
     }]);
-
     if (error) { alert("Error saving order: " + error.message); return; }
-
-    alert(`✅ Payment successful!\nPayment ID: ${paymentId}\nProduct: ${currentProduct.title}\nAmount: ₹${paymentAmount}`);
-
+    alert(`Payment successful.\nPayment ID: ${paymentId}\nProduct: ${currentProduct.title}\nAmount: Rs.${currentProduct.price}`);
     if (currentProduct.pdfUrl && currentProduct.pdfUrl !== 'null' && currentProduct.pdfUrl !== '') {
         await downloadPDF(currentProduct.pdfUrl, currentProduct.title);
     }
-
-    await sendPDFViaEmail(
-        pendingFormData.buyer_email,
-        pendingFormData.buyer_name,
-        paymentId,
-        paymentAmount,
-        currentProduct.title,
-        currentProduct.pdfUrl
-    );
-
+    await sendPDFViaEmail(pendingFormData.buyer_email, pendingFormData.buyer_name, paymentId, currentProduct.price, currentProduct.title, currentProduct.pdfUrl);
     pendingFormData = null;
 }
 
-// ─── Custom Itinerary request + payment ──────────────────────────────────────
-function processItineraryPayment() {
-    const full_name    = document.getElementById("full_name").value;
-    const email        = document.getElementById("itinerary_email").value;
-    const phone        = document.getElementById("phone").value;
-    const trip_type    = document.getElementById("trip_type").value;
-    const destination  = document.getElementById("destination").value;
-    const days         = document.getElementById("days").value;
-    const people       = document.getElementById("people").value;
-    const budget       = document.getElementById("budget").value;
-    const travel_dates = document.getElementById("travel_dates").value;
-    const travel_style = document.getElementById("travel_style").value;
-    const food_preference  = document.getElementById("food_preference").value;
-    const kids_travelling  = document.getElementById("kids_travelling").value;
-    const special_requirements = document.getElementById("special_requirements").value;
-
-    // The PDF URL that was pre-selected from the library (may be empty)
-    const selectedPdfUrl = document.getElementById("selected_itinerary_pdf_url").value;
-
-    if (!full_name || !email || !phone || !trip_type || !destination || !days || !people) {
-        alert("Please fill all required fields"); return;
-    }
-
-    pendingFormData = {
-        full_name, email, phone, trip_type, destination,
-        days: parseInt(days), people: parseInt(people),
-        budget: budget ? parseFloat(budget) : null,
-        travel_dates, travel_style, food_preference,
-        kids_travelling, special_requirements,
-        selectedPdfUrl   // carry the chosen PDF URL through payment
-    };
-
-    const options = {
-        key: RAZORPAY_KEY,
-        amount: 100,   // ₹1 in paise
-        currency: "INR",
-        name: "Custom Itinerary",
-        description: "Personalized Travel Itinerary Plan",
-        prefill: { name: full_name, email, contact: phone },
-        handler: handleItineraryPaymentSuccess,
-        modal: { ondismiss: () => { pendingFormData = null; alert("Payment cancelled"); } }
-    };
-    new Razorpay(options).open();
-}
-
-async function handleItineraryPaymentSuccess(response) {
-    const paymentId   = response.razorpay_payment_id;
-    const paymentAmount = 1;
-
-    if (!pendingFormData) { alert("Error: No form data found"); return; }
-
-    // Save to Supabase (exclude our local selectedPdfUrl field)
-    const { selectedPdfUrl, ...dbData } = pendingFormData;
-
-    const { error } = await supabaseClient.from('itinerary_requests').insert([{
-        ...dbData,
-        payment_status: 'Paid',
-        payment_id:     paymentId,
-        payment_amount: paymentAmount,
-        payment_date:   new Date().toISOString()
-    }]);
-
-    if (error) { alert("Error saving itinerary: " + error.message); return; }
-
-    alert(`✅ Payment successful! Itinerary request submitted.\nPayment ID: ${paymentId}`);
-
-    // ── PDF download after payment ──────────────────────────────────────────
-    // Priority 1: PDF explicitly chosen from the library card
-    if (selectedPdfUrl && selectedPdfUrl !== '') {
-        await downloadPDF(selectedPdfUrl, `${pendingFormData.destination}_Itinerary`);
-    } else {
-        // Priority 2: Find a matching itinerary in the cached list
-        const pdfUrl = findMatchingItineraryPdf(pendingFormData.destination, pendingFormData.trip_type);
-        if (pdfUrl) {
-            await downloadPDF(pdfUrl, `${pendingFormData.destination}_Itinerary`);
-        } else {
-            // Priority 3: Query Supabase for any match
-            const pdfUrlFromDb = await fetchItineraryPdfFromDb(pendingFormData.destination, pendingFormData.trip_type);
-            if (pdfUrlFromDb) {
-                await downloadPDF(pdfUrlFromDb, `${pendingFormData.destination}_Itinerary`);
-            } else {
-                // Fallback: text confirmation file
-                createAndDownloadItineraryTxt(
-                    pendingFormData.full_name,
-                    pendingFormData.destination,
-                    pendingFormData.days,
-                    pendingFormData.people,
-                    paymentId
-                );
-            }
-        }
-    }
-
-    await sendItineraryViaEmail(
-        pendingFormData.email,
-        pendingFormData.full_name,
-        paymentId,
-        pendingFormData.destination,
-        pendingFormData.days,
-        pendingFormData.people
-    );
-
-    clearItineraryForm();
-    pendingFormData = null;
-}
-
-/**
- * Search in-memory itinerary cache for a PDF whose title or category
- * loosely matches the submitted destination or trip_type.
- */
-function findMatchingItineraryPdf(destination, tripType) {
-    if (!allItineraries.length) return null;
-    const dest = (destination || '').toLowerCase();
-    const type = (tripType || '').toLowerCase();
-
-    // Exact / partial match on title or category
-    const match = allItineraries.find(it =>
-        (it.title    && it.title.toLowerCase().includes(dest)) ||
-        (it.category && it.category.toLowerCase().includes(type)) ||
-        (it.title    && it.title.toLowerCase().includes(type))
-    );
-    return match && match.pdf_url ? match.pdf_url : null;
-}
-
-/**
- * Fallback: query Supabase itineraries table for a PDF match.
- */
-async function fetchItineraryPdfFromDb(destination, tripType) {
-    try {
-        // Try matching by category (trip_type) first
-        let { data } = await supabaseClient
-            .from('itineraries')
-            .select('pdf_url')
-            .ilike('category', `%${tripType}%`)
-            .not('pdf_url', 'is', null)
-            .limit(1);
-
-        if (data && data.length && data[0].pdf_url) return data[0].pdf_url;
-
-        // Try matching by title containing destination
-        ({ data } = await supabaseClient
-            .from('itineraries')
-            .select('pdf_url')
-            .ilike('title', `%${destination}%`)
-            .not('pdf_url', 'is', null)
-            .limit(1));
-
-        if (data && data.length && data[0].pdf_url) return data[0].pdf_url;
-
-        // Last resort: any itinerary with a PDF
-        ({ data } = await supabaseClient
-            .from('itineraries')
-            .select('pdf_url')
-            .not('pdf_url', 'is', null)
-            .limit(1));
-
-        return data && data.length ? data[0].pdf_url : null;
-    } catch (err) {
-        console.error("fetchItineraryPdfFromDb error:", err);
-        return null;
-    }
-}
-
-// ─── Email helpers ────────────────────────────────────────────────────────────
+/* ── Email helpers ── */
 async function sendPDFViaEmail(email, name, paymentId, amount, productName, pdfUrl) {
-    const emailHTML = `
-        <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;">
-            <h2>Payment Confirmation &amp; Your PDF</h2>
-            <p>Dear <strong>${escapeHtml(name)}</strong>,</p>
-            <p>Payment of <strong>₹${amount}</strong> for <strong>${escapeHtml(productName)}</strong> processed successfully.</p>
-            <p><strong>Payment ID:</strong> ${paymentId}</p>
-            <p>Click the link below to download your PDF:</p>
-            <a href="${pdfUrl}" target="_blank">Download PDF</a>
-            <p>Thank you for your purchase!</p>
-        </div>`;
-    try {
-        await emailjs.send("service_8o8nozh", "template_xui60z6", { name, email, message: emailHTML });
-    } catch (err) { console.error("Email error:", err); }
+    const msg = `Dear ${escapeHtml(name)}, payment of Rs.${amount} for ${escapeHtml(productName)} was processed. Payment ID: ${paymentId}. Download your PDF: ${pdfUrl}. Thank you.`;
+    try { await emailjs.send("service_8o8nozh", "template_xui60z6", { name, email, message: msg }); } catch (err) { console.error("Email error:", err); }
 }
 
-async function sendItineraryViaEmail(email, name, paymentId, destination, days, people) {
-    const itineraryHTML = `
-        <div style="font-family:Arial,sans-serif;">
-            <h2>Itinerary Request Confirmed!</h2>
-            <p>Dear <strong>${escapeHtml(name)}</strong>,</p>
-            <p>Your custom itinerary request is confirmed and payment is processed!</p>
-            <p><strong>Payment ID:</strong> ${paymentId}</p>
-            <p><strong>Destination:</strong> ${escapeHtml(destination)}</p>
-            <p><strong>Duration:</strong> ${days} days</p>
-            <p><strong>Travelers:</strong> ${people} people</p>
-            <p>Our travel experts will contact you within 24 hours with your personalized itinerary.</p>
-        </div>`;
-    try {
-        await emailjs.send("service_8o8nozh", "template_xui60z6", { name, email, message: itineraryHTML });
-    } catch (err) { console.error("Email error:", err); }
-}
-
-// ─── Fallback TXT download (no PDF found) ────────────────────────────────────
-function createAndDownloadItineraryTxt(name, destination, days, people, paymentId) {
-    const content = `TRAVEL ITINERARY CONFIRMATION\n================================\n\nCustomer Name: ${name}\nDestination: ${destination}\nDuration: ${days} days\nTravelers: ${people}\nPayment ID: ${paymentId}\n\nStatus: CONFIRMED\n\nOur travel experts will contact you within 24 hours.\n\nThank you!`;
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href     = url;
-    a.download = `Itinerary_${name.replace(/\s/g, '_')}_${paymentId}.txt`;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    alert("📄 Itinerary confirmation downloaded! (No matching PDF found in library)");
-}
-
-// ─── Form reset ───────────────────────────────────────────────────────────────
-function clearItineraryForm() {
-    ["full_name","itinerary_email","phone","destination","days","people","budget","travel_dates","special_requirements"]
-        .forEach(id => document.getElementById(id).value = "");
-    document.getElementById("trip_type").value      = "";
-    document.getElementById("travel_style").value   = "";
-    document.getElementById("food_preference").value = "No Preference";
-    document.getElementById("kids_travelling").value = "No children";
-    document.getElementById("selected_itinerary_pdf_url").value = "";
-}
-
-// ─── Utility ──────────────────────────────────────────────────────────────────
+/* ── Utility ── */
 function escapeHtml(text) {
     if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+    const div = document.createElement('div'); div.textContent = text; return div.innerHTML;
 }
 
-// ─── Init ──────────────────────────────────────
+/* ── Init ── */
 document.addEventListener('DOMContentLoaded', () => {
+    initCarousel();
     loadReviews();
     loadProducts();
     loadItineraries();
+    buildFAQ();
+
+    // Fix Google Form iframe src to use the correct embed URL
+    const iframe = document.querySelector('.google-form-wrapper iframe');
+    if (iframe) {
+        // Convert edit URL to viewform embed URL
+        iframe.src = 'https://docs.google.com/forms/d/1kSMMX855SDEP9W8a4N9j05y52MQcmh7i5QcwNHNMca4/viewform?embedded=true';
+    }
 });
 </script>
-
 </body>
 </html>
