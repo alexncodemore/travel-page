@@ -865,6 +865,111 @@
         .modal-form input:focus,
         .modal-form textarea:focus { border-color: var(--ochre); background: var(--white); }
 
+        /* ── SUCCESS MODAL ── */
+        .success-icon-wrap {
+            width: 72px; height: 72px;
+            background: linear-gradient(135deg, #28a745 0%, #20c557 100%);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 8px 24px rgba(40,167,69,0.3);
+            animation: popIn 0.5s 0.1s var(--ease) both;
+        }
+        @keyframes popIn {
+            from { opacity:0; transform: scale(0.5); }
+            to   { opacity:1; transform: scale(1); }
+        }
+        .success-icon-wrap svg {
+            width: 36px; height: 36px;
+            stroke: #fff; stroke-width: 2.5;
+            fill: none; stroke-linecap: round; stroke-linejoin: round;
+        }
+        .success-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.75rem; font-weight: 700;
+            color: var(--ink); text-align: center;
+            margin-bottom: 6px; line-height: 1.2;
+        }
+        .success-subtitle {
+            font-size: 0.88rem; color: var(--ink-3);
+            text-align: center; margin-bottom: 22px;
+            font-weight: 300; line-height: 1.6;
+        }
+        .success-product-name {
+            color: var(--rust); font-weight: 600;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1rem;
+        }
+        .success-info-box {
+            background: var(--ochre-pale);
+            border: 1px solid rgba(200,137,26,0.22);
+            border-radius: var(--radius-lg);
+            padding: 16px 18px;
+            margin-bottom: 20px;
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        .success-info-row {
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 0.82rem;
+        }
+        .success-info-row .label { color: var(--ink-3); font-weight: 400; }
+        .success-info-row .value { color: var(--ink); font-weight: 600; font-size: 0.84rem; }
+        .success-info-row .value.pid {
+            font-family: monospace; font-size: 0.76rem;
+            background: var(--sand-2); padding: 2px 8px;
+            border-radius: 4px; color: var(--ink-2);
+        }
+        .success-divider {
+            height: 1px; background: rgba(200,137,26,0.15); margin: 4px 0;
+        }
+        .success-email-note {
+            font-size: 0.78rem; color: var(--ink-3);
+            text-align: center; margin-bottom: 20px;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .success-email-note::before {
+            content: '✉';
+            font-size: 0.9rem; color: var(--ochre);
+        }
+        .success-btn-download {
+            background: var(--rust);
+            color: var(--white);
+            border: none;
+            border-radius: var(--radius);
+            padding: 14px 28px;
+            width: 100%;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.88rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            transition: all 0.22s var(--ease);
+            margin-bottom: 10px;
+        }
+        .success-btn-download:hover { background: var(--rust-deep); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(184,75,47,0.35); }
+        .success-btn-download svg {
+            width: 18px; height: 18px;
+            stroke: currentColor; fill: none;
+            stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+        }
+        .success-btn-later {
+            background: transparent;
+            border: 1px solid var(--sand-2);
+            border-radius: var(--radius);
+            padding: 11px 28px;
+            width: 100%;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--ink-3);
+            cursor: pointer;
+            letter-spacing: 0.04em;
+            transition: all 0.2s var(--ease);
+        }
+        .success-btn-later:hover { border-color: var(--ink-3); color: var(--ink); }
+
         /* PDF viewer */
         .pdf-overlay {
             display: none; position: fixed; inset: 0; z-index: 3000;
@@ -1248,6 +1353,7 @@
             <div class="empty-state"><p>Loading reviews...</p></div>
         </div>
     </div>
+    <center><small><a href="review.html" style="color: #5a5048;">Give your own review </a></small></center>
 </section>
 
 <div class="rule"></div>
@@ -1344,6 +1450,42 @@
                 Proceed to Pay — Rs.<span id="displayPrice">0</span>
             </button>
         </div>
+    </div>
+</div>
+
+<!-- PAYMENT SUCCESS MODAL -->
+<div class="modal-overlay" id="successModal">
+    <div class="modal-box" style="max-width: 440px;">
+        <div class="success-icon-wrap">
+            <svg viewBox="0 0 24 24">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+        </div>
+        <div class="success-title">Payment Successful!</div>
+        <div class="success-subtitle">
+            Your purchase of <span class="success-product-name" id="successProductName"></span> is confirmed.
+        </div>
+        <div class="success-info-box">
+            <div class="success-info-row">
+                <span class="label">Amount Paid</span>
+                <span class="value" id="successAmount"></span>
+            </div>
+            <div class="success-divider"></div>
+            <div class="success-info-row">
+                <span class="label">Payment ID</span>
+                <span class="value pid" id="successPaymentId"></span>
+            </div>
+        </div>
+        <div class="success-email-note">Itinerary link also sent to your email address.</div>
+        <button class="success-btn-download" id="successDownloadBtn" onclick="triggerSuccessDownload()">
+            <svg viewBox="0 0 24 24">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Download My Itinerary PDF
+        </button>
+        <button class="success-btn-later" onclick="closeSuccessModal()">I'll download later — close</button>
     </div>
 </div>
 
@@ -1572,9 +1714,11 @@ function processProductPaymentFromModal() {
     }).open();
 }
 
+/* ── Payment Success ── */
 async function handleProductPaymentSuccess(response) {
     const paymentId = response.razorpay_payment_id;
     if (!pendingFormData) return;
+
     const { error } = await supabaseClient.from('product_orders').insert([{
         product_id: currentProduct.id, product_name: currentProduct.title, product_price: currentProduct.price,
         buyer_name: pendingFormData.buyer_name, buyer_email: pendingFormData.buyer_email, buyer_phone: pendingFormData.buyer_phone,
@@ -1582,13 +1726,47 @@ async function handleProductPaymentSuccess(response) {
         payment_status: 'Paid', payment_id: paymentId,
         payment_amount: currentProduct.price, payment_date: new Date().toISOString()
     }]);
+
     if (error) { alert("Error saving order: " + error.message); return; }
-    alert(`Payment successful.\nPayment ID: ${paymentId}\nProduct: ${currentProduct.title}\nAmount: Rs.${currentProduct.price}`);
+
+    // Send email in background
+    await sendPDFViaEmail(
+        pendingFormData.buyer_email,
+        pendingFormData.buyer_name,
+        paymentId,
+        currentProduct.price,
+        currentProduct.title,
+        currentProduct.pdfUrl
+    );
+
+    // Populate and show success modal
+    document.getElementById("successProductName").textContent = currentProduct.title;
+    document.getElementById("successAmount").textContent = `Rs.${parseFloat(currentProduct.price).toFixed(2)}`;
+    document.getElementById("successPaymentId").textContent = paymentId;
+
+    // Show/hide download button based on PDF availability
+    const dlBtn = document.getElementById("successDownloadBtn");
     if (currentProduct.pdfUrl && currentProduct.pdfUrl !== 'null' && currentProduct.pdfUrl !== '') {
-        await downloadPDF(currentProduct.pdfUrl, currentProduct.title);
+        dlBtn.style.display = 'flex';
+    } else {
+        dlBtn.style.display = 'none';
     }
-    await sendPDFViaEmail(pendingFormData.buyer_email, pendingFormData.buyer_name, paymentId, currentProduct.price, currentProduct.title, currentProduct.pdfUrl);
+
+    document.getElementById("successModal").classList.add("open");
     pendingFormData = null;
+}
+
+function triggerSuccessDownload() {
+    if (currentProduct && currentProduct.pdfUrl && currentProduct.pdfUrl !== 'null' && currentProduct.pdfUrl !== '') {
+        downloadPDF(currentProduct.pdfUrl, currentProduct.title);
+    } else {
+        alert("PDF link not available. Please check your email for the download link.");
+    }
+}
+
+function closeSuccessModal() {
+    document.getElementById("successModal").classList.remove("open");
+    currentProduct = null;
 }
 
 /* ── Email helpers ── */
@@ -1611,10 +1789,8 @@ document.addEventListener('DOMContentLoaded', () => {
     loadItineraries();
     buildFAQ();
 
-    // Fix Google Form iframe src to use the correct embed URL
     const iframe = document.querySelector('.google-form-wrapper iframe');
     if (iframe) {
-        // Convert edit URL to viewform embed URL
         iframe.src = 'https://docs.google.com/forms/d/1kSMMX855SDEP9W8a4N9j05y52MQcmh7i5QcwNHNMca4/viewform?embedded=true';
     }
 });
