@@ -2,342 +2,103 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Product Purchase - EmailJS</title>
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <title>EmailJS Diagnostic</title>
     <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <h1>Test Product Purchase Flow</h1>
+    <h1>EmailJS Diagnostic Tool</h1>
     
-    <!-- Product List -->
-    <div style="margin: 20px 0; padding: 20px; border: 1px solid black;">
-        <h2>Available Products</h2>
-        <div id="productsList"></div>
-    </div>
-
-    <!-- Purchase Modal (Simple) -->
-    <div id="purchaseModal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border: 2px solid black; z-index: 1000;">
-        <h3 id="modalTitle">Purchase Product</h3>
-        <div>
-            <div><label>Name: </label><input type="text" id="buyer_name" placeholder="Full Name"></div>
-            <div style="margin-top: 10px;"><label>Email: </label><input type="email" id="buyer_email" placeholder="Email Address"></div>
-            <div style="margin-top: 10px;"><label>Phone: </label><input type="text" id="buyer_phone" placeholder="Phone Number"></div>
-            <div style="margin-top: 10px;"><label>Travellers: </label><input type="number" id="travelers" min="1" value="1"></div>
-            <div style="margin-top: 10px;"><label>Message: </label><textarea id="buyer_message" rows="2" placeholder="Any special requirements..."></textarea></div>
-            <div style="margin-top: 10px;"><strong>Amount: ₹<span id="displayPrice">0</span></strong></div>
-            <button onclick="processPayment()" style="margin-top: 15px; padding: 8px 16px;">Pay with Razorpay</button>
-            <button onclick="closeModal()" style="margin-top: 15px; margin-left: 10px; padding: 8px 16px;">Cancel</button>
-        </div>
-        <div id="modalResult" style="margin-top: 10px; color: red;"></div>
-    </div>
-    <div id="modalOverlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 999;"></div>
-
-    <!-- Results Display -->
-    <div style="margin-top: 20px; padding: 20px; border: 1px solid black;">
-        <h2>Transaction Log</h2>
-        <div id="log" style="font-family: monospace; font-size: 12px; max-height: 300px; overflow-y: auto;"></div>
-    </div>
-
+    <div id="diagnostic"></div>
+    
     <script>
-        // Initialize
-        emailjs.init("7rgj4t_06JrmsxgHC");
-        const supabase = window.supabase.createClient(
-            "https://eyekpbzcdouhkquqjjae.supabase.co",
-            "sb_publishable_hONe7ntkTZaGeyFsLV0iMQ_9aTXtOBE"
-        );
-        const RAZORPAY_KEY = "rzp_live_SV68ifsBjM5tPz";
-        
-        let currentProduct = null;
-        let pendingFormData = null;
-        
-        // Log function
-        function addLog(message, type = "info") {
-            const logDiv = document.getElementById("log");
-            const timestamp = new Date().toLocaleTimeString();
-            const color = type === "error" ? "red" : (type === "success" ? "green" : "blue");
-            logDiv.innerHTML += `<div style="color: ${color}; margin: 5px 0;">[${timestamp}] ${message}</div>`;
-            logDiv.scrollTop = logDiv.scrollHeight;
-            console.log(message);
-        }
-        
-        // Load products from Supabase
-        async function loadProducts() {
-            addLog("Loading products from Supabase...");
+        async function runDiagnostic() {
+            const output = document.getElementById("diagnostic");
+            output.innerHTML = "<h2>Running Diagnostics...</h2>";
+            
+            // Check 1: EmailJS initialization
+            output.innerHTML += "<h3>1. Checking EmailJS Initialization...</h3>";
             try {
-                const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
-                
-                if (error) {
-                    addLog(`Error loading products: ${error.message}`, "error");
-                    document.getElementById("productsList").innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
-                    return;
-                }
-                
-                if (!data || data.length === 0) {
-                    addLog("No products found in database", "error");
-                    document.getElementById("productsList").innerHTML = "<p>No products available. Please add products to your Supabase 'products' table.</p>";
-                    return;
-                }
-                
-                addLog(`Found ${data.length} product(s)`, "success");
-                
-                // Display products
-                let html = "<table border='1' cellpadding='10' cellspacing='0' style='border-collapse: collapse; width: 100%;'>";
-                html += "<tr><th>ID</th><th>Title</th><th>Price</th><th>PDF URL</th><th>Action</th></tr>";
-                
-                data.forEach(product => {
-                    html += `<tr>
-                        <td>${product.id}</td>
-                        <td>${product.title}</td>
-                        <td>₹${product.price}</td>
-                        <td>${product.pdf_url ? product.pdf_url.substring(0, 50) + "..." : "No PDF"}</td>
-                        <td><button onclick="openPurchaseModal(${product.id}, '${product.title.replace(/'/g, "\\'")}', ${product.price}, '${product.pdf_url || ''}')">Buy Now</button></td>
-                    </tr>`;
-                });
-                html += "</table>";
-                document.getElementById("productsList").innerHTML = html;
-                
-            } catch (err) {
-                addLog(`Exception: ${err.message}`, "error");
-                document.getElementById("productsList").innerHTML = `<p style="color: red;">Error: ${err.message}</p>`;
-            }
-        }
-        
-        // Open purchase modal
-        function openPurchaseModal(id, title, price, pdfUrl) {
-            addLog(`Opening purchase modal for: ${title} (₹${price})`);
-            currentProduct = { id, title, price, pdfUrl };
-            document.getElementById("modalTitle").innerHTML = `Purchase: ${title}`;
-            document.getElementById("displayPrice").innerHTML = price;
-            document.getElementById("buyer_name").value = "";
-            document.getElementById("buyer_email").value = "";
-            document.getElementById("buyer_phone").value = "";
-            document.getElementById("buyer_message").value = "";
-            document.getElementById("travelers").value = "1";
-            document.getElementById("modalResult").innerHTML = "";
-            document.getElementById("purchaseModal").style.display = "block";
-            document.getElementById("modalOverlay").style.display = "block";
-        }
-        
-        function closeModal() {
-            document.getElementById("purchaseModal").style.display = "none";
-            document.getElementById("modalOverlay").style.display = "none";
-            currentProduct = null;
-        }
-        
-        // Process payment with Razorpay
-        function processPayment() {
-            const buyer_name = document.getElementById("buyer_name").value.trim();
-            const buyer_email = document.getElementById("buyer_email").value.trim();
-            const buyer_phone = document.getElementById("buyer_phone").value.trim();
-            const travelers = parseInt(document.getElementById("travelers").value);
-            const message = document.getElementById("buyer_message").value;
-            
-            if (!buyer_name || !buyer_email || !buyer_phone) {
-                document.getElementById("modalResult").innerHTML = "Please fill all required fields (Name, Email, Phone)";
-                addLog("Payment failed: Missing required fields", "error");
-                return;
+                emailjs.init("7rgj4t_06JrmsxgHC");
+                output.innerHTML += "<p style='color: green'>✅ EmailJS initialized successfully</p>";
+            } catch(e) {
+                output.innerHTML += `<p style='color: red'>❌ EmailJS init failed: ${e.message}</p>`;
             }
             
-            addLog(`Initiating payment for ${buyer_name} (${buyer_email}) - Product: ${currentProduct.title} - Amount: ₹${currentProduct.price}`);
+            // Check 2: Test API call
+            output.innerHTML += "<h3>2. Testing EmailJS API...</h3>";
             
-            pendingFormData = { buyer_name, buyer_email, buyer_phone, travelers, message };
-            
-            const options = {
-                key: RAZORPAY_KEY,
-                amount: Math.round(currentProduct.price * 100),
-                currency: "INR",
-                name: "Wanderers Itinerary",
-                description: `Purchase: ${currentProduct.title}`,
-                prefill: {
-                    name: buyer_name,
-                    email: buyer_email,
-                    contact: buyer_phone
-                },
-                handler: function(response) {
-                    addLog(`Payment successful! Payment ID: ${response.razorpay_payment_id}`, "success");
-                    handlePaymentSuccess(response);
-                },
-                modal: {
-                    ondismiss: function() {
-                        addLog("Payment cancelled by user", "error");
-                        pendingFormData = null;
-                        document.getElementById("modalResult").innerHTML = "Payment cancelled";
-                    }
-                }
+            const testParams = {
+                name: "Diagnostic Test",
+                email: "diagnostic@test.com",
+                message: "This is a diagnostic test from Wanderers Itinerary.",
+                payment_id: "DIAG_123",
+                amount: "100",
+                product_name: "Diagnostic Test",
+                download_link: "https://example.com/test.pdf"
             };
             
-            const rzp = new Razorpay(options);
-            rzp.open();
-        }
-        
-        // Handle payment success
-        async function handlePaymentSuccess(response) {
-            const paymentId = response.razorpay_payment_id;
-            
-            if (!pendingFormData) {
-                addLog("Error: No pending form data", "error");
-                return;
+            try {
+                const response = await emailjs.send("service_8o8nozh", "template_xui60z6", testParams);
+                output.innerHTML += `<p style='color: green'>✅ API call successful! Status: ${response.status}</p>`;
+                output.innerHTML += `<p>Response: ${JSON.stringify(response)}</p>`;
+            } catch(e) {
+                output.innerHTML += `<p style='color: red'>❌ API call failed:</p>`;
+                output.innerHTML += `<pre style='background: #ffeeee; padding: 10px;'>${JSON.stringify(e, null, 2)}</pre>`;
+                
+                // Provide troubleshooting steps
+                output.innerHTML += `
+                    <div style="background: #fff3e0; padding: 15px; margin-top: 20px;">
+                        <h3>🔧 Troubleshooting Steps:</h3>
+                        <ol>
+                            <li>Go to <a href="https://dashboard.emailjs.com/" target="_blank">EmailJS Dashboard</a></li>
+                            <li>Check if your service "service_8o8nozh" exists and is active</li>
+                            <li>Check if template "template_xui60z6" exists</li>
+                            <li>Verify the template has these variables: {{name}}, {{email}}, {{message}}, {{payment_id}}, {{amount}}, {{product_name}}, {{download_link}}</li>
+                            <li>Check your EmailJS account has enough quota (free tier: 200 emails/month)</li>
+                            <li>Verify your public key "7rgj4t_06JrmsxgHC" matches your account</li>
+                        </ol>
+                        
+                        <h3>📝 Required Template Variables:</h3>
+                        <pre style="background: #eee; padding: 10px;">
+{{name}}
+{{email}}
+{{message}}
+{{payment_id}}
+{{amount}}
+{{product_name}}
+{{download_link}}
+                        </pre>
+                        
+                        <h3>🔑 Your Configuration:</h3>
+                        <ul>
+                            <li>Public Key: 7rgj4t_06JrmsxgHC</li>
+                            <li>Service ID: service_8o8nozh</li>
+                            <li>Template ID: template_xui60z6</li>
+                        </ul>
+                    </div>
+                `;
             }
             
-            addLog(`Saving order to Supabase... Payment ID: ${paymentId}`);
-            
-            // Save order to Supabase
-            const { error } = await supabase.from('product_orders').insert([{
-                product_id: currentProduct.id,
-                product_name: currentProduct.title,
-                product_price: currentProduct.price,
-                buyer_name: pendingFormData.buyer_name,
-                buyer_email: pendingFormData.buyer_email,
-                buyer_phone: pendingFormData.buyer_phone,
-                travelers: pendingFormData.travelers,
-                message: pendingFormData.message,
-                payment_status: 'Paid',
-                payment_id: paymentId,
-                payment_amount: currentProduct.price,
-                payment_date: new Date().toISOString()
-            }]);
-            
-            if (error) {
-                addLog(`Error saving order: ${error.message}`, "error");
-                document.getElementById("modalResult").innerHTML = `Error: ${error.message}`;
-                return;
-            }
-            
-            addLog(`Order saved successfully!`, "success");
-            
-            // Send email with PDF
-            if (currentProduct.pdfUrl && currentProduct.pdfUrl !== 'null' && currentProduct.pdfUrl !== '') {
-                addLog(`Sending email with PDF link to ${pendingFormData.buyer_email}...`);
-                await sendEmailWithPDFLink(
-                    pendingFormData.buyer_email,
-                    pendingFormData.buyer_name,
-                    paymentId,
-                    currentProduct.price,
-                    currentProduct.title,
-                    currentProduct.pdfUrl
-                );
-            } else {
-                addLog(`No PDF URL available for this product`, "error");
-                await sendSimpleEmail(
-                    pendingFormData.buyer_email,
-                    pendingFormData.buyer_name,
-                    paymentId,
-                    currentProduct.price,
-                    currentProduct.title
-                );
-            }
-            
-            document.getElementById("modalResult").innerHTML = `<span style="color: green;">✓ Payment successful! Order saved. Email sent to ${pendingFormData.buyer_email}</span>`;
-            addLog(`Purchase flow completed successfully!`, "success");
-            
-            // Close modal after 3 seconds
-            setTimeout(() => {
-                closeModal();
-            }, 3000);
-            
-            pendingFormData = null;
-        }
-        
-        // Send email with PDF link
-        async function sendEmailWithPDFLink(email, name, paymentId, amount, productName, pdfUrl) {
-            const message = `
-                Dear ${name},
-                
-                Thank you for purchasing ${productName}!
-                
-                Payment Details:
-                - Amount: Rs.${amount}
-                - Payment ID: ${paymentId}
-                - Product: ${productName}
-                
-                Download Your Itinerary: ${pdfUrl}
-                
-                Please download your itinerary immediately. This link is for your personal use only.
-                
-                Happy travels!
-                
-                - Wanderers Itinerary Team
-                Contact: hello@wanderersitinerary.in
-            `;
+            // Check 3: Supabase connection
+            output.innerHTML += "<h3>3. Testing Supabase Connection...</h3>";
+            const supabase = window.supabase.createClient(
+                "https://eyekpbzcdouhkquqjjae.supabase.co",
+                "sb_publishable_hONe7ntkTZaGeyFsLV0iMQ_9aTXtOBE"
+            );
             
             try {
-                const result = await emailjs.send("service_8o8nozh", "template_xui60z6", {
-                    name: name,
-                    email: email,
-                    message: message,
-                    payment_id: paymentId,
-                    amount: amount,
-                    product_name: productName,
-                    download_link: pdfUrl
-                });
-                addLog(`Email sent successfully to ${email}`, "success");
-                return true;
-            } catch (err) {
-                addLog(`Email error: ${err.text || err.message}`, "error");
-                return false;
+                const { data, error } = await supabase.from('products').select('count', { count: 'exact', head: true });
+                if (error) {
+                    output.innerHTML += `<p style='color: red'>❌ Supabase error: ${error.message}</p>`;
+                } else {
+                    output.innerHTML += `<p style='color: green'>✅ Supabase connection successful</p>`;
+                }
+            } catch(e) {
+                output.innerHTML += `<p style='color: red'>❌ Supabase connection failed: ${e.message}</p>`;
             }
         }
         
-        // Send simple email (fallback)
-        async function sendSimpleEmail(email, name, paymentId, amount, productName) {
-            const message = `
-                Dear ${name},
-                
-                Thank you for purchasing ${productName}!
-                
-                Payment Details:
-                - Amount: Rs.${amount}
-                - Payment ID: ${paymentId}
-                - Product: ${productName}
-                
-                Note: No PDF was attached to this product. Please contact support.
-                
-                Happy travels!
-                
-                - Wanderers Itinerary Team
-            `;
-            
-            try {
-                const result = await emailjs.send("service_8o8nozh", "template_xui60z6", {
-                    name: name,
-                    email: email,
-                    message: message,
-                    payment_id: paymentId,
-                    amount: amount,
-                    product_name: productName
-                });
-                addLog(`Simple email sent successfully to ${email}`, "success");
-                return true;
-            } catch (err) {
-                addLog(`Simple email error: ${err.text || err.message}`, "error");
-                return false;
-            }
-        }
-        
-        // Test email function
-        async function testEmail() {
-            addLog("Testing email functionality...");
-            const testEmail = prompt("Enter test email address:", "test@example.com");
-            if (testEmail) {
-                await sendSimpleEmail(testEmail, "Test User", "TEST_123", "99", "Test Product");
-            }
-        }
-        
-        // Load products on page load
-        window.onload = () => {
-            addLog("Page loaded. Initializing...");
-            loadProducts();
-            
-            // Add test button
-            const testBtn = document.createElement("button");
-            testBtn.textContent = "Test Email Only";
-            testBtn.onclick = testEmail;
-            testBtn.style.marginTop = "10px";
-            testBtn.style.padding = "8px 16px";
-            document.querySelector("#productsList").parentNode.appendChild(testBtn);
-        };
+        runDiagnostic();
     </script>
 </body>
 </html>
