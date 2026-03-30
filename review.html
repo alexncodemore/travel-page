@@ -5,37 +5,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Share Your Experience — Wanderers Itinerary</title>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --ink:        #0f0d0a;
-            --ink-2:      #2a241c;
-            --ink-3:      #5a5048;
-            --sand:       #f5efe6;
-            --sand-2:     #ece4d8;
-            --sand-3:     #d8ccbb;
-            --ochre:      #c8891a;
-            --ochre-deep: #a36a08;
-            --ochre-pale: #fdf5e8;
-            --rust:       #b84b2f;
-            --rust-deep:  #8f3520;
-            --white:      #fefcf9;
-            --line:       rgba(200,137,26,0.18);
-            --shadow-sm:  0 2px 12px rgba(15,13,10,0.07);
-            --shadow-md:  0 8px 40px rgba(15,13,10,0.12);
-            --shadow-lg:  0 20px 80px rgba(15,13,10,0.18);
-            --radius:     4px;
-            --radius-lg:  10px;
-            --ease:       cubic-bezier(.4,0,.2,1);
+            --crimson:      #C0392B;
+            --crimson-deep: #922B21;
+            --crimson-light:#E74C3C;
+            --scarlet:      #E53E3E;
+            --amber:        #F6C90E;
+            --amber-deep:   #D4A017;
+            --amber-pale:   #FFFBEA;
+            --saffron:      #F59E0B;
+            --coral:        #F97316;
+            --cream:        #FFFDF7;
+            --cream-2:      #FFF8EE;
+            --cream-3:      #FDEBC8;
+            --warm-white:   #FFFEF9;
+            --sand:         #F5E6C8;
+            --sand-deep:    #E8D5A3;
+            --blush:        #FDE8E4;
+            --ink:          #1A0A00;
+            --ink-2:        #3D1A0A;
+            --ink-3:        #7A4A35;
+            --ink-4:        #B07A60;
+
+            --line:         rgba(192,57,43,0.15);
+            --shadow-sm:    0 2px 12px rgba(192,57,43,0.08);
+            --shadow-md:    0 8px 40px rgba(192,57,43,0.14);
+            --shadow-lg:    0 24px 80px rgba(192,57,43,0.2);
+            --shadow-amber: 0 8px 32px rgba(246,201,14,0.35);
+            --radius:       6px;
+            --radius-lg:    14px;
+            --radius-xl:    24px;
+            --ease:         cubic-bezier(.4,0,.2,1);
+            --nav-h:        70px;
         }
 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         html { scroll-behavior: smooth; font-size: 16px; }
 
         body {
-            font-family: 'Outfit', sans-serif;
-            background: var(--white);
+            font-family: 'DM Sans', sans-serif;
+            background: var(--warm-white);
             color: var(--ink);
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
@@ -43,96 +55,116 @@
         }
 
         ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: var(--sand); }
-        ::-webkit-scrollbar-thumb { background: var(--ochre); border-radius: 2px; }
+        ::-webkit-scrollbar-track { background: var(--cream-2); }
+        ::-webkit-scrollbar-thumb { background: var(--crimson); border-radius: 3px; }
 
-        /* ── NAVBAR ── */
+        body::before {
+            content: '';
+            position: fixed; inset: 0; z-index: -1;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+            background-size: 200px;
+            pointer-events: none;
+        }
+
+        /* ── NAVBAR (matches main site) ── */
         .navbar {
             position: fixed; top: 0; left: 0; right: 0; z-index: 999;
-            background: rgba(15,13,10,0.96);
-            backdrop-filter: blur(16px);
-            height: 64px;
+            background: rgba(255,253,247,0.97);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            height: var(--nav-h);
             display: flex; align-items: center; justify-content: space-between;
-            padding: 0 5%;
-            border-bottom: 1px solid rgba(200,137,26,0.25);
+            padding: 0 clamp(16px, 5%, 64px);
+            border-bottom: 2px solid var(--amber);
+            box-shadow: 0 2px 16px rgba(192,57,43,0.07);
         }
 
-        .nav-logo {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--white);
-            letter-spacing: 0.03em;
-            text-decoration: none;
+        .nav-brand {
+            display: flex; align-items: center; gap: 10px;
+            text-decoration: none; flex-shrink: 0;
         }
-        .nav-logo em { font-style: italic; color: var(--ochre); }
+        .nav-brand img {
+            width: 40px; height: 40px; object-fit: contain;
+        }
+        .nav-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.05rem, 2vw, 1.35rem);
+            font-weight: 900;
+            color: var(--crimson);
+            letter-spacing: 0.01em;
+            white-space: nowrap; line-height: 1;
+        }
+        .nav-logo em { font-style: italic; color: var(--amber-deep); }
 
         .nav-back {
-            color: rgba(254,252,249,0.65);
+            display: inline-flex; align-items: center; gap: 7px;
+            color: var(--ink-3);
             text-decoration: none;
-            font-size: 0.8rem;
-            font-weight: 500;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            transition: color 0.25s var(--ease);
-            display: flex; align-items: center; gap: 6px;
+            font-size: 0.775rem; font-weight: 600;
+            letter-spacing: 0.08em; text-transform: uppercase;
+            transition: color 0.2s var(--ease);
+            padding: 9px 18px;
+            border: 1.5px solid var(--line);
+            border-radius: 40px;
         }
-        .nav-back:hover { color: var(--ochre); }
-        .nav-back svg { width: 14px; height: 14px; }
+        .nav-back:hover { color: var(--crimson); border-color: var(--crimson); }
+        .nav-back svg { width: 13px; height: 13px; flex-shrink: 0; }
 
-        /* ── PAGE HERO ── */
+        /* ── HERO ── */
         .page-hero {
             background: var(--ink);
-            padding: 140px 5% 80px;
-            position: relative;
-            overflow: hidden;
+            padding: clamp(120px, 18vh, 160px) clamp(16px, 5%, 64px) clamp(64px, 8vh, 96px);
+            position: relative; overflow: hidden;
         }
         .page-hero::before {
             content: '';
             position: absolute; inset: 0;
             background: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1800&auto=format&fit=crop') center/cover;
-            opacity: 0.12;
+            opacity: 0.14;
         }
         .page-hero::after {
             content: '';
-            position: absolute; bottom: 0; left: 0; right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--ochre), transparent);
+            position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, transparent, var(--crimson), var(--amber), transparent);
+        }
+        /* decorative radial glow */
+        .page-hero-glow {
+            position: absolute; top: -80px; right: -80px;
+            width: 500px; height: 500px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(246,201,14,0.07) 0%, transparent 70%);
+            pointer-events: none;
         }
         .page-hero-inner {
             position: relative; z-index: 1;
             max-width: 1160px; margin: 0 auto;
             text-align: center;
         }
-        .section-label {
-            display: inline-block;
-            font-size: 0.68rem;
-            font-weight: 700;
-            letter-spacing: 0.2em;
-            text-transform: uppercase;
-            color: var(--ochre);
-            margin-bottom: 1rem;
-            padding-bottom: 8px;
-            border-bottom: 1px solid rgba(200,137,26,0.4);
+        .hero-eyebrow {
+            display: inline-flex; align-items: center; gap: 10px;
+            font-size: 0.68rem; font-weight: 700;
+            letter-spacing: 0.22em; text-transform: uppercase;
+            color: var(--amber); margin-bottom: 1.2rem;
         }
+        .hero-eyebrow::before, .hero-eyebrow::after {
+            content: '';
+            display: block; width: 28px; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--amber));
+        }
+        .hero-eyebrow::before { transform: scaleX(-1); }
         .page-hero h1 {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: clamp(2.4rem, 5vw, 4rem);
-            font-weight: 700;
-            color: var(--white);
-            line-height: 1.1;
-            margin-bottom: 1rem;
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.4rem, 5.5vw, 4.5rem);
+            font-weight: 900; color: #fff;
+            line-height: 1.05; margin-bottom: 1rem;
             animation: fadeUp 0.8s var(--ease) both;
         }
-        .page-hero h1 em { font-style: italic; color: var(--ochre); }
+        .page-hero h1 em { font-style: italic; color: var(--amber); }
         .page-hero p {
-            color: rgba(254,252,249,0.6);
-            font-size: 1rem;
-            line-height: 1.7;
-            max-width: 520px;
-            margin: 0 auto;
+            color: rgba(255,253,247,0.6);
+            font-size: clamp(0.9rem, 1.4vw, 1.02rem); line-height: 1.75;
+            max-width: 500px; margin: 0 auto;
             font-weight: 300;
-            animation: fadeUp 0.8s 0.1s var(--ease) both;
+            animation: fadeUp 0.8s 0.12s var(--ease) both;
         }
 
         @keyframes fadeUp {
@@ -142,269 +174,284 @@
 
         /* ── MAIN LAYOUT ── */
         .main-wrap {
-            max-width: 1160px;
-            margin: 0 auto;
-            padding: 72px 5% 96px;
+            max-width: 1160px; margin: 0 auto;
+            padding: clamp(48px, 7vw, 80px) clamp(16px, 5%, 64px) clamp(64px, 8vw, 100px);
             display: grid;
-            grid-template-columns: 1fr 1.2fr;
-            gap: 72px;
+            grid-template-columns: 1fr 1.25fr;
+            gap: clamp(40px, 6vw, 72px);
             align-items: start;
         }
 
-        /* ── FORM SIDE ── */
-        .form-side {}
+        /* ── SECTION LABELS (shared style) ── */
+        .section-label {
+            display: inline-flex; align-items: center; gap: 10px;
+            font-size: 0.68rem; font-weight: 700;
+            letter-spacing: 0.2em; text-transform: uppercase;
+            color: var(--crimson); margin-bottom: 0.7rem;
+        }
+        .section-label::before {
+            content: '';
+            width: 18px; height: 2px;
+            background: linear-gradient(90deg, var(--crimson), var(--amber));
+            flex-shrink: 0;
+        }
 
+        /* ── FORM CARD ── */
         .form-card {
-            background: var(--white);
-            border: 1px solid var(--sand-2);
-            border-radius: var(--radius-lg);
-            padding: 40px;
+            background: var(--cream);
+            border: 1px solid var(--sand);
+            border-radius: var(--radius-xl);
+            padding: clamp(28px, 4vw, 40px);
             box-shadow: var(--shadow-md);
-            position: sticky;
-            top: 88px;
+            position: sticky; top: calc(var(--nav-h) + 20px);
             animation: fadeUp 0.7s 0.15s var(--ease) both;
         }
 
         .form-card-header {
-            margin-bottom: 28px;
-            padding-bottom: 24px;
-            border-bottom: 1px solid var(--sand-2);
+            margin-bottom: 26px;
+            padding-bottom: 22px;
+            border-bottom: 1px solid var(--line);
         }
-        .form-card-header .section-label { margin-bottom: 8px; }
         .form-card-header h2 {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.6rem; font-weight: 700;
-            color: var(--ink); line-height: 1.2;
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.45rem, 2.5vw, 1.8rem);
+            font-weight: 900; color: var(--ink); line-height: 1.15;
         }
-        .form-card-header h2 em { font-style: italic; color: var(--rust); }
+        .form-card-header h2 em { font-style: italic; color: var(--crimson); }
         .form-card-header p {
-            font-size: 0.84rem; color: var(--ink-3); line-height: 1.6;
-            font-weight: 300; margin-top: 6px;
+            font-size: 0.84rem; color: var(--ink-3);
+            line-height: 1.65; font-weight: 300; margin-top: 6px;
         }
 
-        .form-fields { display: flex; flex-direction: column; gap: 16px; }
+        .form-fields { display: flex; flex-direction: column; gap: 15px; }
 
-        .field-group {}
         .field-label {
             display: block;
-            font-size: 0.7rem; font-weight: 700;
+            font-size: 0.68rem; font-weight: 700;
             letter-spacing: 0.12em; text-transform: uppercase;
-            color: var(--ink-3); margin-bottom: 6px;
+            color: var(--ink-3); margin-bottom: 5px;
         }
-        .field-label span { color: var(--rust); margin-left: 2px; }
+        .field-label span { color: var(--crimson); margin-left: 2px; }
 
         .field-input {
             width: 100%;
-            background: var(--sand);
-            border: 1.5px solid transparent;
+            background: var(--cream-2);
+            border: 1.5px solid var(--line);
             border-radius: var(--radius);
-            padding: 12px 16px;
-            font-family: 'Outfit', sans-serif;
-            font-size: 0.88rem;
-            color: var(--ink);
+            padding: 11px 15px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.87rem; color: var(--ink);
             outline: none;
             transition: border-color 0.2s var(--ease), background 0.2s;
             appearance: none;
         }
-        .field-input:focus { border-color: var(--ochre); background: var(--white); }
-        .field-input::placeholder { color: var(--sand-3); }
+        .field-input:focus { border-color: var(--crimson); background: #fff; }
+        .field-input::placeholder { color: var(--sand-deep); }
+        textarea.field-input { resize: vertical; min-height: 108px; line-height: 1.65; }
 
-        textarea.field-input { resize: vertical; min-height: 110px; line-height: 1.6; }
-
-        /* Star rating selector */
-        .star-selector {
-            display: flex; gap: 6px; align-items: center;
-        }
+        /* Star rating */
+        .star-row { display: flex; align-items: center; gap: 4px; }
         .star-btn {
             background: none; border: none; cursor: pointer;
-            font-size: 1.7rem; color: var(--sand-3);
+            font-size: 1.75rem; color: var(--sand-deep);
             transition: color 0.15s var(--ease), transform 0.15s;
-            line-height: 1; padding: 2px;
+            line-height: 1; padding: 2px 3px;
         }
-        .star-btn:hover,
-        .star-btn.active { color: var(--ochre); }
-        .star-btn:hover { transform: scale(1.15); }
-        .star-label-text {
-            font-size: 0.78rem; color: var(--ink-3); margin-left: 8px;
-            font-weight: 400; min-width: 80px;
+        .star-btn:hover, .star-btn.active { color: var(--amber); }
+        .star-btn:hover { transform: scale(1.18); }
+        .star-label {
+            font-size: 0.77rem; color: var(--ink-3);
+            margin-left: 6px; font-weight: 500; min-width: 78px;
         }
 
+        /* Submit button — same as .btn-crimson on main site */
         .submit-btn {
             display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-            width: 100%;
-            padding: 14px 28px;
-            background: var(--rust);
-            color: var(--white);
-            border: none; border-radius: var(--radius);
-            font-family: 'Outfit', sans-serif;
-            font-weight: 600; font-size: 0.85rem;
-            letter-spacing: 0.07em; text-transform: uppercase;
+            width: 100%; padding: 13px 28px; border-radius: 40px;
+            background: linear-gradient(135deg, var(--crimson), var(--scarlet));
+            color: #fff; border: none;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 700; font-size: 0.82rem;
+            letter-spacing: 0.06em; text-transform: uppercase;
             cursor: pointer;
-            transition: background 0.2s var(--ease), transform 0.2s, box-shadow 0.2s;
-            margin-top: 6px;
+            transition: all 0.22s var(--ease);
+            box-shadow: 0 4px 18px rgba(192,57,43,0.3);
+            margin-top: 4px;
         }
-        .submit-btn:hover { background: var(--rust-deep); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(184,75,47,0.35); }
+        .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(192,57,43,0.45); }
         .submit-btn:disabled { opacity: 0.6; pointer-events: none; }
-        .submit-btn svg { width: 16px; height: 16px; }
-
-        /* Toast */
-        .toast {
-            position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(100px);
-            background: var(--ink); color: var(--white);
-            padding: 14px 28px; border-radius: 40px;
-            font-size: 0.86rem; font-weight: 500;
-            box-shadow: var(--shadow-lg);
-            z-index: 9999;
-            transition: transform 0.4s var(--ease), opacity 0.4s;
-            opacity: 0;
-            white-space: nowrap;
-            display: flex; align-items: center; gap: 10px;
-            border: 1px solid rgba(200,137,26,0.2);
-        }
-        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-        .toast.success .toast-icon { color: #4caf50; }
-        .toast.error .toast-icon { color: var(--rust); }
-        .toast-icon { font-size: 1rem; }
 
         /* ── REVIEWS SIDE ── */
-        .reviews-side {}
-
-        .reviews-header {
-            display: flex; align-items: flex-end; justify-content: space-between;
-            margin-bottom: 28px; gap: 16px; flex-wrap: wrap;
+        .reviews-header { margin-bottom: 28px; }
+        .reviews-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.6rem, 3vw, 2.1rem);
+            font-weight: 900; color: var(--ink); line-height: 1.1;
+            margin-bottom: 14px;
         }
-        .reviews-header-left {}
-        .reviews-header-left h2 {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.8rem; font-weight: 700;
-            color: var(--ink); line-height: 1.1;
-        }
-        .reviews-header-left h2 em { font-style: italic; color: var(--rust); }
+        .reviews-header h2 em { font-style: italic; color: var(--crimson); }
 
+        /* Avg rating badge — matches hero-rating on main site */
         .avg-badge {
-            display: inline-flex; align-items: center; gap: 12px;
-            background: var(--ochre-pale);
-            border: 1px solid rgba(200,137,26,0.25);
+            display: none;
+            align-items: center; gap: 14px;
+            background: var(--cream);
+            border: 1px solid var(--sand);
             border-radius: var(--radius-lg);
-            padding: 12px 20px;
-            margin-top: 12px;
+            padding: 14px 20px;
+            box-shadow: var(--shadow-sm);
         }
         .avg-num {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 2rem; font-weight: 700; color: var(--ochre); line-height: 1;
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem; font-weight: 900;
+            color: var(--crimson); line-height: 1;
         }
-        .avg-right {}
-        .avg-stars { color: var(--ochre); font-size: 0.85rem; letter-spacing: 2px; }
-        .avg-count { font-size: 0.72rem; color: var(--ink-3); margin-top: 2px; }
+        .avg-stars { color: var(--amber); font-size: 0.9rem; letter-spacing: 3px; }
+        .avg-count { font-size: 0.72rem; color: var(--ink-3); margin-top: 2px; font-weight: 400; }
 
-        .reviews-list {
-            display: flex; flex-direction: column; gap: 18px;
-        }
+        /* Review cards — same pattern as main site */
+        .reviews-list { display: flex; flex-direction: column; gap: 18px; }
 
         .review-card {
-            background: var(--white);
-            border: 1px solid var(--sand-2);
+            background: var(--cream);
+            border: 1px solid var(--sand);
             border-radius: var(--radius-lg);
-            padding: 24px 28px;
+            padding: 24px 26px;
+            position: relative; overflow: hidden;
             transition: transform 0.2s var(--ease), box-shadow 0.2s;
             animation: fadeUp 0.5s var(--ease) both;
         }
-        .review-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+        .review-card::before {
+            content: ''; position: absolute; top: 0; right: 0;
+            width: 60px; height: 60px;
+            background: linear-gradient(225deg, rgba(246,201,14,0.1), transparent);
+            pointer-events: none;
+        }
+        /* amber top-edge accent, matches pricing-card */
+        .review-card::after {
+            content: ''; position: absolute; top: 0; left: 0;
+            width: 100%; height: 3px;
+            background: linear-gradient(90deg, var(--crimson), var(--amber));
+        }
+        .review-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
 
+        .review-quote-mark {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.8rem; color: var(--crimson);
+            opacity: 0.15; line-height: 0.8; margin-bottom: -4px;
+        }
         .review-top {
-            display: flex; align-items: flex-start; justify-content: space-between;
-            margin-bottom: 12px; gap: 12px;
+            display: flex; align-items: flex-start;
+            justify-content: space-between; gap: 12px;
+            margin-bottom: 10px;
         }
-        .review-meta {}
-        .review-name {
-            font-weight: 600; font-size: 0.95rem; color: var(--ink);
-        }
+        .review-name { font-weight: 700; font-size: 0.9rem; color: var(--ink); }
         .review-place {
-            display: flex; align-items: center; gap: 5px;
-            font-size: 0.78rem; color: var(--ink-3); margin-top: 3px;
+            font-size: 0.76rem; color: var(--ink-3); margin-top: 3px;
+            display: flex; align-items: center; gap: 4px;
         }
-        .review-place svg { width: 12px; height: 12px; color: var(--ochre); flex-shrink: 0; }
-        .review-stars { color: var(--ochre); font-size: 0.88rem; letter-spacing: 2px; flex-shrink: 0; }
+        .review-place-dot {
+            width: 5px; height: 5px; border-radius: 50%;
+            background: var(--amber); flex-shrink: 0;
+        }
+        .review-stars { color: var(--amber); font-size: 0.88rem; letter-spacing: 2px; flex-shrink: 0; }
         .review-text {
-            font-size: 0.87rem; color: var(--ink-3);
-            line-height: 1.7; font-weight: 300;
-            border-left: 2px solid rgba(200,137,26,0.3);
+            font-size: 0.85rem; color: var(--ink-3);
+            line-height: 1.68; font-weight: 300; margin-bottom: 12px;
             padding-left: 14px;
-            margin-bottom: 12px;
-            font-style: italic;
+            border-left: 2px solid var(--amber);
         }
-        .review-date { font-size: 0.7rem; color: var(--sand-3); }
+        .review-date { font-size: 0.7rem; color: var(--sand-deep); font-weight: 500; }
 
         .reviews-empty {
-            text-align: center; padding: 48px 24px;
-            background: var(--sand);
+            text-align: center; padding: 52px 24px;
+            background: var(--cream-2);
+            border: 1px dashed rgba(192,57,43,0.2);
             border-radius: var(--radius-lg);
-            border: 1px dashed var(--sand-3);
         }
         .reviews-empty p { font-size: 0.9rem; color: var(--ink-3); }
 
+        /* Load more — matches .btn-ghost feel but on light bg */
         .load-more-wrap { text-align: center; margin-top: 24px; }
-        .btn-outline {
+        .btn-load-more {
             display: inline-flex; align-items: center; gap: 8px;
-            padding: 11px 28px;
+            padding: 11px 28px; border-radius: 40px;
             background: transparent;
-            border: 1.5px solid var(--sand-2);
-            border-radius: var(--radius);
-            font-family: 'Outfit', sans-serif;
-            font-size: 0.82rem; font-weight: 600;
-            letter-spacing: 0.06em; text-transform: uppercase;
+            border: 1.5px solid var(--line);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.78rem; font-weight: 700;
+            letter-spacing: 0.07em; text-transform: uppercase;
             color: var(--ink-3); cursor: pointer;
-            transition: all 0.2s var(--ease);
+            transition: all 0.22s var(--ease);
         }
-        .btn-outline:hover { border-color: var(--ochre); color: var(--ochre); }
-
-        /* ── FOOTER ── */
-        footer {
-            background: var(--ink);
-            color: rgba(254,252,249,0.45);
-            padding: 36px 5%;
-            border-top: 1px solid rgba(200,137,26,0.2);
-            text-align: center;
-        }
-        footer .nav-logo { display: inline-block; margin-bottom: 10px; }
-        footer p { font-size: 0.82rem; line-height: 1.6; font-weight: 300; }
-        .footer-bottom {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(254,252,249,0.06);
-            font-size: 0.76rem;
-        }
+        .btn-load-more:hover { border-color: var(--crimson); color: var(--crimson); }
 
         /* ── SKELETON ── */
         .skeleton {
-            background: linear-gradient(90deg, var(--sand) 25%, var(--sand-2) 50%, var(--sand) 75%);
+            background: linear-gradient(90deg, var(--sand) 25%, var(--cream-3) 50%, var(--sand) 75%);
             background-size: 200% 100%;
             animation: shimmer 1.4s infinite;
             border-radius: var(--radius);
         }
-        @keyframes shimmer {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
         .skeleton-card {
-            background: var(--white);
-            border: 1px solid var(--sand-2);
-            border-radius: var(--radius-lg);
-            padding: 24px 28px;
+            background: var(--cream); border: 1px solid var(--sand);
+            border-radius: var(--radius-lg); padding: 24px 26px;
         }
-        .skeleton-line { height: 12px; margin-bottom: 10px; }
-        .skeleton-line.short { width: 40%; }
-        .skeleton-line.medium { width: 65%; }
-        .skeleton-line.long { width: 90%; }
+        .skeleton-line { height: 11px; margin-bottom: 10px; }
+        .skeleton-line.short  { width: 38%; }
+        .skeleton-line.medium { width: 60%; }
+        .skeleton-line.long   { width: 92%; }
+
+        /* ── TOAST ── */
+        .toast {
+            position: fixed; bottom: 32px; left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--ink); color: #fff;
+            padding: 13px 26px; border-radius: 40px;
+            font-size: 0.85rem; font-weight: 500;
+            box-shadow: var(--shadow-lg); z-index: 9999;
+            transition: transform 0.4s var(--ease), opacity 0.4s;
+            opacity: 0; white-space: nowrap;
+            display: flex; align-items: center; gap: 10px;
+            border: 1px solid rgba(246,201,14,0.25);
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .toast.success .toast-icon { color: var(--amber); }
+        .toast.error .toast-icon { color: var(--crimson-light); }
+
+        /* ── RULE ── */
+        .rule-gradient {
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--crimson), var(--amber), transparent);
+        }
+
+        /* ── FOOTER ── */
+        footer {
+            background: var(--ink);
+            color: rgba(255,253,247,0.45);
+            padding: clamp(32px, 4vw, 48px) clamp(16px, 5%, 64px);
+            border-top: 3px solid var(--amber);
+            text-align: center;
+        }
+        footer .nav-logo { display: inline-block; margin-bottom: 10px; color: var(--crimson); text-decoration: none; }
+        footer p { font-size: 0.82rem; line-height: 1.6; font-weight: 300; }
+        .footer-bottom {
+            margin-top: 20px; padding-top: 20px;
+            border-top: 1px solid rgba(255,253,247,0.06);
+            font-size: 0.76rem;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            flex-wrap: wrap;
+        }
 
         /* ── RESPONSIVE ── */
         @media (max-width: 900px) {
-            .main-wrap { grid-template-columns: 1fr; gap: 48px; }
+            .main-wrap { grid-template-columns: 1fr; gap: 44px; }
             .form-card { position: static; }
         }
-        @media (max-width: 600px) {
-            .form-card { padding: 28px 20px; }
-            .page-hero { padding: 120px 5% 60px; }
+        @media (max-width: 540px) {
+            .form-card { padding: 24px 18px; }
+            .page-hero { padding: 110px 16px 56px; }
         }
     </style>
 </head>
@@ -412,28 +459,34 @@
 
 <!-- NAVBAR -->
 <nav class="navbar">
-    <a href="index.html" class="nav-logo">Wanderers <em>Itinerary</em></a>
+    <a href="index.html" class="nav-brand">
+        <img src="logo.png" alt="Wanderers Itinerary">
+        <span class="nav-logo">Wanderers <em>Itinerary</em></span>
+    </a>
     <a href="index.html" class="nav-back">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M10 3L5 8l5 5"/>
         </svg>
         Back to Home
     </a>
 </nav>
 
-<!-- PAGE HERO -->
+<!-- HERO -->
 <div class="page-hero">
+    <div class="page-hero-glow"></div>
     <div class="page-hero-inner">
-        <div class="section-label">Testimonials</div>
+        <div class="hero-eyebrow">Testimonials</div>
         <h1>Share Your <em>Journey</em></h1>
         <p>Your experience inspires other independent travellers. Tell us about your trip and help fellow wanderers plan with confidence.</p>
     </div>
 </div>
 
+<div class="rule-gradient"></div>
+
 <!-- MAIN -->
 <div class="main-wrap">
 
-    <!-- FORM -->
+    <!-- FORM SIDE -->
     <div class="form-side">
         <div class="form-card">
             <div class="form-card-header">
@@ -443,57 +496,52 @@
             </div>
 
             <div class="form-fields">
-                <div class="field-group">
+                <div>
                     <label class="field-label" for="r_name">Your Name <span>*</span></label>
                     <input class="field-input" id="r_name" type="text" placeholder="e.g. Priya Sharma">
                 </div>
-                <div class="field-group">
+                <div>
                     <label class="field-label" for="r_place">Destination Travelled <span>*</span></label>
                     <input class="field-input" id="r_place" type="text" placeholder="e.g. Kyoto, Japan">
                 </div>
-                <div class="field-group">
+                <div>
                     <label class="field-label">Your Rating <span>*</span></label>
-                    <div class="star-selector" id="starSelector">
+                    <div class="star-row" id="starRow">
                         <button class="star-btn" data-val="1" onclick="setRating(1)" title="1 Star">★</button>
                         <button class="star-btn" data-val="2" onclick="setRating(2)" title="2 Stars">★</button>
                         <button class="star-btn" data-val="3" onclick="setRating(3)" title="3 Stars">★</button>
                         <button class="star-btn" data-val="4" onclick="setRating(4)" title="4 Stars">★</button>
                         <button class="star-btn" data-val="5" onclick="setRating(5)" title="5 Stars">★</button>
-                        <span class="star-label-text" id="starLabelText">Tap to rate</span>
+                        <span class="star-label" id="starLabel">Tap to rate</span>
                     </div>
                     <input type="hidden" id="r_rating" value="">
                 </div>
-                <div class="field-group">
+                <div>
                     <label class="field-label" for="r_message">Your Experience</label>
                     <textarea class="field-input" id="r_message" placeholder="Tell us about your trip — what worked well, what you loved, how the itinerary helped you..."></textarea>
                 </div>
                 <button class="submit-btn" id="submitBtn" onclick="submitReview()">
-                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M2 8l10 0M8 3l5 5-5 5"/>
-                    </svg>
                     Submit Review
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- REVIEWS -->
+    <!-- REVIEWS SIDE -->
     <div class="reviews-side">
         <div class="reviews-header">
-            <div class="reviews-header-left">
-                <h2>Traveller <em>Stories</em></h2>
-                <div class="avg-badge" id="avgBadge" style="display:none;">
-                    <div class="avg-num" id="avgNum">—</div>
-                    <div class="avg-right">
-                        <div class="avg-stars" id="avgStars"></div>
-                        <div class="avg-count" id="avgCount"></div>
-                    </div>
+            <div class="section-label">Traveller Stories</div>
+            <h2>What People <em>Say</em></h2>
+            <div class="avg-badge" id="avgBadge">
+                <div class="avg-num" id="avgNum">—</div>
+                <div>
+                    <div class="avg-stars" id="avgStars"></div>
+                    <div class="avg-count" id="avgCount"></div>
                 </div>
             </div>
         </div>
 
         <div class="reviews-list" id="reviewsList">
-            <!-- Skeleton loaders -->
             <div class="skeleton-card">
                 <div class="skeleton skeleton-line medium"></div>
                 <div class="skeleton skeleton-line short" style="margin-bottom:16px;"></div>
@@ -516,7 +564,7 @@
         </div>
 
         <div class="load-more-wrap" id="loadMoreWrap" style="display:none;">
-            <button class="btn-outline" onclick="loadMore()">Load More Reviews</button>
+            <button class="btn-load-more" onclick="loadMore()">Load More Reviews</button>
         </div>
     </div>
 </div>
@@ -525,7 +573,9 @@
 <footer>
     <a href="index.html" class="nav-logo">Wanderers <em>Itinerary</em></a>
     <p>Well-researched travel itineraries for independent explorers.</p>
-    <div class="footer-bottom">© 2025 Wanderers Itinerary. All rights reserved.</div>
+    <div class="footer-bottom">
+        <span>© 2025 Wanderers Itinerary. All rights reserved.</span>
+    </div>
 </footer>
 
 <!-- TOAST -->
@@ -534,7 +584,6 @@
     <span id="toastMsg"></span>
 </div>
 
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script>
 const supabaseClient = window.supabase.createClient(
     "https://eyekpbzcdouhkquqjjae.supabase.co",
@@ -553,7 +602,7 @@ function setRating(val) {
     document.querySelectorAll('.star-btn').forEach((btn, i) => {
         btn.classList.toggle('active', i < val);
     });
-    document.getElementById('starLabelText').textContent = `${val} — ${starLabels[val]}`;
+    document.getElementById('starLabel').textContent = val ? `${val} — ${starLabels[val]}` : 'Tap to rate';
 }
 
 function escapeHtml(text) {
@@ -565,18 +614,18 @@ function escapeHtml(text) {
 
 function showToast(msg, type = 'success') {
     const toast = document.getElementById('toast');
-    const icon = document.getElementById('toastIcon');
+    const icon  = document.getElementById('toastIcon');
     document.getElementById('toastMsg').textContent = msg;
     icon.textContent = type === 'success' ? '✓' : '✕';
     toast.className = `toast ${type} show`;
-    setTimeout(() => { toast.classList.remove('show'); }, 3500);
+    setTimeout(() => toast.classList.remove('show'), 3500);
 }
 
 async function submitReview() {
-    const name = document.getElementById("r_name").value.trim();
+    const name         = document.getElementById("r_name").value.trim();
     const travel_place = document.getElementById("r_place").value.trim();
-    const rating = parseInt(document.getElementById("r_rating").value);
-    const message = document.getElementById("r_message").value.trim();
+    const rating       = parseInt(document.getElementById("r_rating").value);
+    const message      = document.getElementById("r_message").value.trim();
 
     if (!name || !travel_place || !rating) {
         showToast("Please fill in your name, destination and rating", 'error');
@@ -585,14 +634,14 @@ async function submitReview() {
 
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
-    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="animation:spin 0.8s linear infinite"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Submitting...`;
+    btn.textContent = 'Submitting…';
 
     const { error } = await supabaseClient
         .from('reviews')
         .insert([{ name, travel_place, rating, message }]);
 
     btn.disabled = false;
-    btn.innerHTML = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 8l10 0M8 3l5 5-5 5"/></svg> Submit Review`;
+    btn.textContent = 'Submit Review';
 
     if (error) {
         showToast("Error submitting review: " + error.message, 'error');
@@ -600,13 +649,10 @@ async function submitReview() {
     }
 
     showToast("Review submitted — thank you!");
-    document.getElementById("r_name").value = "";
-    document.getElementById("r_place").value = "";
-    document.getElementById("r_message").value = "";
-    document.getElementById("r_rating").value = "";
+    ["r_name","r_place","r_message"].forEach(id => document.getElementById(id).value = "");
+    document.getElementById('r_rating').value = "";
     selectedRating = 0;
     setRating(0);
-    document.getElementById('starLabelText').textContent = 'Tap to rate';
     document.querySelectorAll('.star-btn').forEach(b => b.classList.remove('active'));
 
     visibleCount = 6;
@@ -614,7 +660,7 @@ async function submitReview() {
 }
 
 function renderReviews() {
-    const list = document.getElementById("reviewsList");
+    const list    = document.getElementById("reviewsList");
     const visible = allReviews.slice(0, visibleCount);
 
     if (!allReviews.length) {
@@ -624,30 +670,29 @@ function renderReviews() {
         return;
     }
 
-    const avg = (allReviews.reduce((s, r) => s + r.rating, 0) / allReviews.length).toFixed(1);
+    const avg  = (allReviews.reduce((s, r) => s + r.rating, 0) / allReviews.length).toFixed(1);
     const full = Math.floor(avg), half = (avg % 1) >= 0.5 ? 1 : 0, empty = 5 - full - half;
-    document.getElementById('avgNum').textContent = avg;
+
+    document.getElementById('avgNum').textContent   = avg;
     document.getElementById('avgStars').textContent = '★'.repeat(full) + (half ? '½' : '') + '☆'.repeat(empty);
     document.getElementById('avgCount').textContent = `${allReviews.length} verified review${allReviews.length !== 1 ? 's' : ''}`;
     document.getElementById('avgBadge').style.display = 'flex';
 
     list.innerHTML = visible.map((r, idx) => `
         <div class="review-card" style="animation-delay:${idx * 0.06}s;">
+            <div class="review-quote-mark">"</div>
             <div class="review-top">
-                <div class="review-meta">
+                <div>
                     <div class="review-name">${escapeHtml(r.name)}</div>
                     <div class="review-place">
-                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
-                            <path d="M8 2a4 4 0 0 1 4 4c0 3-4 8-4 8S4 9 4 6a4 4 0 0 1 4-4z"/>
-                            <circle cx="8" cy="6" r="1.2"/>
-                        </svg>
+                        <div class="review-place-dot"></div>
                         ${escapeHtml(r.travel_place)}
                     </div>
                 </div>
                 <div class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
             </div>
             ${r.message ? `<div class="review-text">${escapeHtml(r.message)}</div>` : ''}
-            <div class="review-date">${new Date(r.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
+            <div class="review-date">${new Date(r.created_at).toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' })}</div>
         </div>
     `).join('');
 
@@ -666,21 +711,11 @@ async function loadReviews() {
         .select('*')
         .order('created_at', { ascending: false });
 
-    if (error) {
-        showToast("Error loading reviews", 'error');
-        return;
-    }
-
+    if (error) { showToast("Error loading reviews", 'error'); return; }
     allReviews = data || [];
     renderReviews();
 }
 
-/* spin animation for button */
-const style = document.createElement('style');
-style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
-document.head.appendChild(style);
-
-// Init
 loadReviews();
 </script>
 </body>
