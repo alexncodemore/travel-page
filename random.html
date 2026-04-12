@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Itineraries — Wanderers DIY Travel</title>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <!-- ✅ E1 EmailJS setup -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -77,15 +79,6 @@
             display: flex; align-items: center; gap: 10px;
             text-decoration: none;
         }
-        .nav-logo-img {
-            width: 36px; height: 36px;
-            border-radius: 8px;
-            object-fit: cover;
-            border: 1.5px solid var(--amber);
-            box-shadow: 0 2px 8px rgba(192,57,43,0.13);
-            flex-shrink: 0;
-            /* Fallback: styled compass/globe placeholder rendered in canvas below */
-        }
         .nav-logo-img-placeholder {
             width: 36px; height: 36px;
             border-radius: 8px;
@@ -116,7 +109,7 @@
         .nav-back:hover { color: var(--crimson); border-color: var(--crimson); background: rgba(192,57,43,0.04); }
         .nav-back svg { width: 13px; height: 13px; }
 
-        /* ── HERO BANNER — NO CURVE ── */
+        /* ── HERO BANNER ── */
         .page-hero {
             padding-top: calc(var(--nav-h) + 64px);
             padding-bottom: 64px;
@@ -126,7 +119,6 @@
             position: relative; overflow: hidden;
             text-align: center;
         }
-        /* subtle grid pattern */
         .page-hero::before {
             content: '';
             position: absolute; inset: 0;
@@ -135,7 +127,6 @@
             background-size: 48px 48px;
             pointer-events: none;
         }
-        /* diagonal accent lines */
         .hero-accent {
             position: absolute; top: 0; right: -60px;
             width: 340px; height: 100%;
@@ -310,7 +301,6 @@
             background: linear-gradient(135deg, #F0E2C8, #FAE6D0);
             position: relative;
         }
-        /* vary image heights for masonry feel */
         .card-img.h-sm  { height: 170px; }
         .card-img.h-md  { height: 210px; }
         .card-img.h-lg  { height: 260px; }
@@ -350,7 +340,6 @@
         .card-desc {
             font-size: 0.81rem; color: var(--ink-3);
             line-height: 1.65; font-weight: 300;
-            /* Clamp to 3 lines, reveal more on "Learn More" */
             display: -webkit-box;
             -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
@@ -729,7 +718,6 @@
 <!-- NAVBAR -->
 <nav class="navbar">
     <a href="index.html" class="nav-brand">
-        <!-- Logo image — replace src with your actual logo URL -->
         <div class="nav-logo-img-placeholder" id="navLogoWrap">
             <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"/>
@@ -745,7 +733,7 @@
     </a>
 </nav>
 
-<!-- HERO — flat bottom, no curve -->
+<!-- HERO -->
 <div class="page-hero">
     <div class="hero-accent"></div>
     <div class="page-hero-eyebrow">Ready-Made Plans</div>
@@ -798,8 +786,6 @@
 
 <!-- GRID -->
 <div class="grid-section">
-
-    <!-- Custom Plan Banner -->
     <div class="custom-banner">
         <div class="custom-banner-text">
             <h3>Can't find your <em>dream destination?</em></h3>
@@ -823,7 +809,6 @@
 
     <!-- Actual masonry grid -->
     <div class="masonry-grid" id="itineraryGrid" style="display:none;"></div>
-
 </div>
 
 <!-- FOOTER -->
@@ -887,7 +872,7 @@
             <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
         <div class="success-title">Payment Successful!</div>
-        <div class="success-sub">Your purchase of <strong id="sProductName"></strong> is confirmed.</div>
+        <div class="success-sub">Your purchase of <strong id="sProductName"></strong> is confirmed. A copy has been sent to your email.</div>
         <div class="info-box">
             <div class="info-row"><span class="lbl">Amount Paid</span><span class="val" id="sAmount"></span></div>
             <div class="info-row" style="margin-top:4px;"><span class="lbl">Payment ID</span><span class="val mono" id="sPayId"></span></div>
@@ -901,12 +886,37 @@
 </div>
 
 <script>
+// ── Supabase ──
 const supabaseClient = window.supabase.createClient(
     "https://hzkzymnkplvtvewzhujm.supabase.co",
     "sb_publishable_7CV9rFdQ636EJ2n8apno6w_cjvRApyU"
 );
 
+// ── ✅ E1 EmailJS Init ──
+emailjs.init("bucrwpv7Sw7MxYfgC");
+
 const RAZORPAY_KEY = "rzp_live_SV68ifsBjM5tPz";
+
+// ── EmailJS: send itinerary confirmation + PDF link ──
+async function sendConfirmationEmail(buyerName, buyerEmail, productTitle, pdfUrl, paymentId, amount) {
+    try {
+        await emailjs.send("service_m5luj9m", "template_6l1iexf", {
+            from_name:    "Wanderers Itinerary",   // sender label
+            from_email:   "no-reply@wanderers.com", // shown in template as sender
+            to_email:     buyerEmail,               // ✅ dynamic recipient = buyer's email
+            to_name:      buyerName,
+            product_name: productTitle,
+            pdf_url:      pdfUrl || "",
+            payment_id:   paymentId,
+            amount:       "₹" + parseFloat(amount).toFixed(2),
+            message:      `Thank you for purchasing "${productTitle}"! Your itinerary PDF is ready. Payment ID: ${paymentId}`
+        });
+        console.log("✅ Confirmation email sent to", buyerEmail);
+    } catch (err) {
+        console.warn("⚠️ Email sending failed (non-critical):", err);
+        // Don't block the user — payment already succeeded
+    }
+}
 
 // Heights cycle for masonry visual interest
 const IMG_HEIGHTS = ['h-md', 'h-lg', 'h-sm', 'h-md', 'h-sm', 'h-lg', 'h-md', 'h-lg', 'h-sm'];
@@ -915,6 +925,7 @@ let allProducts = [];
 let filtered    = [];
 let activeFilter = 'all';
 let currentProduct = null;
+let currentBuyer   = {};   // store buyer info for email after payment
 
 function esc(t) {
     if (!t) return '';
@@ -1000,7 +1011,6 @@ function renderGrid() {
         return;
     }
 
-    // Globe SVG for placeholder
     const globeSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`;
 
     grid.innerHTML = filtered.map((p, i) => {
@@ -1048,7 +1058,6 @@ function renderGrid() {
 function openDescModal(p) {
     const globeSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`;
 
-    // Image
     const imgWrap = document.getElementById('descModalImg');
     if (p.image_url) {
         imgWrap.innerHTML = `<img class="desc-modal-img" src="${esc(p.image_url)}" alt="${esc(p.title)}">`;
@@ -1056,7 +1065,6 @@ function openDescModal(p) {
         imgWrap.innerHTML = `<div class="desc-modal-img-placeholder">${globeSvg}</div>`;
     }
 
-    // Category
     const catEl = document.getElementById('descModalCat');
     if (p.category) {
         catEl.textContent = p.category;
@@ -1065,22 +1073,16 @@ function openDescModal(p) {
         catEl.style.display = 'none';
     }
 
-    // Title
     document.getElementById('descModalTitle').textContent = p.title || '';
 
-    // Meta
     let metaHtml = '';
     if (p.days) metaHtml += `<span class="desc-modal-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${esc(String(p.days))} days</span>`;
     if (p.category) metaHtml += `<span class="desc-modal-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>${esc(p.category)}</span>`;
     document.getElementById('descModalMeta').innerHTML = metaHtml;
 
-    // Description
     document.getElementById('descModalDesc').textContent = p.description || 'A carefully researched DIY itinerary for independent travellers.';
-
-    // Price
     document.getElementById('descModalPrice').innerHTML = `₹${parseFloat(p.price).toFixed(2)}<small>per itinerary</small>`;
 
-    // Buy button
     document.getElementById('descModalBuyBtn').onclick = () => {
         closeDescModal();
         openModal({id: p.id, title: p.title, price: p.price, pdf_url: p.pdf_url || ''});
@@ -1123,6 +1125,9 @@ function submitPurchase() {
         return;
     }
 
+    // ✅ Save buyer info so we can use it in the payment handler
+    currentBuyer = { name, email, phone, travelers, message };
+
     closeModal();
 
     const rzp = new Razorpay({
@@ -1134,21 +1139,34 @@ function submitPurchase() {
         prefill: { name, email, contact: phone },
         handler: async (res) => {
             const payId = res.razorpay_payment_id;
+
+            // 1️⃣ Save order to Supabase
             await supabaseClient.from('product_orders').insert([{
                 product_id:     currentProduct.id,
                 product_name:   currentProduct.title,
                 product_price:  currentProduct.price,
-                buyer_name:     name,
-                buyer_email:    email,
-                buyer_phone:    phone,
-                travelers,
-                message:        message || null,
+                buyer_name:     currentBuyer.name,
+                buyer_email:    currentBuyer.email,
+                buyer_phone:    currentBuyer.phone,
+                travelers:      currentBuyer.travelers,
+                message:        currentBuyer.message || null,
                 payment_status: 'Paid',
                 payment_id:     payId,
                 payment_amount: currentProduct.price,
                 payment_date:   new Date().toISOString()
             }]);
 
+            // 2️⃣ ✅ Send confirmation email with PDF link via EmailJS (E1 setup)
+            await sendConfirmationEmail(
+                currentBuyer.name,
+                currentBuyer.email,
+                currentProduct.title,
+                currentProduct.pdf_url,
+                payId,
+                currentProduct.price
+            );
+
+            // 3️⃣ Show success modal
             document.getElementById('sProductName').textContent = currentProduct.title;
             document.getElementById('sAmount').textContent      = `₹${parseFloat(currentProduct.price).toFixed(2)}`;
             document.getElementById('sPayId').textContent       = payId;
