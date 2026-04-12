@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Itineraries — Wanderers DIY Travel</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --crimson:      #C0392B;
+            --crimson-deep: #922B21;
+            --crimson-light:#E74C3C;
+            --scarlet:      #E53E3E;
+            --amber:        #F6C90E;
+            --amber-deep:   #D4A017;
+            --amber-pale:   #FFFBEA;
+            --saffron:      #F59E0B;
+            --coral:        #F97316;
+            --bg-base:      #FFFDF7;
+            --bg-surface:   #FFF8EE;
+            --bg-deep:      #1A0A00;
+            --card-bg:      #FFFDF7;
+            --card-border:  #F0E2C8;
+            --ink:          #1A0A00;
+            --ink-2:        #3D1A0A;
+            --ink-3:        #7A4A35;
+            --ink-4:        #B07A60;
+            --line:         rgba(192,57,43,0.13);
+            --shadow-sm:    0 2px 12px rgba(192,57,43,0.07);
+            --shadow-md:    0 8px 32px rgba(192,57,43,0.12);
+            --shadow-lg:    0 20px 60px rgba(192,57,43,0.16);
+            --radius:       8px;
+            --radius-lg:    14px;
+            --radius-xl:    22px;
+            --ease:         cubic-bezier(.4,0,.2,1);
+            --nav-h:        68px;
+            --section-x:    clamp(16px, 5%, 64px);
+            --content-max:  1280px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg-base);
+            color: var(--ink);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body::before {
+            content: '';
+            position: fixed; inset: 0; z-index: -1;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+            background-size: 200px;
+            pointer-events: none;
+        }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: var(--bg-surface); }
+        ::-webkit-scrollbar-thumb { background: var(--crimson); border-radius: 3px; }
+
+        /* ── NAVBAR ── */
+        .navbar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 999;
+            height: var(--nav-h);
+            background: rgba(255,253,247,0.97);
+            backdrop-filter: blur(18px);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 var(--section-x);
+            border-bottom: 2px solid var(--amber);
+            box-shadow: 0 2px 14px rgba(192,57,43,0.06);
+        }
+        .nav-brand {
+            display: flex; align-items: center; gap: 10px;
+            text-decoration: none;
+        }
+        .nav-logo-img {
+            width: 36px; height: 36px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 1.5px solid var(--amber);
+            box-shadow: 0 2px 8px rgba(192,57,43,0.13);
+            flex-shrink: 0;
+            /* Fallback: styled compass/globe placeholder rendered in canvas below */
+        }
+        .nav-logo-img-placeholder {
+            width: 36px; height: 36px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--crimson), var(--amber-deep));
+            display: flex; align-items: center; justify-content: center;
+            border: 1.5px solid var(--amber);
+            box-shadow: 0 2px 8px rgba(192,57,43,0.13);
+            flex-shrink: 0;
+        }
+        .nav-logo-img-placeholder svg { width: 20px; height: 20px; }
+        .nav-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            font-weight: 900; color: var(--crimson);
+            letter-spacing: 0.01em;
+            line-height: 1;
+        }
+        .nav-logo em { font-style: italic; color: var(--amber-deep); }
+        .nav-back {
+            display: flex; align-items: center; gap: 6px;
+            text-decoration: none; color: var(--ink-3);
+            font-size: 0.78rem; font-weight: 600;
+            letter-spacing: 0.06em; text-transform: uppercase;
+            transition: color 0.2s;
+            border: 1.5px solid var(--card-border);
+            padding: 7px 16px; border-radius: 40px;
+        }
+        .nav-back:hover { color: var(--crimson); border-color: var(--crimson); background: rgba(192,57,43,0.04); }
+        .nav-back svg { width: 13px; height: 13px; }
+
+        /* ── HERO BANNER — NO CURVE ── */
+        .page-hero {
+            padding-top: calc(var(--nav-h) + 64px);
+            padding-bottom: 64px;
+            padding-left: var(--section-x);
+            padding-right: var(--section-x);
+            background: linear-gradient(150deg, var(--bg-deep) 0%, #3D1A0A 100%);
+            position: relative; overflow: hidden;
+            text-align: center;
+        }
+        /* subtle grid pattern */
+        .page-hero::before {
+            content: '';
+            position: absolute; inset: 0;
+            background-image: linear-gradient(rgba(246,201,14,0.04) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(246,201,14,0.04) 1px, transparent 1px);
+            background-size: 48px 48px;
+            pointer-events: none;
+        }
+        /* diagonal accent lines */
+        .hero-accent {
+            position: absolute; top: 0; right: -60px;
+            width: 340px; height: 100%;
+            background: linear-gradient(135deg, transparent 40%, rgba(246,201,14,0.06) 40%, rgba(246,201,14,0.06) 50%, transparent 50%);
+            pointer-events: none;
+        }
+        .page-hero-eyebrow {
+            display: inline-flex; align-items: center; gap: 8px;
+            font-size: 0.67rem; font-weight: 700;
+            letter-spacing: 0.22em; text-transform: uppercase; color: var(--amber);
+            margin-bottom: 1rem;
+            background: rgba(246,201,14,0.1);
+            border: 1px solid rgba(246,201,14,0.2);
+            padding: 5px 16px; border-radius: 40px;
+        }
+        .page-hero-eyebrow::before { content: ''; display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: var(--amber); }
+        .page-hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.2rem, 5.5vw, 4rem);
+            font-weight: 900; color: #fff; line-height: 1.02;
+            margin-bottom: 1.1rem;
+            position: relative;
+        }
+        .page-hero h1 em { font-style: italic; color: var(--amber); }
+        .page-hero p {
+            color: rgba(255,253,247,0.58);
+            font-size: clamp(0.88rem, 1.5vw, 1rem);
+            line-height: 1.8; font-weight: 300;
+            max-width: 520px; margin: 0 auto 0;
+        }
+        .hero-stats {
+            display: flex; justify-content: center; gap: clamp(24px, 5vw, 56px);
+            margin-top: 36px; flex-wrap: wrap;
+        }
+        .hero-stat { text-align: center; }
+        .hero-stat-num {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem; font-weight: 900; color: var(--amber);
+            line-height: 1;
+        }
+        .hero-stat-lbl {
+            font-size: 0.67rem; font-weight: 600;
+            letter-spacing: 0.14em; text-transform: uppercase;
+            color: rgba(255,253,247,0.4); margin-top: 4px;
+        }
+        .hero-divider {
+            width: 1px; background: rgba(246,201,14,0.15);
+            align-self: stretch; margin: 4px 0;
+        }
+
+        /* ── SEARCH + FILTERS ── */
+        .controls-bar {
+            max-width: var(--content-max);
+            margin: 40px auto 0;
+            padding: 0 var(--section-x);
+        }
+        .search-wrap {
+            position: relative; margin-bottom: 18px;
+        }
+        .search-wrap svg {
+            position: absolute; left: 18px; top: 50%; transform: translateY(-50%);
+            width: 18px; height: 18px; color: var(--ink-3); pointer-events: none;
+        }
+        .search-input {
+            width: 100%;
+            background: var(--card-bg);
+            border: 1.5px solid var(--card-border);
+            border-radius: var(--radius-xl);
+            padding: 15px 20px 15px 50px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem; color: var(--ink);
+            outline: none;
+            box-shadow: var(--shadow-sm);
+            transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+        }
+        .search-input:focus {
+            border-color: var(--crimson);
+            box-shadow: 0 0 0 4px rgba(192,57,43,0.09);
+        }
+        .search-input::placeholder { color: var(--ink-4); }
+
+        .filters-row {
+            display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+            margin-bottom: 10px;
+        }
+        .filter-label {
+            font-size: 0.68rem; font-weight: 700;
+            letter-spacing: 0.12em; text-transform: uppercase;
+            color: var(--ink-3); white-space: nowrap;
+        }
+        .filter-pill {
+            background: var(--card-bg);
+            border: 1.5px solid var(--card-border);
+            border-radius: 40px;
+            padding: 7px 17px;
+            font-size: 0.77rem; font-weight: 600;
+            color: var(--ink-3);
+            cursor: pointer;
+            transition: all 0.18s var(--ease);
+            white-space: nowrap;
+        }
+        .filter-pill:hover { border-color: var(--amber); color: var(--ink); background: var(--amber-pale); }
+        .filter-pill.active {
+            background: linear-gradient(135deg, var(--crimson), var(--scarlet));
+            border-color: transparent; color: #fff;
+            box-shadow: 0 3px 12px rgba(192,57,43,0.28);
+        }
+
+        .sort-select {
+            background: var(--card-bg);
+            border: 1.5px solid var(--card-border);
+            border-radius: 40px;
+            padding: 7px 30px 7px 14px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.77rem; font-weight: 600; color: var(--ink-3);
+            cursor: pointer; outline: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237A4A35' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            transition: border-color 0.2s;
+        }
+        .sort-select:focus { border-color: var(--crimson); }
+
+        .results-info {
+            font-size: 0.78rem; color: var(--ink-3);
+            font-weight: 400; margin-top: 10px;
+            min-height: 22px;
+        }
+        .results-info strong { color: var(--crimson); }
+
+        /* ── MASONRY GRID ── */
+        .grid-section {
+            max-width: var(--content-max);
+            margin: 28px auto 0;
+            padding: 0 var(--section-x) 80px;
+        }
+
+        .masonry-grid {
+            columns: 3 320px;
+            column-gap: 22px;
+        }
+
+        @media (max-width: 700px) {
+            .masonry-grid { columns: 1; }
+        }
+        @media (min-width: 701px) and (max-width: 1000px) {
+            .masonry-grid { columns: 2 300px; }
+        }
+
+        /* ── CARD ── */
+        .itin-card {
+            break-inside: avoid;
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--card-border);
+            overflow: hidden;
+            display: flex; flex-direction: column;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.28s var(--ease), box-shadow 0.28s var(--ease);
+            animation: fadeUp 0.45s var(--ease) both;
+            margin-bottom: 22px;
+        }
+        .itin-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-img {
+            overflow: hidden;
+            background: linear-gradient(135deg, #F0E2C8, #FAE6D0);
+            position: relative;
+        }
+        /* vary image heights for masonry feel */
+        .card-img.h-sm  { height: 170px; }
+        .card-img.h-md  { height: 210px; }
+        .card-img.h-lg  { height: 260px; }
+        .card-img img {
+            width: 100%; height: 100%; object-fit: cover;
+            transition: transform 0.55s var(--ease);
+            display: block;
+        }
+        .itin-card:hover .card-img img { transform: scale(1.07); }
+        .card-img-placeholder {
+            width: 100%; height: 100%;
+            min-height: 190px;
+            display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, #F5E8D0, #F0D9BC);
+        }
+        .card-img-placeholder svg { width: 48px; height: 48px; opacity: 0.25; }
+
+        .card-category-badge {
+            position: absolute; top: 12px; left: 12px;
+            background: rgba(26,10,0,0.7);
+            backdrop-filter: blur(8px);
+            color: var(--amber); font-size: 0.62rem; font-weight: 700;
+            letter-spacing: 0.14em; text-transform: uppercase;
+            padding: 4px 12px; border-radius: 40px;
+            border: 1px solid rgba(246,201,14,0.25);
+        }
+
+        .card-body {
+            padding: 18px 20px 14px;
+            display: flex; flex-direction: column; gap: 7px;
+        }
+        .card-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem; font-weight: 900;
+            color: var(--ink); line-height: 1.2;
+        }
+        .card-desc {
+            font-size: 0.81rem; color: var(--ink-3);
+            line-height: 1.65; font-weight: 300;
+            /* Clamp to 3 lines, reveal more on "Learn More" */
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .card-learn-more {
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: 0.74rem; font-weight: 700;
+            color: var(--crimson);
+            background: none; border: none;
+            cursor: pointer; padding: 0;
+            letter-spacing: 0.05em;
+            transition: color 0.18s;
+            margin-top: 2px;
+            width: fit-content;
+        }
+        .card-learn-more:hover { color: var(--crimson-deep); }
+        .card-learn-more svg { width: 12px; height: 12px; transition: transform 0.2s; }
+        .card-learn-more:hover svg { transform: translateX(3px); }
+
+        .card-meta {
+            display: flex; gap: 12px; flex-wrap: wrap;
+        }
+        .card-meta-item {
+            display: flex; align-items: center; gap: 5px;
+            font-size: 0.71rem; color: var(--ink-3); font-weight: 500;
+        }
+        .card-meta-item svg { width: 11px; height: 11px; flex-shrink: 0; color: var(--ink-4); }
+
+        .card-footer {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 13px 20px;
+            border-top: 1px solid var(--line);
+            background: var(--bg-surface);
+        }
+        .card-price {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.45rem; font-weight: 900; color: var(--crimson);
+        }
+        .card-price small {
+            display: block;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.63rem; color: var(--ink-4);
+            font-weight: 400; margin-top: 1px;
+        }
+        .btn-buy {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: linear-gradient(135deg, var(--crimson), var(--scarlet));
+            color: #fff; padding: 9px 18px; border-radius: 40px;
+            font-size: 0.73rem; font-weight: 700;
+            letter-spacing: 0.06em; text-transform: uppercase;
+            cursor: pointer; text-decoration: none; border: none;
+            box-shadow: 0 3px 14px rgba(192,57,43,0.26);
+            transition: all 0.2s var(--ease);
+        }
+        .btn-buy:hover { transform: translateY(-2px); box-shadow: 0 7px 22px rgba(192,57,43,0.42); }
+        .btn-buy svg { width: 12px; height: 12px; }
+
+        /* ── EMPTY STATE ── */
+        .empty-state {
+            text-align: center; padding: 80px 20px;
+        }
+        .empty-state svg { width: 56px; height: 56px; color: var(--card-border); margin-bottom: 18px; }
+        .empty-state h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.35rem; font-weight: 900; color: var(--ink);
+            margin-bottom: 8px;
+        }
+        .empty-state p { font-size: 0.86rem; color: var(--ink-3); font-weight: 300; line-height: 1.7; }
+
+        /* ── LOADING ── */
+        .skeleton-grid {
+            columns: 3 320px; column-gap: 22px;
+        }
+        .skeleton-card {
+            break-inside: avoid;
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--card-border);
+            overflow: hidden;
+            margin-bottom: 22px;
+        }
+        .skeleton-img {
+            background: linear-gradient(90deg, #F0E2C8 25%, #FAF0E0 50%, #F0E2C8 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.4s infinite;
+        }
+        .skeleton-img.h-sm { height: 170px; }
+        .skeleton-img.h-md { height: 210px; }
+        .skeleton-img.h-lg { height: 260px; }
+        .skeleton-body { padding: 18px 20px; }
+        .skeleton-line {
+            height: 11px; border-radius: 6px; margin-bottom: 9px;
+            background: linear-gradient(90deg, #F0E2C8 25%, #FAF0E0 50%, #F0E2C8 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.4s infinite;
+        }
+        .skeleton-line.wide  { width: 80%; }
+        .skeleton-line.short { width: 48%; }
+        .skeleton-line.tall  { height: 54px; }
+        @keyframes shimmer {
+            from { background-position: 200% 0; }
+            to   { background-position: -200% 0; }
+        }
+
+        /* ── CUSTOM PLAN BANNER ── */
+        .custom-banner {
+            background: linear-gradient(135deg, var(--amber), var(--saffron) 55%, var(--coral));
+            border-radius: var(--radius-xl);
+            padding: clamp(22px, 4vw, 38px) clamp(22px, 4vw, 44px);
+            margin: 0 0 30px 0;
+            display: flex; align-items: center;
+            gap: clamp(20px, 4vw, 40px);
+            flex-wrap: wrap;
+            position: relative; overflow: hidden;
+        }
+        .custom-banner::before {
+            content: '';
+            position: absolute; right: -40px; top: -40px;
+            width: 220px; height: 220px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.08);
+            pointer-events: none;
+        }
+        .custom-banner-text { flex: 1; min-width: 200px; position: relative; }
+        .custom-banner-text h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.1rem, 2.5vw, 1.45rem);
+            color: var(--ink); font-weight: 900; line-height: 1.22;
+            margin-bottom: 5px;
+        }
+        .custom-banner-text h3 em { font-style: italic; }
+        .custom-banner-text p {
+            font-size: 0.82rem; color: rgba(26,10,0,0.58);
+            font-weight: 400; line-height: 1.6;
+        }
+        .btn-custom {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--ink); color: var(--amber);
+            padding: 13px 26px; border-radius: 40px;
+            font-size: 0.76rem; font-weight: 700;
+            letter-spacing: 0.08em; text-transform: uppercase;
+            text-decoration: none; flex-shrink: 0; position: relative;
+            transition: all 0.2s var(--ease);
+            box-shadow: 0 4px 18px rgba(26,10,0,0.22);
+        }
+        .btn-custom:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(26,10,0,0.32); }
+        .btn-custom svg { width: 13px; height: 13px; }
+
+        /* ── DESCRIPTION MODAL ── */
+        .desc-modal-overlay {
+            display: none; position: fixed; inset: 0; z-index: 1900;
+            background: rgba(26,10,0,0.72); backdrop-filter: blur(12px);
+            align-items: center; justify-content: center; padding: 20px;
+        }
+        .desc-modal-overlay.open { display: flex; }
+        .desc-modal-box {
+            background: var(--card-bg);
+            border-radius: var(--radius-xl); 
+            width: 100%; max-width: 620px;
+            box-shadow: 0 40px 90px rgba(26,10,0,0.5);
+            position: relative; 
+            animation: modalIn 0.3s var(--ease) both;
+            max-height: 88vh; 
+            overflow: hidden;
+            display: flex; flex-direction: column;
+        }
+        .desc-modal-img {
+            width: 100%; height: 220px; object-fit: cover;
+            display: block; flex-shrink: 0;
+        }
+        .desc-modal-img-placeholder {
+            width: 100%; height: 180px;
+            background: linear-gradient(135deg, #F0E2C8, #FAE6D0);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .desc-modal-img-placeholder svg { width: 54px; height: 54px; opacity: 0.2; }
+        .desc-modal-close {
+            position: absolute; top: 14px; right: 14px;
+            background: rgba(255,253,247,0.92);
+            backdrop-filter: blur(8px);
+            border: none;
+            width: 32px; height: 32px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; cursor: pointer; color: var(--ink);
+            transition: background 0.2s, color 0.2s;
+            box-shadow: 0 2px 8px rgba(26,10,0,0.15);
+            z-index: 10;
+        }
+        .desc-modal-close:hover { background: var(--crimson); color: #fff; }
+        .desc-modal-body {
+            padding: clamp(20px, 4vw, 32px);
+            overflow-y: auto; flex: 1;
+        }
+        .desc-modal-cat {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 0.63rem; font-weight: 700;
+            letter-spacing: 0.16em; text-transform: uppercase;
+            color: var(--amber-deep);
+            background: var(--amber-pale);
+            border: 1px solid rgba(246,201,14,0.3);
+            padding: 4px 12px; border-radius: 40px;
+            margin-bottom: 12px;
+        }
+        .desc-modal-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.3rem, 3vw, 1.85rem); 
+            color: var(--ink);
+            font-weight: 900; 
+            line-height: 1.15;
+            margin-bottom: 14px;
+        }
+        .desc-modal-meta {
+            display: flex; gap: 16px; flex-wrap: wrap;
+            margin-bottom: 20px; padding-bottom: 18px;
+            border-bottom: 1px solid var(--line);
+        }
+        .desc-modal-meta-item {
+            display: flex; align-items: center; gap: 5px;
+            font-size: 0.75rem; color: var(--ink-3); font-weight: 500;
+        }
+        .desc-modal-meta-item svg { width: 13px; height: 13px; color: var(--crimson); }
+        .desc-modal-desc-label {
+            font-size: 0.65rem; font-weight: 700;
+            letter-spacing: 0.14em; text-transform: uppercase;
+            color: var(--ink-4); margin-bottom: 10px;
+        }
+        .desc-modal-desc {
+            font-size: 0.9rem; color: var(--ink-2);
+            line-height: 1.82; font-weight: 300;
+            white-space: pre-wrap;
+        }
+        .desc-modal-footer {
+            padding: 18px clamp(20px, 4vw, 32px);
+            border-top: 1px solid var(--line);
+            background: var(--bg-surface);
+            display: flex; align-items: center;
+            justify-content: space-between; flex-wrap: wrap; gap: 12px;
+            flex-shrink: 0;
+        }
+        .desc-modal-price {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem; font-weight: 900; color: var(--crimson);
+        }
+        .desc-modal-price small {
+            display: block;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.63rem; color: var(--ink-4);
+            font-weight: 400; margin-top: 1px;
+        }
+
+        /* ── PURCHASE MODAL ── */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0; z-index: 2000;
+            background: rgba(26,10,0,0.72); backdrop-filter: blur(10px);
+            align-items: center; justify-content: center; padding: 20px;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal-box {
+            background: var(--card-bg);
+            border-radius: var(--radius-xl); padding: clamp(22px,4vw,36px);
+            width: 100%; max-width: 470px;
+            box-shadow: 0 40px 90px rgba(26,10,0,0.5);
+            position: relative; animation: modalIn 0.3s var(--ease) both;
+            max-height: 90vh; overflow-y: auto;
+        }
+        @keyframes modalIn {
+            from { opacity:0; transform: scale(0.93) translateY(18px); }
+            to   { opacity:1; transform: scale(1) translateY(0); }
+        }
+        .modal-close {
+            position: absolute; top: 14px; right: 16px;
+            background: var(--bg-surface); border: none;
+            width: 30px; height: 30px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; cursor: pointer; color: var(--ink-3);
+            transition: background 0.2s, color 0.2s;
+        }
+        .modal-close:hover { background: var(--crimson); color: #fff; }
+        .modal-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem; color: var(--ink);
+            font-weight: 900; margin-bottom: 20px;
+            padding-right: 28px; line-height: 1.2;
+        }
+        .modal-title span {
+            color: var(--ink-3); display: block;
+            font-size: 0.76rem; font-family: 'DM Sans', sans-serif;
+            font-weight: 400; margin-top: 5px;
+        }
+        .modal-label {
+            font-size: 0.65rem; font-weight: 700;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            color: var(--ink-3); margin-bottom: 5px; display: block;
+        }
+        .modal-input {
+            width: 100%; background: var(--bg-surface);
+            border: 1.5px solid var(--line);
+            border-radius: var(--radius); padding: 10px 13px;
+            font-family: 'DM Sans', sans-serif; font-size: 0.88rem;
+            color: var(--ink); outline: none; transition: border-color 0.2s;
+            margin-bottom: 13px;
+        }
+        .modal-input:focus { border-color: var(--crimson); background: #fff; }
+        .btn-confirm {
+            width: 100%; background: linear-gradient(135deg, var(--crimson), var(--scarlet));
+            color: #fff; border: none; border-radius: 40px;
+            padding: 14px 26px; font-family: 'DM Sans', sans-serif;
+            font-size: 0.84rem; font-weight: 700; letter-spacing: 0.07em;
+            text-transform: uppercase; cursor: pointer; margin-top: 4px;
+            box-shadow: 0 4px 18px rgba(192,57,43,0.28);
+            transition: all 0.2s var(--ease);
+        }
+        .btn-confirm:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(192,57,43,0.42); }
+
+        /* ── SUCCESS MODAL ── */
+        .success-icon {
+            width: 60px; height: 60px;
+            background: linear-gradient(135deg, #27AE60, #2ECC71);
+            border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; margin: 0 auto 14px;
+            box-shadow: 0 8px 24px rgba(39,174,96,0.3);
+        }
+        .success-icon svg { width: 28px; height: 28px; stroke: #fff; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+        .success-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 900; text-align: center; margin-bottom: 6px; }
+        .success-sub { font-size: 0.84rem; color: var(--ink-3); text-align: center; line-height: 1.65; margin-bottom: 20px; font-weight: 300; }
+        .info-box {
+            background: var(--amber-pale); border: 1px solid rgba(246,201,14,0.22);
+            border-radius: var(--radius-lg); padding: 14px 16px; margin-bottom: 16px;
+        }
+        .info-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.79rem; margin-bottom: 4px; }
+        .info-row .lbl { color: var(--ink-3); }
+        .info-row .val { color: var(--ink); font-weight: 700; }
+        .info-row .val.mono { font-family: monospace; font-size: 0.72rem; background: #F0E2C8; padding: 2px 7px; border-radius: 4px; }
+        .btn-dl {
+            width: 100%; background: linear-gradient(135deg, var(--crimson), var(--scarlet));
+            color: #fff; border: none; border-radius: 40px;
+            padding: 12px; font-family: 'DM Sans', sans-serif;
+            font-size: 0.82rem; font-weight: 700; letter-spacing: 0.06em;
+            text-transform: uppercase; cursor: pointer; margin-bottom: 8px;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            box-shadow: 0 4px 18px rgba(192,57,43,0.28);
+            transition: all 0.2s var(--ease);
+        }
+        .btn-dl:hover { transform: translateY(-2px); }
+        .btn-later {
+            width: 100%; background: transparent; border: 1px solid var(--line);
+            border-radius: 40px; padding: 10px; font-family: 'DM Sans', sans-serif;
+            font-size: 0.76rem; font-weight: 500; color: var(--ink-3);
+            cursor: pointer; transition: all 0.2s var(--ease);
+        }
+        .btn-later:hover { border-color: var(--ink-3); color: var(--ink); }
+
+        /* ── FOOTER ── */
+        .page-footer {
+            text-align: center;
+            padding: 28px var(--section-x);
+            border-top: 1px solid var(--line);
+            font-size: 0.73rem; color: var(--ink-4);
+        }
+        .page-footer a { color: var(--crimson); text-decoration: none; font-weight: 600; }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 600px) {
+            .custom-banner { flex-direction: column; text-align: center; }
+            .btn-custom { width: 100%; justify-content: center; }
+            .filters-row { gap: 6px; }
+            .hero-stats { gap: 20px; }
+            .hero-divider { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+    <a href="index.html" class="nav-brand">
+        <!-- Logo image — replace src with your actual logo URL -->
+        <div class="nav-logo-img-placeholder" id="navLogoWrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="2" y1="12" x2="22" y2="12"/>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            </svg>
+        </div>
+        <span class="nav-logo">Wanderers <em>Itinerary</em></span>
+    </a>
+    <a href="index.html" class="nav-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to Home
+    </a>
+</nav>
+
+<!-- HERO — flat bottom, no curve -->
+<div class="page-hero">
+    <div class="hero-accent"></div>
+    <div class="page-hero-eyebrow">Ready-Made Plans</div>
+    <h1>Curated <em>Travel</em><br>Itineraries</h1>
+    <p>Day-by-day travel plans for independent explorers. Buy, download, and travel with confidence.</p>
+    <div class="hero-stats">
+        <div class="hero-stat">
+            <div class="hero-stat-num" id="statCount">—</div>
+            <div class="hero-stat-lbl">Itineraries</div>
+        </div>
+        <div class="hero-divider"></div>
+        <div class="hero-stat">
+            <div class="hero-stat-num">DIY</div>
+            <div class="hero-stat-lbl">Self-Guided</div>
+        </div>
+        <div class="hero-divider"></div>
+        <div class="hero-stat">
+            <div class="hero-stat-num">PDF</div>
+            <div class="hero-stat-lbl">Instant Download</div>
+        </div>
+    </div>
+</div>
+
+<!-- CONTROLS -->
+<div class="controls-bar">
+    <div class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" class="search-input" id="searchInput" placeholder="Search destinations, countries, regions…" oninput="filterItineraries()">
+    </div>
+    <div class="filters-row">
+        <span class="filter-label">Filter:</span>
+        <button class="filter-pill active" data-filter="all" onclick="setFilter('all', this)">All</button>
+        <button class="filter-pill" data-filter="europe" onclick="setFilter('europe', this)">Europe</button>
+        <button class="filter-pill" data-filter="asia" onclick="setFilter('asia', this)">Asia</button>
+        <button class="filter-pill" data-filter="americas" onclick="setFilter('americas', this)">Americas</button>
+        <button class="filter-pill" data-filter="middle east" onclick="setFilter('middle east', this)">Middle East</button>
+        <button class="filter-pill" data-filter="oceania" onclick="setFilter('oceania', this)">Oceania</button>
+        <button class="filter-pill" data-filter="africa" onclick="setFilter('africa', this)">Africa</button>
+        <span class="filter-label" style="margin-left:auto;">Sort:</span>
+        <select class="sort-select" id="sortSelect" onchange="filterItineraries()">
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="price-asc">Price: Low → High</option>
+            <option value="price-desc">Price: High → Low</option>
+            <option value="name-az">Name: A → Z</option>
+        </select>
+    </div>
+    <div class="results-info" id="resultsInfo"></div>
+</div>
+
+<!-- GRID -->
+<div class="grid-section">
+
+    <!-- Custom Plan Banner -->
+    <div class="custom-banner">
+        <div class="custom-banner-text">
+            <h3>Can't find your <em>dream destination?</em></h3>
+            <p>We'll build a fully customised DIY itinerary just for you — tailored to your dates, budget &amp; travel style.</p>
+        </div>
+        <a href="https://docs.google.com/forms/d/1kSMMX855SDEP9W8a4N9j05y52MQcmh7i5QcwNHNMca4/viewform" target="_blank" rel="noopener" class="btn-custom">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Request Custom Plan
+        </a>
+    </div>
+
+    <!-- Loading skeletons -->
+    <div class="skeleton-grid" id="skeletonGrid">
+        <div class="skeleton-card"><div class="skeleton-img h-md"></div><div class="skeleton-body"><div class="skeleton-line wide"></div><div class="skeleton-line short"></div><div class="skeleton-line tall"></div></div></div>
+        <div class="skeleton-card"><div class="skeleton-img h-lg"></div><div class="skeleton-body"><div class="skeleton-line wide"></div><div class="skeleton-line short"></div><div class="skeleton-line tall"></div></div></div>
+        <div class="skeleton-card"><div class="skeleton-img h-sm"></div><div class="skeleton-body"><div class="skeleton-line wide"></div><div class="skeleton-line short"></div><div class="skeleton-line tall"></div></div></div>
+        <div class="skeleton-card"><div class="skeleton-img h-md"></div><div class="skeleton-body"><div class="skeleton-line wide"></div><div class="skeleton-line short"></div><div class="skeleton-line tall"></div></div></div>
+        <div class="skeleton-card"><div class="skeleton-img h-sm"></div><div class="skeleton-body"><div class="skeleton-line wide"></div><div class="skeleton-line short"></div><div class="skeleton-line tall"></div></div></div>
+        <div class="skeleton-card"><div class="skeleton-img h-lg"></div><div class="skeleton-body"><div class="skeleton-line wide"></div><div class="skeleton-line short"></div><div class="skeleton-line tall"></div></div></div>
+    </div>
+
+    <!-- Actual masonry grid -->
+    <div class="masonry-grid" id="itineraryGrid" style="display:none;"></div>
+
+</div>
+
+<!-- FOOTER -->
+<footer class="page-footer">
+    <p>© 2025 Wanderers Itinerary · <a href="index.html">Home</a> · <a href="https://docs.google.com/forms/d/1kSMMX855SDEP9W8a4N9j05y52MQcmh7i5QcwNHNMca4/viewform" target="_blank">Custom Plan</a></p>
+</footer>
+
+<!-- DESCRIPTION DETAIL MODAL -->
+<div class="desc-modal-overlay" id="descModal">
+    <div class="desc-modal-box">
+        <button class="desc-modal-close" onclick="closeDescModal()">×</button>
+        <div id="descModalImg"></div>
+        <div class="desc-modal-body">
+            <div class="desc-modal-cat" id="descModalCat" style="display:none;"></div>
+            <div class="desc-modal-title" id="descModalTitle"></div>
+            <div class="desc-modal-meta" id="descModalMeta"></div>
+            <div class="desc-modal-desc-label">About this itinerary</div>
+            <div class="desc-modal-desc" id="descModalDesc"></div>
+        </div>
+        <div class="desc-modal-footer">
+            <div class="desc-modal-price" id="descModalPrice"></div>
+            <button class="btn-buy" id="descModalBuyBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+                Buy Now
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- PURCHASE MODAL -->
+<div class="modal-overlay" id="purchaseModal">
+    <div class="modal-box">
+        <button class="modal-close" onclick="closeModal()">×</button>
+        <div class="modal-title" id="modalTitle">
+            Complete Purchase
+            <span id="modalSub">Fill in your details to proceed</span>
+        </div>
+        <input type="hidden" id="selId">
+        <input type="hidden" id="selPdf">
+        <input type="hidden" id="selPrice">
+        <label class="modal-label">Full Name</label>
+        <input class="modal-input" id="m_name" placeholder="Your full name">
+        <label class="modal-label">Email</label>
+        <input class="modal-input" type="email" id="m_email" placeholder="Email address">
+        <label class="modal-label">Phone</label>
+        <input class="modal-input" id="m_phone" placeholder="Phone number">
+        <label class="modal-label">Travellers</label>
+        <input class="modal-input" type="number" id="m_travelers" min="1" value="1">
+        <label class="modal-label">Message (optional)</label>
+        <textarea class="modal-input" id="m_message" rows="2" placeholder="Any special requirements…"></textarea>
+        <button class="btn-confirm" id="payBtn" onclick="submitPurchase()">
+            Proceed to Pay — ₹<span id="dispPrice">0</span>
+        </button>
+    </div>
+</div>
+
+<!-- SUCCESS MODAL -->
+<div class="modal-overlay" id="successModal">
+    <div class="modal-box" style="max-width:420px; text-align:center;">
+        <div class="success-icon">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="success-title">Payment Successful!</div>
+        <div class="success-sub">Your purchase of <strong id="sProductName"></strong> is confirmed.</div>
+        <div class="info-box">
+            <div class="info-row"><span class="lbl">Amount Paid</span><span class="val" id="sAmount"></span></div>
+            <div class="info-row" style="margin-top:4px;"><span class="lbl">Payment ID</span><span class="val mono" id="sPayId"></span></div>
+        </div>
+        <button class="btn-dl" id="sDlBtn" onclick="triggerDownload()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download My Itinerary PDF
+        </button>
+        <button class="btn-later" onclick="document.getElementById('successModal').classList.remove('open')">I'll download later</button>
+    </div>
+</div>
+
+<script>
+const supabaseClient = window.supabase.createClient(
+    "https://hzkzymnkplvtvewzhujm.supabase.co",
+    "sb_publishable_7CV9rFdQ636EJ2n8apno6w_cjvRApyU"
+);
+
+const RAZORPAY_KEY = "rzp_live_SV68ifsBjM5tPz";
+
+// Heights cycle for masonry visual interest
+const IMG_HEIGHTS = ['h-md', 'h-lg', 'h-sm', 'h-md', 'h-sm', 'h-lg', 'h-md', 'h-lg', 'h-sm'];
+
+let allProducts = [];
+let filtered    = [];
+let activeFilter = 'all';
+let currentProduct = null;
+
+function esc(t) {
+    if (!t) return '';
+    const d = document.createElement('div'); d.textContent = t; return d.innerHTML;
+}
+
+/* ── LOAD ── */
+async function loadProducts() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('products')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        document.getElementById('skeletonGrid').style.display = 'none';
+        document.getElementById('itineraryGrid').style.display = 'block';
+
+        if (error || !data || data.length === 0) {
+            renderEmpty('No itineraries available yet. Check back soon!');
+            return;
+        }
+
+        allProducts = data;
+        document.getElementById('statCount').textContent = data.length;
+        filterItineraries();
+    } catch (err) {
+        document.getElementById('skeletonGrid').style.display = 'none';
+        document.getElementById('itineraryGrid').style.display = 'block';
+        renderEmpty('Something went wrong loading itineraries.');
+        console.error(err);
+    }
+}
+
+/* ── FILTER & SORT ── */
+function setFilter(val, el) {
+    activeFilter = val;
+    document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    filterItineraries();
+}
+
+function filterItineraries() {
+    const q    = document.getElementById('searchInput').value.toLowerCase().trim();
+    const sort = document.getElementById('sortSelect').value;
+
+    filtered = allProducts.filter(p => {
+        const matchSearch = !q ||
+            (p.title        && p.title.toLowerCase().includes(q)) ||
+            (p.description  && p.description.toLowerCase().includes(q)) ||
+            (p.category     && p.category.toLowerCase().includes(q));
+        const matchFilter = activeFilter === 'all' ||
+            (p.category && p.category.toLowerCase().includes(activeFilter));
+        return matchSearch && matchFilter;
+    });
+
+    filtered.sort((a, b) => {
+        if (sort === 'newest')     return new Date(b.created_at) - new Date(a.created_at);
+        if (sort === 'oldest')     return new Date(a.created_at) - new Date(b.created_at);
+        if (sort === 'price-asc')  return parseFloat(a.price) - parseFloat(b.price);
+        if (sort === 'price-desc') return parseFloat(b.price) - parseFloat(a.price);
+        if (sort === 'name-az')    return (a.title||'').localeCompare(b.title||'');
+        return 0;
+    });
+
+    renderGrid();
+
+    const info = document.getElementById('resultsInfo');
+    if (allProducts.length > 0) {
+        info.innerHTML = `Showing <strong>${filtered.length}</strong> of <strong>${allProducts.length}</strong> itineraries`;
+    }
+}
+
+/* ── RENDER ── */
+function renderGrid() {
+    const grid = document.getElementById('itineraryGrid');
+
+    if (filtered.length === 0) {
+        grid.innerHTML = `<div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <h3>Nothing found</h3>
+            <p>No itineraries match your search.<br>Try different keywords or filters.</p>
+        </div>`;
+        return;
+    }
+
+    // Globe SVG for placeholder
+    const globeSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`;
+
+    grid.innerHTML = filtered.map((p, i) => {
+        const hClass = IMG_HEIGHTS[i % IMG_HEIGHTS.length];
+        const productJson = JSON.stringify({id:p.id, title:p.title, price:p.price, pdf_url:p.pdf_url||""})
+            .replace(/'/g, "&#39;").replace(/"/g, '&quot;');
+        const descJson = JSON.stringify(p).replace(/'/g, "&#39;").replace(/"/g, '&quot;');
+
+        return `
+        <div class="itin-card" style="animation-delay:${i * 0.055}s">
+            <div class="card-img ${hClass}">
+                ${p.image_url
+                    ? `<img src="${esc(p.image_url)}" alt="${esc(p.title)}" loading="lazy">`
+                    : `<div class="card-img-placeholder">${globeSvg}</div>`
+                }
+                ${p.category ? `<span class="card-category-badge">${esc(p.category)}</span>` : ''}
+            </div>
+            <div class="card-body">
+                <div class="card-title">${esc(p.title)}</div>
+                <div class="card-desc">${esc(p.description) || 'A carefully researched DIY itinerary for independent travellers.'}</div>
+                <button class="card-learn-more" onclick='openDescModal(${descJson})'>
+                    Learn more
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </button>
+                <div class="card-meta">
+                    ${p.days ? `<span class="card-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${esc(String(p.days))} days</span>` : ''}
+                    ${p.category ? `<span class="card-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>${esc(p.category)}</span>` : ''}
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="card-price">
+                    ₹${parseFloat(p.price).toFixed(2)}
+                    <small>per itinerary</small>
+                </div>
+                <button class="btn-buy" onclick='openModal(${productJson})'>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+                    Buy Now
+                </button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+/* ── DESCRIPTION MODAL ── */
+function openDescModal(p) {
+    const globeSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`;
+
+    // Image
+    const imgWrap = document.getElementById('descModalImg');
+    if (p.image_url) {
+        imgWrap.innerHTML = `<img class="desc-modal-img" src="${esc(p.image_url)}" alt="${esc(p.title)}">`;
+    } else {
+        imgWrap.innerHTML = `<div class="desc-modal-img-placeholder">${globeSvg}</div>`;
+    }
+
+    // Category
+    const catEl = document.getElementById('descModalCat');
+    if (p.category) {
+        catEl.textContent = p.category;
+        catEl.style.display = 'inline-flex';
+    } else {
+        catEl.style.display = 'none';
+    }
+
+    // Title
+    document.getElementById('descModalTitle').textContent = p.title || '';
+
+    // Meta
+    let metaHtml = '';
+    if (p.days) metaHtml += `<span class="desc-modal-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${esc(String(p.days))} days</span>`;
+    if (p.category) metaHtml += `<span class="desc-modal-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>${esc(p.category)}</span>`;
+    document.getElementById('descModalMeta').innerHTML = metaHtml;
+
+    // Description
+    document.getElementById('descModalDesc').textContent = p.description || 'A carefully researched DIY itinerary for independent travellers.';
+
+    // Price
+    document.getElementById('descModalPrice').innerHTML = `₹${parseFloat(p.price).toFixed(2)}<small>per itinerary</small>`;
+
+    // Buy button
+    document.getElementById('descModalBuyBtn').onclick = () => {
+        closeDescModal();
+        openModal({id: p.id, title: p.title, price: p.price, pdf_url: p.pdf_url || ''});
+    };
+
+    document.getElementById('descModal').classList.add('open');
+}
+
+function closeDescModal() {
+    document.getElementById('descModal').classList.remove('open');
+}
+
+/* ── PURCHASE MODAL ── */
+function openModal(p) {
+    currentProduct = p;
+    document.getElementById('modalTitle').innerHTML = `Complete Purchase<span>${esc(p.title)}</span>`;
+    document.getElementById('selId').value    = p.id;
+    document.getElementById('selPdf').value   = p.pdf_url;
+    document.getElementById('selPrice').value = p.price;
+    document.getElementById('dispPrice').textContent = parseFloat(p.price).toFixed(2);
+    ['m_name','m_email','m_phone','m_message'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('m_travelers').value = '1';
+    document.getElementById('purchaseModal').classList.add('open');
+}
+
+function closeModal() {
+    document.getElementById('purchaseModal').classList.remove('open');
+}
+
+/* ── PURCHASE ── */
+function submitPurchase() {
+    const name      = document.getElementById('m_name').value.trim();
+    const email     = document.getElementById('m_email').value.trim();
+    const phone     = document.getElementById('m_phone').value.trim();
+    const travelers = parseInt(document.getElementById('m_travelers').value);
+    const message   = document.getElementById('m_message').value.trim();
+
+    if (!name || !email || !phone || !travelers) {
+        alert('Please fill all required fields.');
+        return;
+    }
+
+    closeModal();
+
+    const rzp = new Razorpay({
+        key: RAZORPAY_KEY,
+        amount: Math.round(parseFloat(currentProduct.price) * 100),
+        currency: 'INR',
+        name: currentProduct.title,
+        description: `Purchase: ${currentProduct.title}`,
+        prefill: { name, email, contact: phone },
+        handler: async (res) => {
+            const payId = res.razorpay_payment_id;
+            await supabaseClient.from('product_orders').insert([{
+                product_id:     currentProduct.id,
+                product_name:   currentProduct.title,
+                product_price:  currentProduct.price,
+                buyer_name:     name,
+                buyer_email:    email,
+                buyer_phone:    phone,
+                travelers,
+                message:        message || null,
+                payment_status: 'Paid',
+                payment_id:     payId,
+                payment_amount: currentProduct.price,
+                payment_date:   new Date().toISOString()
+            }]);
+
+            document.getElementById('sProductName').textContent = currentProduct.title;
+            document.getElementById('sAmount').textContent      = `₹${parseFloat(currentProduct.price).toFixed(2)}`;
+            document.getElementById('sPayId').textContent       = payId;
+            const dl = document.getElementById('sDlBtn');
+            dl.style.display = (currentProduct.pdf_url && currentProduct.pdf_url !== 'null') ? 'flex' : 'none';
+            document.getElementById('successModal').classList.add('open');
+        },
+        modal: { ondismiss: () => alert('Payment cancelled.') }
+    });
+    rzp.open();
+}
+
+async function triggerDownload() {
+    if (!currentProduct || !currentProduct.pdf_url) return;
+    try {
+        const res  = await fetch(currentProduct.pdf_url);
+        const blob = await res.blob();
+        const url  = URL.createObjectURL(blob);
+        const a    = document.createElement('a');
+        a.href     = url;
+        a.download = `${(currentProduct.title||'itinerary').replace(/[^a-z0-9]/gi,'_')}.pdf`;
+        document.body.appendChild(a); a.click();
+        document.body.removeChild(a); URL.revokeObjectURL(url);
+    } catch (e) {
+        window.open(currentProduct.pdf_url, '_blank');
+    }
+}
+
+/* Close modals on backdrop click */
+document.querySelectorAll('.modal-overlay, .desc-modal-overlay').forEach(m => {
+    m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+
+/* ── INIT ── */
+document.addEventListener('DOMContentLoaded', loadProducts);
+</script>
+
+<!-- Razorpay -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</body>
+</html>
